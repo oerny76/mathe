@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e3a2f" />
+  <title>Mathe-Stunde</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="board">
+    <h1>✏️ Mathe&#8209;Stunde</h1>
+    <p class="subtitle">Wähle dein Namensschild und leg los!</p>
+  </header>
+
+  <nav id="kid-tabs" class="kid-tabs"></nav>
+
+  <main id="app">
+    <section id="worksheet-picker" class="worksheet-picker" hidden>
+      <p class="subtitle" id="picker-hint"></p>
+      <div id="worksheet-list" class="worksheet-list"></div>
+    </section>
+
+    <section id="worksheet-view" hidden>
+      <button id="back-btn" class="chalk-button ghost small">← Andere Aufgabe wählen</button>
+
+      <section id="status-panel" class="status-panel">
+        <span id="week-label"></span>
+        <span id="progress-label"></span>
+      </section>
+
+      <div id="task-list" class="task-list"></div>
+
+      <div class="actions">
+        <button id="check-btn" class="chalk-button" hidden>Fertig – prüfen!</button>
+        <button id="retry-btn" class="chalk-button ghost" hidden>Nochmal versuchen</button>
+      </div>
+
+      <div id="result-banner" class="result-banner" hidden></div>
+    </section>
+  </main>
+
+  <footer class="board-footer">
+    <p>Viel Erfolg &amp; viel Spaß beim Rechnen! 🧮</p>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

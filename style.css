@@ -1,0 +1,287 @@
+/* ---------- Design-Tokens ---------- */
+:root {
+  --board-bg: #1e3a2f;
+  --board-bg-2: #234636;
+  --chalk-white: #f5f5f0;
+  --chalk-yellow: #f2c744;
+  --chalk-pink: #f27da5;
+  --chalk-blue: #5dade2;
+  --chalk-green: #7fd858;
+  --chalk-red: #e76f51;
+  --line: rgba(245, 245, 240, 0.18);
+  --font-display: "Arial Rounded MT Bold", "Baloo 2", "Segoe UI", sans-serif;
+  --font-body: "Segoe UI", Verdana, Arial, sans-serif;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 38px,
+      var(--line) 39px,
+      var(--line) 40px
+    ),
+    var(--board-bg);
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+}
+
+body {
+  padding: 0 0 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ---------- Kopfbereich ---------- */
+.board {
+  text-align: center;
+  padding: 28px 20px 12px;
+}
+
+.board h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  letter-spacing: 0.5px;
+  margin: 0 0 6px;
+  text-shadow: 0 0 14px rgba(245, 245, 240, 0.25);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--chalk-yellow);
+  font-size: 0.95rem;
+}
+
+/* ---------- Kind-Auswahl (Namensschilder) ---------- */
+.kid-tabs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 10px 16px 20px;
+  flex-wrap: wrap;
+}
+
+.kid-tab {
+  border: 2px dashed var(--chalk-white);
+  background: transparent;
+  color: var(--chalk-white);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 10px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.kid-tab:hover { transform: translateY(-2px); }
+
+.kid-tab.active {
+  background: var(--kid-color, var(--chalk-yellow));
+  border-style: solid;
+  color: #1e3a2f;
+  font-weight: bold;
+}
+
+/* ---------- Arbeitsblatt-Auswahl ---------- */
+.worksheet-picker {
+  padding: 4px 16px 20px;
+}
+
+.worksheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.worksheet-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  background: var(--board-bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.worksheet-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--chalk-yellow);
+}
+
+.worksheet-card.done {
+  border-color: var(--chalk-green);
+  opacity: 0.85;
+}
+
+.worksheet-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.worksheet-meta {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.worksheet-badge {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  color: var(--chalk-green);
+  font-family: var(--font-display);
+}
+
+.chalk-button.small {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  box-shadow: none;
+  margin: 4px 16px 12px;
+}
+
+/* ---------- Status-Zeile ---------- */
+.status-panel {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px 10px;
+  font-size: 0.85rem;
+  color: var(--chalk-white);
+  opacity: 0.85;
+}
+
+/* ---------- Aufgaben ---------- */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 16px;
+}
+
+.task-card {
+  background: var(--board-bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+}
+
+.task-number {
+  font-family: var(--font-display);
+  color: var(--chalk-yellow);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.task-question {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.task-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-input-row input {
+  flex: 1;
+  font-size: 1.1rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--chalk-white);
+  color: #1e3a2f;
+  font-family: var(--font-body);
+}
+
+.task-input-row input:focus {
+  outline: 3px solid var(--chalk-yellow);
+  outline-offset: 1px;
+}
+
+.task-mark {
+  font-size: 1.4rem;
+  width: 28px;
+  text-align: center;
+}
+
+.task-card.correct { border-color: var(--chalk-green); }
+.task-card.wrong { border-color: var(--chalk-red); }
+
+.task-card.correct .task-mark::after { content: "✔"; color: var(--chalk-green); }
+.task-card.wrong .task-mark::after { content: "✕"; color: var(--chalk-red); }
+
+/* ---------- Buttons ---------- */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 16px 4px;
+}
+
+.chalk-button {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: none;
+  background: var(--chalk-yellow);
+  color: #1e3a2f;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+}
+
+.chalk-button:active { transform: translateY(2px); box-shadow: none; }
+
+.chalk-button.ghost {
+  background: transparent;
+  border: 2px solid var(--chalk-white);
+  color: var(--chalk-white);
+}
+
+/* ---------- Ergebnis-Banner ---------- */
+.result-banner {
+  margin: 20px 16px 0;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  background: var(--board-bg-2);
+  border: 2px solid var(--chalk-green);
+}
+
+.result-banner.needs-practice {
+  border-color: var(--chalk-red);
+}
+
+/* ---------- Footer ---------- */
+.board-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  padding-top: 24px;
+}
+
+/* ---------- Barrierefreiheit ---------- */
+:focus-visible {
+  outline: 3px solid var(--chalk-yellow);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
