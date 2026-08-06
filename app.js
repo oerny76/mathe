@@ -187,8 +187,29 @@ function renderTasks() {
         />
         <span class="task-mark" aria-hidden="true"></span>
       </div>
+      <button type="button" class="scratch-toggle" data-task-id="${task.id}">✏️ Rechenfeld</button>
+      <textarea
+        class="scratch-pad"
+        placeholder="Hier kannst du rechnen …"
+        rows="3"
+        hidden
+      ></textarea>
     `;
     els.taskList.appendChild(card);
+  });
+
+  els.taskList.querySelectorAll(".scratch-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const pad = btn.nextElementSibling;
+      const isHidden = pad.hasAttribute("hidden");
+      if (isHidden) {
+        pad.removeAttribute("hidden");
+        btn.textContent = "✏️ Rechenfeld ausblenden";
+      } else {
+        pad.setAttribute("hidden", "");
+        btn.textContent = "✏️ Rechenfeld";
+      }
+    });
   });
 
   els.checkBtn.hidden = currentTasks.length === 0;
