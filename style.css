@@ -221,8 +221,44 @@ body {
 .task-card.correct { border-color: var(--chalk-green); }
 .task-card.wrong { border-color: var(--chalk-red); }
 
-.task-card.correct .task-mark::after { content: "✔"; color: var(--chalk-green); }
-.task-card.wrong .task-mark::after { content: "✕"; color: var(--chalk-red); }
+.task-card.correct .task-mark::after { content: "âœ”"; color: var(--chalk-green); }
+.task-card.wrong .task-mark::after { content: "âœ•"; color: var(--chalk-red); }
+
+/* ---------- Notizfeld (Rechenfeld) ---------- */
+.scratch-toggle {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: var(--chalk-yellow);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-decoration: underline dotted;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.scratch-pad {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px dashed var(--line);
+  background: rgba(245, 245, 240, 0.06);
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.scratch-pad:focus {
+  outline: 2px solid var(--chalk-yellow);
+  outline-offset: 1px;
+}
+
+.scratch-pad[hidden] {
+  display: none;
+}
 
 /* ---------- Buttons ---------- */
 .actions {
