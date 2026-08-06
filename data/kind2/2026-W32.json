@@ -1,0 +1,14 @@
+{
+  "kind": "MJ",
+  "alter": 12,
+  "woche": "2026-W32",
+  "titel": "Woche 32 – Malnehmen, Teilen und Textaufgaben",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "8 × 9 = ?", "loesung": "72" },
+    { "id": 2, "typ": "rechnen", "frage": "156 : 12 = ?", "loesung": "13" },
+    { "id": 3, "typ": "rechnen", "frage": "14 × 6 = ?", "loesung": "84" },
+    { "id": 4, "typ": "sachaufgabe", "frage": "Ein Karton enthält 24 Eier. Wie viele Eier sind in 7 Kartons?", "loesung": "168" },
+    { "id": 5, "typ": "sachaufgabe", "frage": "Familie Müller fährt 420 km. Nach 260 km machen sie Pause. Wie viele Kilometer liegen noch vor ihnen?", "loesung": "160" },
+    { "id": 6, "typ": "knobelaufgabe", "frage": "Ich bin eine zweistellige Zahl. Meine Quersumme ist 9, und ich bin durch 6 teilbar. Welche Zahl bin ich? (Tipp: es gibt mehrere Lösungen, gib die größte an)", "loesung": "90" }
+  ]
+}

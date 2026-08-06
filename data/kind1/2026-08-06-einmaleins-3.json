@@ -1,0 +1,14 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-08-06",
+  "titel": "Malreihen & Teilen – Murmeln in der Pause",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "68 + 57 = ?", "loesung": "125" },
+    { "id": 2, "typ": "rechnen", "frage": "124 − 68 = ?", "loesung": "56" },
+    { "id": 3, "typ": "rechnen", "frage": "8 × 9 = ?", "loesung": "72" },
+    { "id": 4, "typ": "sachaufgabe", "frage": "In der Pause verteilt die Lehrerin 96 Murmeln gleichmäßig an 8 Kinder. Wie viele Murmeln bekommt jedes Kind?", "loesung": "12" },
+    { "id": 5, "typ": "sachaufgabe", "frage": "Lisa kauft 3 Packungen mit je 12 Bonbons. Sie verschenkt 14 Bonbons an ihre Klasse. Wie viele Bonbons hat sie noch?", "loesung": "22" },
+    { "id": 6, "typ": "knobelaufgabe", "frage": "Ich bin eine zweistellige Zahl zwischen 60 und 70. Ich bin durch 9 teilbar. Welche Zahl bin ich?", "loesung": "63" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-08-06",
+  "titel": "Zehnerübergang & Einmaleins – Runde 2",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "56 + 37 = ?", "loesung": "93" },
+    { "id": 2, "typ": "rechnen", "frage": "91 − 48 = ?", "loesung": "43" },
+    { "id": 3, "typ": "rechnen", "frage": "7 × 6 = ?", "loesung": "42" },
+    { "id": 4, "typ": "sachaufgabe", "frage": "Tom hat 53 Sticker. Er verschenkt 27 an seinen Bruder und bekommt danach von Oma noch 15 dazu. Wie viele Sticker hat er jetzt?", "loesung": "41" },
+    { "id": 5, "typ": "knobelaufgabe", "frage": "Ich bin eine Zahl zwischen 40 und 50. Addiere ich meine beiden Ziffern, erhalte ich 9. Welche Zahl bin ich?", "loesung": "45" },
+    { "id": 6, "typ": "rechnen", "frage": "63 : 7 = ?", "loesung": "9" }
+  ]
+}

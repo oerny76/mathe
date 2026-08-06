@@ -1,0 +1,14 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-08-06",
+  "titel": "Zehnerübergang & Einmaleins – Sticker sammeln",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "47 + 28 = ?", "loesung": "75" },
+    { "id": 2, "typ": "rechnen", "frage": "82 − 39 = ?", "loesung": "43" },
+    { "id": 3, "typ": "rechnen", "frage": "4 × 6 = ?", "loesung": "24" },
+    { "id": 4, "typ": "sachaufgabe", "frage": "Tom sammelt Sticker. Er hat 34 Sticker und bekommt von seiner Freundin 19 dazu. Wie viele Sticker hat er jetzt?", "loesung": "53" },
+    { "id": 5, "typ": "knobelaufgabe", "frage": "Ich bin eine Zahl zwischen 30 und 40. Addiere ich meine beiden Ziffern, erhalte ich 7. Welche Zahl bin ich?", "loesung": "34" },
+    { "id": 6, "typ": "rechnen", "frage": "5 × 7 = ?", "loesung": "35" }
+  ]
+}
