@@ -17,22 +17,25 @@
   </header>
 
   <nav id="kid-tabs" class="kid-tabs"></nav>
-
-  <section id="puzzle" class="puzzle-card" hidden>
-    <p class="puzzle-title" id="puzzle-title"></p>
-    <div class="puzzle-frame">
-      <div class="puzzle-image" id="puzzle-image"></div>
-      <div class="puzzle-grid" id="puzzle-grid"></div>
-    </div>
-    <p class="puzzle-status" id="puzzle-status"></p>
-    <button id="puzzle-download" class="chalk-button small" hidden>📥 Bild herunterladen</button>
-  </section>
   <canvas id="puzzle-canvas" hidden></canvas>
 
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
-      <p class="subtitle" id="picker-hint"></p>
-      <div id="worksheet-list" class="worksheet-list"></div>
+      <div id="puzzle-picker" class="puzzle-picker" hidden>
+        <div class="puzzle-frame" id="puzzle-frame">
+          <div class="puzzle-image" id="puzzle-image"></div>
+          <div class="puzzle-grid" id="puzzle-grid"></div>
+        </div>
+        <div class="puzzle-actions">
+          <button id="puzzle-download" class="chalk-button ghost small" hidden>📥 Als Hintergrundbild speichern</button>
+          <button id="backlog-toggle" class="chalk-button ghost small" hidden>📚 Weitere Übungen</button>
+        </div>
+      </div>
+
+      <div id="classic-picker">
+        <p class="subtitle" id="picker-hint"></p>
+        <div id="worksheet-list" class="worksheet-list"></div>
+      </div>
     </section>
 
     <section id="worksheet-view" hidden>

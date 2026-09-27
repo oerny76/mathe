@@ -139,7 +139,14 @@ geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
 Ein SVG-Bild für die ganze Woche (nicht pro Arbeitsblatt), Thema rotierend
 durch die Interessen (diese Woche FC Bayern München, nächste Woche Drachen,
 usw. – unabhängig davon, dass in Schritt 3 immer beide Lesetexte erzeugt
-werden).
+werden). Das Bild ist die **Einstiegsseite** des Kindes: nach der
+Namensschild-Auswahl steht dort nur noch dieses Bild, aufgeteilt in 4
+anklickbare Teile (eins pro Arbeitsblatt der Woche). Jedes Teil wird nicht
+binär auf-/zugedeckt, sondern mit einer Opazität passend zum Anteil richtig
+gelöster Aufgaben angezeigt (z.B. 3 von 6 richtig → 50% sichtbar) – erst bei
+100% ist das Teil voll sichtbar. Nach Fertigstellung aller 4 Teile kann das
+Kind das Bild als hochauflösendes PNG herunterladen und als iPad-Hintergrund
+speichern – deshalb muss das Bild im **Hochformat 3:4** sein.
 
 **Stil:** dynamisch/abenteuerlich, NICHT niedlich-kindlich. Denk an eine
 Fantasy-Abenteuer-Szene: dramatische Silhouetten, Dämmerungs-/
@@ -160,7 +167,9 @@ neues Motiv).
 - **KEINE** `<text>`-Elemente, **KEINE** `<image>`/`<foreignObject>`,
   **KEINE** `<filter>`, keine externen Referenzen (URLs, Google Fonts o.ä.) –
   das Bild muss offline im Browser als PNG rasterisierbar sein.
-- `viewBox="0 0 800 800"`, `xmlns="http://www.w3.org/2000/svg"` gesetzt.
+- **Hochformat**, Seitenverhältnis 3:4, z.B. `viewBox="0 0 1200 1600"`,
+  `xmlns="http://www.w3.org/2000/svg"` gesetzt (passend als iPad-
+  Hintergrundbild – NICHT quadratisch).
 - Das Motiv zeigt in allen vier Quadranten (oben-links, oben-rechts,
   unten-links, unten-rechts) etwas Erkennbares, da es als 2×2-Puzzle
   aufgedeckt wird.
