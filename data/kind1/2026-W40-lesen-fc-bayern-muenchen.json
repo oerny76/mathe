@@ -1,0 +1,17 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "lesen",
+  "titel": "Lesetext: Mikas erster Stadionbesuch",
+  "text": "Mika durfte zum ersten Mal ins Stadion des FC Bayern München. Schon von Weitem sah er die runde, weiß leuchtende Allianz Arena in München. Sein Onkel erklärte ihm, dass viele Fans den Verein liebevoll den „Rekordmeister\" nennen, weil er in der Bundesliga schon öfter Meister wurde als jeder andere Verein in Deutschland.\n\nAm Eingang trugen fast alle Fans rote Trikots und rote Schals. Mika bekam von seinem Onkel ebenfalls einen roten Schal geschenkt. Auf dem Weg zu ihren Plätzen hörte er immer wieder den Spruch „Mia san mia\" – das ist bayerisch und bedeutet ungefähr „Wir sind, wer wir sind\". Der Spruch ist so etwas wie das Motto des Vereins.\n\nAls die Mannschaft das Spielfeld betrat, wurde es im ganzen Stadion laut. Alle sprangen auf und jubelten. Mika war beeindruckt, wie viele Menschen zusammen dieselbe Mannschaft anfeuerten. Am Ende gewann der FC Bayern das Spiel, und Mika sang mit den Fans mit, so gut er konnte. Er wusste: Diesen Tag würde er nie vergessen.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Wie heißt das Stadion des FC Bayern München?", "loesung": "Allianz Arena" },
+    { "id": 2, "typ": "leseverstehen", "frage": "In welcher Stadt liegt das Stadion?", "loesung": "München" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Wie nennen viele Fans den Verein liebevoll?", "loesung": "Rekordmeister" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Welche Farbe hatten die Schals der Fans?", "loesung": "rot" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Was bedeutet der Spruch „Mia san mia\" ungefähr?", "loesung": "Wir sind, wer wir sind" },
+    { "id": 6, "typ": "leseverstehen", "frage": "Wer schenkte Mika den Schal?", "loesung": "sein Onkel" }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "MJ",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "The Case of the Missing Bicycle",
+  "text": "Mia and Leo were best friends. They loved solving small mysteries in their town. One day, Leo's bicycle disappeared from the school yard. Leo was very sad.\n\n\"Let's find some clues,\" said Mia. They looked around the yard. Near the fence, they found a red thread. It looked like it was from a jacket.\n\nMia remembered that Tom, a boy from another class, had a red jacket. They asked Tom some careful questions. Tom looked nervous and finally told the truth: he borrowed the bike because his own bike was broken. He forgot to ask Leo first.\n\nTom said sorry and gave the bicycle back. Leo was happy again, and Mia felt proud. They decided to start their own little detective club. Now other kids in school bring them small mysteries to solve too.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "What is missing at the beginning of the story?", "loesung": "a bicycle" },
+    { "id": 2, "typ": "leseverstehen", "frage": "What did Mia and Leo find near the fence?", "loesung": "a red thread" },
+    { "id": 3, "typ": "leseverstehen", "frage": "What color was Tom's jacket?", "loesung": "red" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Why did Tom take the bike?", "loesung": "his bike was broken" },
+    { "id": 5, "typ": "leseverstehen", "frage": "What did Tom say to Leo?", "loesung": "sorry" },
+    { "id": 6, "typ": "leseverstehen", "frage": "What do Mia and Leo start at the end of the story?", "loesung": "a detective club" }
+  ]
+}

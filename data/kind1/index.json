@@ -7,7 +7,11 @@
     "2026-09-27-grundrechenarten-wochenmix.json",
     "2026-09-27-kopfrechnen-blitz.json",
     "2026-09-27-lesen-fc-bayern.json",
-    "2026-09-27-lesen-drache-funke.json"
+    "2026-09-27-lesen-drache-funke.json",
+    "2026-W40-einmaleins.json",
+    "2026-W40-kopfrechnen.json",
+    "2026-W40-lesen-fc-bayern-muenchen.json",
+    "2026-W40-lesen-drachen-glut.json"
   ],
-  "aktuellesBild": "2026-W39-bild.json"
+  "aktuellesBild": "2026-W40-bild.json"
 }

@@ -4,7 +4,11 @@
     "2026-09-27-kopfrechnen-prozente.json",
     "2026-09-27-kopfrechnen-blitz.json",
     "2026-09-27-einmaleins-profi.json",
-    "2026-09-27-geometrie-grundlagen.json"
+    "2026-09-27-geometrie-grundlagen.json",
+    "2026-W40-kopfrechnen.json",
+    "2026-W40-einmaleins.json",
+    "2026-W40-geometrie.json",
+    "2026-W40-englisch.json"
   ],
-  "aktuellesBild": "2026-W39-bild.json"
+  "aktuellesBild": "2026-W40-bild.json"
 }
