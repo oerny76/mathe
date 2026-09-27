@@ -125,13 +125,34 @@ bekommen sie zusätzlich ein Feld `"woche"` mit der ISO-Kalenderwoche (z.B.
 Arbeitsblätter ohne `"woche"` gelten als Backlog/Extra-Übung und laufen nicht
 ins Wochenbild ein – sie bleiben aber ganz normal spielbar.
 
-### Wochenbild-Puzzle (Gamification)
+### Wochenbild-Puzzle (Gamification, Einstiegsseite)
 
-Oben in der App wird pro Kind (falls vorhanden) ein Puzzle-Belohnungsbild
-angezeigt: Für jeden in der aktuellen Woche erledigten Bereich deckt sich ein
-Viertel eines Bildes auf. Sind alle Teile aufgedeckt, kann das Bild als
-hochauflösendes PNG heruntergeladen werden (2000×2000px, direkt im Browser aus
-dem SVG gerendert – kein Server nötig).
+Für Kinder mit Wochenbild (aktuell TJ) **ist das Bild die Einstiegsseite**:
+nach der Namensschild-Auswahl steht dort nur noch das große Hochformat-Bild
+(Seitenverhältnis 3:4, geeignet als iPad-Hintergrundbild), aufgeteilt in 4
+anklickbare Teile – eins pro Arbeitsblatt der aktuellen Woche. Ein Tippen auf
+ein Teil öffnet direkt das zugehörige Arbeitsblatt (die Kachel trägt Icon,
+Kurzlabel und Punktestand als Orientierung, auch wenn das Bild darunter noch
+kaum zu sehen ist).
+
+Jedes Teil ist nicht einfach nur verdeckt/aufgedeckt, sondern zeigt das Bild
+mit einer **Opazität passend zum Anteil richtig gelöster Aufgaben** dieses
+Arbeitsblatts (z.B. 3 von 6 richtig → Teil zu 50% sichtbar). Erst wenn
+**alle** Aufgaben eines Arbeitsblatts richtig sind, ist das Teil komplett
+sichtbar. Falsche Antworten lassen sich jederzeit erneut anklicken und
+korrigieren (beim Wiederöffnen sind bereits beantwortete Aufgaben sofort
+grün/rot markiert) – herausfordernd, aber nicht frustrierend, da nichts
+verloren geht und Teilfortschritt sofort sichtbar wird.
+
+Weitere, nicht der aktuellen Woche zugeordnete Arbeitsblätter (Backlog/Extra-
+Übung) verschwinden dabei nicht: ein kleiner Button „📚 Weitere Übungen“
+unter dem Bild blendet sie bei Bedarf als klassische Liste ein.
+
+Sind alle 4 Teile fertig, bekommt der Bildrahmen einen goldenen Schimmer und
+ein Button erscheint, um das Bild als **hochauflösendes PNG** herunterzuladen
+(Seitenverhältnis und Auflösung werden automatisch aus dem `viewBox` des SVG
+abgeleitet, aktuell ca. 2049×2732px – direkt im Browser aus dem SVG gerendert,
+kein Server nötig), zum Speichern als Hintergrundbild auf dem iPad.
 
 Dafür trägt `index.json` zusätzlich ein, welches Bild aktuell gilt:
 
@@ -152,9 +173,10 @@ Die referenzierte Datei (`data/<kindId>/2026-W39-bild.json`) sieht so aus:
 
 Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
 `scripts/generate.js` erzeugt:
-- in sich geschlossen, `viewBox="0 0 800 800"`, keine externen Referenzen
-  (keine Bilder/Fonts/URLs) – muss offline aus dem Browser heraus als PNG
-  rasterisierbar sein
+- in sich geschlossen, **Hochformat-`viewBox` im Verhältnis 3:4** (z.B.
+  `viewBox="0 0 1200 1600"` – passend als iPad-Hintergrundbild), keine
+  externen Referenzen (keine Bilder/Fonts/URLs) – muss offline aus dem
+  Browser heraus als PNG rasterisierbar sein
 - nur einfache Formen (`rect`, `circle`, `ellipse`, `path`, `polygon`,
   Gradients in `defs`), **keine** `<text>`-Elemente (Schriftladen kann beim
   Rasterisieren scheitern) und keine `<filter>`

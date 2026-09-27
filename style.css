@@ -88,39 +88,27 @@ body {
   font-weight: bold;
 }
 
-/* ---------- Wochenbild-Puzzle (Gamification) ---------- */
-.puzzle-card {
-  margin: 0 16px 20px;
-  padding: 14px 16px 18px;
-  background: var(--board-bg-2);
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
+/* ---------- Wochenbild-Puzzle (Gamification / Einstiegsseite) ---------- */
+.puzzle-picker {
+  padding: 8px 16px 4px;
   text-align: center;
-  transition: border-color 0.3s ease;
-}
-
-.puzzle-card.complete {
-  border-color: var(--chalk-yellow);
-  animation: puzzle-card-pop 0.5s ease;
-}
-
-.puzzle-title {
-  font-family: var(--font-display);
-  color: var(--chalk-yellow);
-  margin: 0 0 10px;
-  font-size: 1rem;
 }
 
 .puzzle-frame {
   position: relative;
   width: 100%;
-  max-width: 260px;
-  aspect-ratio: 1 / 1;
+  max-width: 420px;
+  aspect-ratio: 3 / 4;
   margin: 0 auto;
-  border-radius: 12px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: #10201a;
   box-shadow: 0 0 0 3px var(--line);
+  transition: box-shadow 0.4s ease;
+}
+
+.puzzle-frame.complete {
+  box-shadow: 0 0 0 3px var(--chalk-yellow), 0 0 32px 6px rgba(242, 199, 68, 0.45);
 }
 
 .puzzle-image {
@@ -143,40 +131,69 @@ body {
 }
 
 .puzzle-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.puzzle-tile-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--board-bg);
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.puzzle-tile-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 4px;
-  background: var(--board-bg);
-  border: 1px dashed var(--line);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(16, 32, 26, 0.45);
+  backdrop-filter: blur(1px);
   color: var(--chalk-white);
-  font-size: 1.7rem;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  font-size: 1.6rem;
+  transition: opacity 0.4s ease;
 }
 
 .puzzle-tile-label {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-family: var(--font-display);
   color: var(--chalk-yellow);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-.puzzle-tile.revealed {
-  opacity: 0;
-  transform: scale(1.4) rotate(6deg);
-  pointer-events: none;
-}
-
-.puzzle-status {
-  margin: 10px 0 0;
-  font-size: 0.85rem;
+.puzzle-tile-fraction {
+  font-size: 0.6rem;
+  font-family: var(--font-body);
+  color: var(--chalk-white);
   opacity: 0.85;
 }
 
-@keyframes puzzle-card-pop {
-  0% { transform: scale(0.97); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
+.puzzle-tile.done .puzzle-tile-content {
+  opacity: 0;
+}
+
+.puzzle-tile:hover .puzzle-tile-content {
+  transform: translateY(-1px);
+}
+
+.puzzle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 /* ---------- Arbeitsblatt-Auswahl ---------- */

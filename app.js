@@ -19,13 +19,14 @@ const els = {
   checkBtn: document.getElementById("check-btn"),
   retryBtn: document.getElementById("retry-btn"),
   resultBanner: document.getElementById("result-banner"),
-  puzzleSection: document.getElementById("puzzle"),
-  puzzleTitle: document.getElementById("puzzle-title"),
+  puzzlePicker: document.getElementById("puzzle-picker"),
+  puzzleFrame: document.getElementById("puzzle-frame"),
   puzzleImage: document.getElementById("puzzle-image"),
   puzzleGrid: document.getElementById("puzzle-grid"),
-  puzzleStatus: document.getElementById("puzzle-status"),
   puzzleDownloadBtn: document.getElementById("puzzle-download"),
   puzzleCanvas: document.getElementById("puzzle-canvas"),
+  backlogToggle: document.getElementById("backlog-toggle"),
+  classicPicker: document.getElementById("classic-picker"),
 };
 
 let currentKid = null;
@@ -96,12 +97,14 @@ function setActiveTab(kidId) {
   });
 }
 
-// ---------- Schritt 1: Kind wählen -> Liste der vorhandenen Arbeitsblätter ----------
+// ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
 async function selectKid(kid) {
   currentKid = kid;
   setActiveTab(kid.id);
 
   showPicker();
+  els.puzzlePicker.hidden = true;
+  els.classicPicker.hidden = false;
   els.pickerHint.textContent = "Aufgaben werden geladen …";
   els.worksheetList.innerHTML = "";
 
@@ -142,103 +145,128 @@ async function selectKid(kid) {
     );
 
     const valid = worksheets.filter(Boolean).sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
-    els.pickerHint.textContent = "Wähle eine Aufgabe aus:";
-    renderWorksheetList(valid);
-    await loadPuzzle(kid, index, valid);
+    await setupPickerView(kid, index, valid);
   } catch (err) {
     els.pickerHint.textContent = "Für dich sind noch keine Aufgaben vorbereitet. Frag einen Erwachsenen! 🙈";
-    els.puzzleSection.hidden = true;
   }
 }
 
-// ---------- Wochenbild-Puzzle (Gamification) ----------
-async function loadPuzzle(kid, index, worksheets) {
+// ---------- Einstiegsseite: Wochenbild-Puzzle (bevorzugt) oder klassische Liste ----------
+async function setupPickerView(kid, index, worksheets) {
   currentBild = null;
   currentWeekFiles = [];
 
-  if (!index.aktuellesBild) {
-    els.puzzleSection.hidden = true;
-    return;
+  if (index.aktuellesBild) {
+    try {
+      const res = await fetch(`data/${kid.id}/${index.aktuellesBild}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Kein Wochenbild gefunden");
+      currentBild = await res.json();
+    } catch {
+      currentBild = null;
+    }
   }
 
-  try {
-    const res = await fetch(`data/${kid.id}/${index.aktuellesBild}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Kein Wochenbild gefunden");
-    currentBild = await res.json();
-  } catch {
-    els.puzzleSection.hidden = true;
-    return;
+  if (currentBild) {
+    // Jedes Arbeitsblatt dieser Woche ist ein Puzzle-Teil – unabhängig davon, wie
+    // sich die Woche auf die Bereiche verteilt (z.B. 2 Lesen + 2 Rechnen).
+    currentWeekFiles = worksheets
+      .filter((ws) => ws.woche === currentBild.woche)
+      .sort((a, b) => a.file.localeCompare(b.file));
   }
 
-  // Jedes Arbeitsblatt dieser Woche ist ein Puzzle-Teil – unabhängig davon, wie
-  // sich die Woche auf die Bereiche verteilt (z.B. 2 Lesen + 2 Rechnen).
-  currentWeekFiles = worksheets
-    .filter((ws) => ws.woche === currentBild.woche)
-    .sort((a, b) => a.file.localeCompare(b.file));
+  if (currentBild && currentWeekFiles.length > 0) {
+    // Bild-Einstiegsseite: nur das Bild, Aufgaben stecken in den anklickbaren Teilen.
+    els.puzzlePicker.hidden = false;
+    els.puzzleImage.innerHTML = currentBild.svg || "";
+    renderPuzzleGrid();
 
-  if (currentWeekFiles.length === 0) {
-    els.puzzleSection.hidden = true;
-    return;
+    const backlog = worksheets.filter((ws) => !currentWeekFiles.includes(ws));
+    els.classicPicker.hidden = true;
+    els.backlogToggle.hidden = backlog.length === 0;
+    els.backlogToggle.textContent = "📚 Weitere Übungen";
+    els.pickerHint.textContent = "Weitere Übungen zum Vertiefen:";
+    renderWorksheetList(backlog);
+  } else {
+    // Fallback: kein Wochenbild vorhanden (z.B. MJ) -> klassische Liste wie bisher.
+    els.puzzlePicker.hidden = true;
+    els.classicPicker.hidden = false;
+    els.backlogToggle.hidden = true;
+    els.pickerHint.textContent = "Wähle eine Aufgabe aus:";
+    renderWorksheetList(worksheets);
   }
-
-  els.puzzleSection.hidden = false;
-  els.puzzleTitle.textContent = `🧩 ${currentBild.titel || "Dein Wochenbild"}`;
-  els.puzzleImage.innerHTML = currentBild.svg || "";
-  renderPuzzleGrid();
 }
 
 function renderPuzzleGrid() {
   if (!currentBild) return;
 
   els.puzzleGrid.innerHTML = "";
-  let doneCount = 0;
+  let allDone = currentWeekFiles.length > 0;
 
   currentWeekFiles.forEach((ws) => {
     const total = (worksheetCache[ws.file]?.aufgaben || []).length;
     const progress = loadProgress(currentKid.id, ws.file);
-    const erledigt = progress ? progress.correctCount === total : false;
-    if (erledigt) doneCount++;
+    const correct = progress ? progress.correctCount : 0;
+    const fraction = total > 0 ? Math.min(correct / total, 1) : 0;
+    if (fraction < 1) allDone = false;
 
-    const tile = document.createElement("div");
-    tile.className = "puzzle-tile" + (erledigt ? " revealed" : "");
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "puzzle-tile" + (fraction >= 1 ? " done" : "");
+    tile.setAttribute("aria-label", `${ws.titel} – ${correct} von ${total} richtig`);
     tile.innerHTML = `
-      <span>${BEREICH_ICONS[ws.bereich] || "❓"}</span>
-      <span class="puzzle-tile-label">${escapeHtml(bereichLabel(ws.bereich).replace(/^\S+\s/, ""))}</span>
+      <span class="puzzle-tile-scrim" style="opacity: ${1 - fraction}"></span>
+      <span class="puzzle-tile-content">
+        <span>${BEREICH_ICONS[ws.bereich] || "❓"}</span>
+        <span class="puzzle-tile-label">${escapeHtml(bereichLabel(ws.bereich).replace(/^\S+\s/, ""))}</span>
+        <span class="puzzle-tile-fraction">${correct}/${total}</span>
+      </span>
     `;
+    tile.addEventListener("click", () => openWorksheet(ws.file));
     els.puzzleGrid.appendChild(tile);
   });
 
-  const total = currentWeekFiles.length;
-  els.puzzleStatus.textContent =
-    doneCount === total
-      ? "🎉 Alle Teile aufgedeckt – dein Bild ist fertig!"
-      : `${doneCount} von ${total} Teilen aufgedeckt`;
-
-  els.puzzleSection.classList.toggle("complete", doneCount === total && total > 0);
-  els.puzzleDownloadBtn.hidden = !(doneCount === total && total > 0);
+  els.puzzleFrame.classList.toggle("complete", allDone);
+  els.puzzleDownloadBtn.hidden = !allDone;
 }
 
 function downloadPuzzleImage() {
   if (!currentBild?.svg || !currentKid) return;
+
+  // Ziel-Seitenverhältnis aus dem viewBox des SVG ableiten (aktuell 3:4, passend
+  // als iPad-Hintergrundbild), statt es hart zu verdrahten.
+  const viewBoxMatch = currentBild.svg.match(/viewBox="([\d.\s]+)"/);
+  let vbWidth = 1200;
+  let vbHeight = 1600;
+  if (viewBoxMatch) {
+    const parts = viewBoxMatch[1].trim().split(/\s+/).map(Number);
+    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+      vbWidth = parts[2];
+      vbHeight = parts[3];
+    }
+  }
+
+  const targetLongSide = 2732; // hochauflösend genug für iPad-Hintergrundbilder
+  const scale = targetLongSide / Math.max(vbWidth, vbHeight);
+  const width = Math.round(vbWidth * scale);
+  const height = Math.round(vbHeight * scale);
 
   const svgBlob = new Blob([currentBild.svg], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(svgBlob);
   const img = new Image();
 
   img.onload = () => {
-    const size = 2000;
     const canvas = els.puzzleCanvas;
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, size, size);
-    ctx.drawImage(img, 0, 0, size, size);
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
     URL.revokeObjectURL(url);
 
     canvas.toBlob((blob) => {
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `${currentKid.name}-wochenbild-${currentBild.woche || "aktuell"}.png`;
+      link.download = `${currentKid.name}-hintergrundbild-${currentBild.woche || "aktuell"}.png`;
       link.click();
       URL.revokeObjectURL(link.href);
     }, "image/png");
@@ -337,10 +365,18 @@ function renderTasks() {
 
   currentTasks.forEach((task, index) => {
     const card = document.createElement("div");
-    card.className = "task-card";
     card.dataset.taskId = task.id;
 
     const savedAnswer = saved?.answers?.[task.id] ?? "";
+
+    // Bereits beantwortete Aufgaben sofort als richtig/falsch markieren, damit
+    // das Kind beim erneuten Öffnen direkt sieht, was noch zu korrigieren ist –
+    // ohne extra "Fertig"-Klick und ohne die Eingabe zu sperren.
+    let initialState = "";
+    if (savedAnswer !== "") {
+      initialState = normalizeAnswer(savedAnswer) === normalizeAnswer(task.loesung) ? " correct" : " wrong";
+    }
+    card.className = "task-card" + initialState;
 
     card.innerHTML = `
       <span class="task-number">Aufgabe ${index + 1} von ${currentTasks.length}</span>
@@ -455,6 +491,11 @@ els.checkBtn.addEventListener("click", checkAnswers);
 els.retryBtn.addEventListener("click", retry);
 els.backBtn.addEventListener("click", backToPicker);
 els.puzzleDownloadBtn.addEventListener("click", downloadPuzzleImage);
+els.backlogToggle.addEventListener("click", () => {
+  const nowHidden = !els.classicPicker.hidden;
+  els.classicPicker.hidden = nowHidden;
+  els.backlogToggle.textContent = nowHidden ? "📚 Weitere Übungen" : "🧩 Übungen ausblenden";
+});
 
 // ---------- Start ----------
 renderTabs();
