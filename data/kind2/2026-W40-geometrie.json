@@ -1,0 +1,16 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "geometrie",
+  "titel": "Geometrie: Eine Stufe schwerer 📐",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "Wie viele Grad hat die Winkelsumme in einem Dreieck?", "loesung": "180" },
+    { "id": 2, "typ": "rechnen", "frage": "Ein rechtwinkliges Dreieck hat eine Grundseite von 10 cm und eine Höhe von 6 cm. Wie groß ist seine Fläche in cm²?", "loesung": "30" },
+    { "id": 3, "typ": "rechnen", "frage": "Ein Quadrat hat eine Fläche von 64 cm². Wie lang ist eine Seite in cm?", "loesung": "8" },
+    { "id": 4, "typ": "rechnen", "frage": "Wie viele Ecken (Eckpunkte) hat ein Würfel?", "loesung": "8" },
+    { "id": 5, "typ": "rechnen", "frage": "Ein Kreis hat einen Durchmesser von 14 cm. Wie groß ist sein Radius in cm?", "loesung": "7" },
+    { "id": 6, "typ": "knobelaufgabe", "frage": "Ein Winkel ist kleiner als 90°. Wie nennt man so einen Winkel? (ein Wort)", "loesung": "spitz" }
+  ]
+}

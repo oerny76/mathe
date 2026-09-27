@@ -85,9 +85,12 @@ Bekannte Bereiche mit fester Reihenfolge/Icon in `app.js` (`BEREICH_LABELS`):
 den bekannten angezeigt.
 
 Aktuell genutzte Bereiche pro Kind:
-- **Tim:** `einmaleins`, `grundrechenarten`, `kopfrechnen`, `lesen`.
-- **Marlene:** `einmaleins`, `kopfrechnen`, `geometrie` – bewusst **kein** `lesen`
-  (MJs Interesse liegt bei Kreativität/Malen/Basteln statt Lesetexten).
+- **Tim:** `einmaleins`, `grundrechenarten`, `kopfrechnen`, `lesen` (deutsche
+  Lesetexte, je einer pro Interesse).
+- **Marlene:** `einmaleins`, `kopfrechnen`, `geometrie`, `lesen` (ein englischer
+  Detektiv-/Rätsel-Lesetext pro Woche, zusätzlich mit Feld `"sprache":
+  "englisch"` markiert – Interesse Kreativität/Malen/Basteln dient nur als
+  Thema fürs Wochenbild).
 
 Für Lese-Arbeitsblätter gibt es zusätzlich ein optionales Feld `"text"` auf
 oberster Ebene: ein Lesetext, der über den Aufgaben angezeigt wird. Die
@@ -121,11 +124,12 @@ unterschiedlicher Aufteilung, je nach Interessen:
 - **2 Lese-Arbeitsblätter**, eins pro Interessengebiet des Kindes (aktuell FC
   Bayern München und Drachen) – so kommen beide Interessen jede Woche vor.
 
-**Marlene – nur Rechnen, kein Lesen:**
-- **4 Rechen-Arbeitsblätter**, aus den Bereichen Kopfrechnen/Einmaleins/
-  Geometrie: alle drei kommen jede Woche vor, plus ein vierter, rotierend
-  verdoppelter Bereich (damit über die Zeit alle drei gleich oft doppelt
-  vorkommen).
+**Marlene – 3 Rechnen + 1 Englisch-Lesetext:**
+- **3 Rechen-Arbeitsblätter**, alle Bereiche jede Woche (Kopfrechnen,
+  Einmaleins, Geometrie) – keine Rotation, keine Verdopplung.
+- **1 englischer Lese-Arbeitsblatt** pro Woche: eine generische
+  Detektiv-/Rätselgeschichte (A2-Sprachniveau), mit 6 Verständnisfragen auf
+  Englisch. Trainiert nebenbei Englisch, nicht nur Leseverständnis.
 
 Jedes Arbeitsblatt ist für ~15 Minuten ausgelegt (6 Aufgaben bei Rechen-
 Blättern, 6 Verständnisfragen zu einem Lesetext bei Lese-Blättern). Das Kind
@@ -228,7 +232,7 @@ eignen sich `<use>`-Referenzen mit `transform="translate(...) scale(-1,1)"`
 zum Spiegeln einer Körperhälfte.
 
 Ohne `"aktuellesBild"` in `index.json` bleibt das Puzzle einfach ausgeblendet
-(z.B. bei Marlene aktuell der Fall).
+(z.B. bei einem neu angelegten Kind ohne Wochenbild).
 
 ## Einrichtung (einmalig)
 
@@ -276,16 +280,21 @@ Für Kinder mit `rechenBereiche` in der `KIDS`-Konfiguration im Skript (aktuell
 Tim und Marlene) erzeugt der Lauf pro Woche Rechen-Arbeitsblätter aus
 `rechenBereiche`, getaggt mit `bereich` + `woche`, sowie ein passendes
 Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben). Ob dazu noch
-Lesetexte kommen, steuert das Feld `lesen` (Standard: `true`):
-- **`lesen` nicht gesetzt oder `true` (aktuell Tim):** 2 der 3
+Lesetexte kommen und in welcher Sprache, steuern die Felder `lesen` (Standard:
+`true`) und `englischLesen`:
+- **`lesen` nicht gesetzt/`true`, kein `englischLesen` (aktuell Tim):** 2 der 3
   `rechenBereiche` rotierend pro Woche + 1 Lese-Arbeitsblatt pro Eintrag in
   `interessen` (~50:50, siehe „Wochenpensum“ oben). Bildthema rotiert durch
   `interessen`, Bildstil `bildStil: "abenteuer"` (Standard).
-- **`lesen: false` (aktuell Marlene):** alle `rechenBereiche` jede Woche + ein
-  vierter, rotierend verdoppelter Bereich (macht 4 Arbeitsblätter/Woche ohne
-  Lesetexte). `interessen` dient hier nur als Bildthema (z.B. `["Kreativität,
-  Malen und Basteln"]`), Bildstil `bildStil: "ausmalbild"` erzeugt ein
-  druckbares Ausmalbild im A4-Format statt des Abenteuer-Wallpapers.
+- **`englischLesen: true` (aktuell Marlene):** alle `rechenBereiche` jede Woche
+  (keine Rotation) + 1 englischer Detektiv-/Rätsel-Lesetext (`bereich:
+  "lesen"`, `sprache: "englisch"`) – macht 4 Arbeitsblätter/Woche. `interessen`
+  dient hier nur als Bildthema (z.B. `["Kreativität, Malen und Basteln"]`),
+  Bildstil `bildStil: "ausmalbild"` erzeugt ein druckbares Ausmalbild im
+  A4-Format statt des Abenteuer-Wallpapers.
+- **`lesen: false`, kein `englischLesen` (aktuell von keinem Kind genutzt):**
+  alle `rechenBereiche` jede Woche + ein vierter, rotierend verdoppelter
+  Bereich, ganz ohne Lesetext.
 
 Das Skript läuft **nicht automatisch** (es gibt bewusst keinen
 GitHub-Actions-Workflow dafür) – du rufst es bei Bedarf lokal auf und

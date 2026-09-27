@@ -1,6 +1,6 @@
 ---
 name: mathe-woche
-description: Erzeugt wöchentliche Matheaufgaben-Arbeitsblätter (Rechnen + Lesetexte) und ein Belohnungs-Wochenbild für die Kinder-Lern-App "Mathe-Stunde" (github.com/oerny76/mathe) und committet die Dateien über den verbundenen GitHub-Connector direkt ins Repo. Verwende diesen Skill, wenn nach neuen Wochenaufgaben für Tim oder Marlene gefragt wird, z.B. "Tim, Wochenaufgaben" oder "Marlene, ein Arbeitsblatt auf Vorrat".
+description: Erzeugt wöchentliche Matheaufgaben-Arbeitsblätter (Rechnen + Lesetexte, bei Marlene inklusive eines Englisch-Lesetexts) und ein Belohnungs-Wochenbild für die Kinder-Lern-App "Mathe-Stunde" (github.com/oerny76/mathe) und committet die Dateien über den verbundenen GitHub-Connector direkt ins Repo. Verwende diesen Skill, wenn nach neuen Wochenaufgaben für Tim oder Marlene gefragt wird, z.B. "Tim, Wochenaufgaben" oder "Marlene, ein Arbeitsblatt auf Vorrat".
 ---
 
 # mathe-woche
@@ -25,18 +25,20 @@ Kontext, aktuelle ISO-Kalenderwoche).
 
 | Name | Ordner-ID | Alter | Rechen-Bereiche | Lesen? | Interessen | Bildstil |
 |------|-----------|-------|-----------------|--------|------------|----------|
-| Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja | FC Bayern München, Drachen | abenteuer (buntes Wallpaper, 3:4) |
-| Marlene | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | **nein** | Kreativität, Malen und Basteln | ausmalbild (Ausmalseite, A4) |
+| Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja (Deutsch, pro Interesse) | FC Bayern München, Drachen | abenteuer (buntes Wallpaper, 3:4) |
+| Marlene | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | ja (Englisch, 1×/Woche) | Bild-Thema: Kreativität, Malen und Basteln · Lese-Thema: Detektivgeschichten (Stil „Die drei Fragezeichen“ o.ä.) | ausmalbild (komplexes Mandala, A4) |
 
 Diese Tabelle muss mit dem `KIDS`-Array in `scripts/generate.js` synchron
 bleiben. Wurde dort etwas geändert (neues Kind, neue Interessen, andere
 Bereiche), zuerst dort **und** in dieser Skill-Datei aktualisieren, bevor du
 danach arbeitest.
 
-Beide Kinder haben inzwischen ein Bereichs-Modell. Der einzige Unterschied:
-Tim bekommt zusätzlich zu den Rechen-Arbeitsblättern Lesetexte (siehe Schritt 3
-unten), Marlene **nicht** – MJs Interesse (Kreativität/Malen/Basteln) dient nur als
-Thema für das Wochenbild (Schritt 4), nicht für einen Lesetext.
+Beide Kinder haben ein Bereichs-Modell und bekommen inzwischen beide auch
+Lesetexte (siehe Schritt 3): Tim liest auf Deutsch, passend zu seinen zwei
+Interessen (FC Bayern München, Drachen); Marlene liest einmal pro Woche einen
+englischen Text im Detektiv-/Rätsel-Genre. Deshalb bekommt Marlene in Schritt 2
+nur noch 3 statt 4 Rechen-Arbeitsblätter – das vierte Arbeitsblatt der Woche
+ist der Englisch-Lesetext.
 
 ## Ablauf für Kinder MIT Rechen-Bereichen (Tim und Marlene)
 
@@ -58,19 +60,18 @@ Schwierigkeitssteigerung.
 
 ### 2. Rechen-Arbeitsblätter erzeugen
 
-Wie viele und welche Bereiche drankommen, hängt davon ab, ob das Kind auch
+Wie viele und welche Bereiche drankommen, hängt davon ab, wie das Kind seine
 Lesetexte bekommt (siehe Tabelle oben):
 
-- **Tim (Lesen: ja):** aus `rechenBereiche` (einmaleins, grundrechenarten,
-  kopfrechnen) werden **2 der 3** ausgewählt – der dritte fällt für diese
-  Woche aus, rotierend über die Wochen (nicht zwei Wochen hintereinander
-  denselben Bereich auslassen). Die restlichen 2 Arbeitsblätter der Woche
-  kommen in Schritt 3 aus den Lesetexten.
-- **Marlene (Lesen: nein):** **alle 3** `rechenBereiche` (kopfrechnen, einmaleins,
-  geometrie) kommen jede Woche vor, plus ein **vierter, rotierend
-  verdoppelter** Bereich (damit über die Zeit alle drei gleich oft doppelt
-  vorkommen) – macht 4 Arbeitsblätter/Woche ohne Lesetexte. Schritt 3 entfällt
-  für Marlene komplett.
+- **Tim (2 Rechen- + 2 Lese-Arbeitsblätter):** aus `rechenBereiche`
+  (einmaleins, grundrechenarten, kopfrechnen) werden **2 der 3** ausgewählt –
+  der dritte fällt für diese Woche aus, rotierend über die Wochen (nicht zwei
+  Wochen hintereinander denselben Bereich auslassen). Die restlichen 2
+  Arbeitsblätter der Woche kommen in Schritt 3 aus den Lesetexten.
+- **Marlene (3 Rechen- + 1 Englisch-Lese-Arbeitsblatt):** **alle 3**
+  `rechenBereiche` (kopfrechnen, einmaleins, geometrie) kommen jede Woche vor.
+  Kein vierter, verdoppelter Bereich mehr – das vierte Arbeitsblatt der Woche
+  ist der Englisch-Lesetext aus Schritt 3.
 
 Für jeden Bereich, genau 6 Aufgaben, altersgerecht, Bearbeitungszeit
 ~15 Minuten, Schwierigkeit leicht über dem letzten Arbeitsblatt desselben
@@ -115,7 +116,9 @@ oder `"knobelaufgabe"` möglich. `"loesung"` immer ein knapper, eindeutiger
 String (die App vergleicht beim Auswerten exakt, nur Groß-/Kleinschreibung
 wird ignoriert) – keine Einheiten, keine Zusatztexte.
 
-### 3. Ein Lese-Arbeitsblatt pro Interesse erzeugen (nur Tim, für Marlene überspringen)
+### 3. Lese-Arbeitsblätter erzeugen (bei beiden Kindern, unterschiedlich)
+
+**Tim – ein deutsches Lese-Arbeitsblatt pro Interesse:**
 
 Für **jedes** Interessengebiet aus der Kinder-Konfiguration (bei Tim also 2:
 FC Bayern München und Drachen) ein eigenes Lese-Arbeitsblatt – damit ergeben
@@ -151,6 +154,45 @@ geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
 }
 ```
 
+**Marlene – ein englisches Lese-Arbeitsblatt pro Woche:**
+
+Genau **ein** Arbeitsblatt/Woche, Genre Detektiv-/Rätselgeschichte im Stil von
+„Die drei Fragezeichen“ – das ist Marlenes aktuelles Lieblingsthema, soll aber auf
+Englisch trainiert werden (Sprache lernen, nicht nur Leseverständnis).
+
+- **KEINE** Übernahme der geschützten Reihe: keine Figurennamen wie Justus,
+  Peter oder Bob, keine wörtlich übernommenen Fälle/Szenen – nur eine eigene,
+  generische Detektiv-/Rätselgeschichte im selben Genre (jugendliche
+  Hobby-Detektive lösen ein Rätsel).
+- Sprachniveau an eine 12-Jährige angepasst, die Englisch in der Schule lernt
+  (ungefähr A2, wie im 6./7. Schuljahr): einfache Satzstrukturen, überwiegend
+  Präsens/einfaches Präteritum, gängiger Wortschatz, keine komplexen
+  Redewendungen oder Slang.
+- Länge **120-180 Wörter** (kürzer als Tims deutsche Texte, weil Englisch für
+  Marlene eine Fremdsprache ist).
+
+Danach genau 6 kurze Verständnisfragen **auf Englisch**, mit knappen,
+eindeutigen englischen Antworten (ein Wort/eine Zahl/eine kurze Phrase) – die
+Auswertung vergleicht exakt, nur Groß-/Kleinschreibung wird ignoriert.
+
+Datei: `data/kind2/<woche>-englisch.json`.
+
+```json
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "<heutiges Datum, JJJJ-MM-TT>",
+  "woche": "<woche>",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "<kurzer, englischer Titel>",
+  "text": "<Detektivgeschichte auf Englisch, 120-180 Wörter>",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "loesung": "<Antwort auf Englisch>" }
+  ]
+}
+```
+
 ### 4. Wochenbild (Puzzle-Belohnungsbild) erzeugen
 
 Ein SVG-Bild für die ganze Woche (nicht pro Arbeitsblatt). Bei Tim rotiert das
@@ -171,22 +213,27 @@ Der Bildstil hängt vom Kind ab (Spalte „Bildstil“ in der Tabelle oben):
 dynamisch/abenteuerlich, NICHT niedlich-kindlich. Denk an eine
 Fantasy-Abenteuer-Szene: dramatische Silhouetten, Dämmerungs-/
 Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe), Gegenlicht, Bewegung/
-Dynamik in der Pose. Referenzbeispiel: `data/kind1/2026-W39-bild.json`
-(Drachensilhouette im Sonnenuntergang) – lies es dir über den GitHub-Connector
-durch, bevor du ein neues Bild baust, und orientiere dich stilistisch daran
-(aber nicht 1:1 kopieren, jede Woche ein neues Motiv). **Hochformat,
-Seitenverhältnis 3:4**, z.B. `viewBox="0 0 1200 1600"`.
+Dynamik in der Pose. Referenzbeispiel: `data/kind1/2026-W40-bild.json`
+(Fußball-Silhouette im Sonnenuntergang) – lies es dir über den
+GitHub-Connector durch, bevor du ein neues Bild baust, und orientiere dich
+stilistisch daran (aber nicht 1:1 kopieren, jede Woche ein neues Motiv).
+**Hochformat, Seitenverhältnis 3:4**, z.B. `viewBox="0 0 1200 1600"`.
 
 **Marlene – Stil „ausmalbild“ (druckbare Ausmalseite in A4):** reine
 Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild eines
 Tieres – schwarze Konturen (`stroke="#1a1a1a"`, `fill="none"`), nur ein
 weißer Hintergrund-`<rect>` mit `fill="#ffffff"`, ruhig und symmetrisch statt
 bunt/comic-haft, gerne mit floralen/dekorativen Mustern (passend zu
-Kreativität/Malen/Basteln). Referenzbeispiel:
-`data/kind2/2026-W39-bild.json` (Schmetterlings-Mandala) – für exakte
-Symmetrie eignen sich `<use>`-Referenzen mit
-`transform="translate(...) scale(-1,1)"` zum Spiegeln einer Körperhälfte,
-statt Koordinaten von Hand zu spiegeln. **Hochformat im A4-Verhältnis**, z.B.
+Kreativität/Malen/Basteln). Marlene ist inzwischen 12 und die Motive sollen
+entsprechend anspruchsvoll sein – **nicht mehr Vorschulniveau** (wenige große,
+einfache Flächen), sondern deutlich mehr Details: feinere Linien, mehr
+Wiederholungen/Segmente in der Symmetrie, verschachtelte Muster im Inneren
+größerer Formen – wie ein Mandala für ältere Kinder/Erwachsene zum
+konzentrierten Ausmalen, nicht wie ein Kindergarten-Ausmalbild.
+Referenzbeispiel: `data/kind2/2026-W40-bild.json` (Pfauen-Mandala) – für
+exakte Symmetrie eignen sich `<use>`-Referenzen mit `transform="rotate(...)"`
+bzw. `transform="translate(...) scale(-1,1)"` zum Spiegeln/Fächern statt
+Koordinaten von Hand zu spiegeln. **Hochformat im A4-Verhältnis**, z.B.
 `viewBox="0 0 2100 2970"`.
 
 **WICHTIG – niemals verletzen (beide Stile):**

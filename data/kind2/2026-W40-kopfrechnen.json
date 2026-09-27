@@ -1,0 +1,16 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Eine Stufe schwerer 🧠",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "Verdreifache 45. Wie viel ist das?", "loesung": "135" },
+    { "id": 2, "typ": "rechnen", "frage": "Halbiere 372. Wie viel ist das?", "loesung": "186" },
+    { "id": 3, "typ": "rechnen", "frage": "30% von 250 = ?", "loesung": "75" },
+    { "id": 4, "typ": "rechnen", "frage": "Ergänze 145 auf 200. Wie viel fehlt?", "loesung": "55" },
+    { "id": 5, "typ": "rechnen", "frage": "14 × 11 = ?", "loesung": "154" },
+    { "id": 6, "typ": "rechnen", "frage": "Runde 6284 auf die nächsten Tausend.", "loesung": "6000" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis: Runde 2 ✖️",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "16 × 16 = ?", "loesung": "256" },
+    { "id": 2, "typ": "rechnen", "frage": "18 × 3 = ?", "loesung": "54" },
+    { "id": 3, "typ": "rechnen", "frage": "195 : 15 = ?", "loesung": "13" },
+    { "id": 4, "typ": "rechnen", "frage": "19 × 2 = ?", "loesung": "38" },
+    { "id": 5, "typ": "rechnen", "frage": "14 × 14 = ?", "loesung": "196" },
+    { "id": 6, "typ": "rechnen", "frage": "210 : 14 = ?", "loesung": "15" }
+  ]
+}

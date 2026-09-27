@@ -1,0 +1,17 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W40",
+  "bereich": "lesen",
+  "titel": "Lesetext: Glut, der schüchterne Drache",
+  "text": "Hoch oben auf einem Berg lebte ein Drache namens Glut. Seine Schuppen schimmerten rötlich wie glühende Kohlen, deshalb hatte er seinen Namen bekommen. Die Menschen im Tal erzählten sich gruselige Geschichten über ihn, dabei war Glut eigentlich sehr schüchtern.\n\nEin Gewitter zog auf, und der laute Donner machte Glut jedes Mal große Angst. Er versteckte sich dann tief in seiner Höhle. Ein Mädchen namens Lina, das mit ihren Schafen in den Bergen unterwegs war, hörte eines Tages leises Wimmern aus der Höhle. Mutig ging sie hinein und entdeckte den zitternden Drachen.\n\nStatt wegzulaufen, setzte sich Lina neben Glut und summte ein ruhiges Lied, das ihre Großmutter ihr beigebracht hatte. Nach und nach beruhigte sich der Drache. Von da an besuchte Lina ihn immer wieder, wenn ein Gewitter kam. Die Dorfbewohner staunten, als sie später sahen, wie Lina und Glut gemeinsam über die Wiesen liefen – der große Drache und das kleine Mädchen, die beste Freunde geworden waren.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Wie heißt der Drache in der Geschichte?", "loesung": "Glut" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Wie heißt das Mädchen?", "loesung": "Lina" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Welche Farbe hatten die Schuppen des Drachen?", "loesung": "rötlich" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Wovor hatte der Drache große Angst?", "loesung": "Donner" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Womit war Lina in den Bergen unterwegs?", "loesung": "Schafe" },
+    { "id": 6, "typ": "leseverstehen", "frage": "Was tat Lina, um den Drachen zu beruhigen?", "loesung": "sie summte ein Lied" }
+  ]
+}
