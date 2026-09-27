@@ -1,16 +1,20 @@
 // scripts/generate.js
 // Erzeugt für jedes Kind die Aufgaben-JSON-Dateien für die aktuelle Kalenderwoche.
-// Kinder mit "rechenBereiche" und "lesen" !== false (aktuell TJ) bekommen pro Woche
-// 2 Rechen-Arbeitsblätter (rotierend durch rechenBereiche) + 1 Lesetext-Arbeitsblatt
-// pro Eintrag in "interessen" (bei TJ aktuell 2 Interessen = 2 Lesetexte), macht 4
-// Arbeitsblätter/Woche mit einer ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe
-// README, Abschnitt "Wochenpensum"). Kinder mit "lesen: false" (aktuell MJ) bekommen
-// stattdessen alle rechenBereiche + einen rotierend verdoppelten Bereich (ebenfalls 4
-// Arbeitsblätter/Woche, aber ohne Lesetexte). Dazu ein wöchentliches
-// Puzzle-Belohnungsbild (siehe README, Abschnitt "Wochenbild-Puzzle"), dessen Stil
-// über "bildStil" gewählt wird ("abenteuer" = Standard, buntes Wallpaper;
-// "ausmalbild" = druckbare A4-Ausmalseite). Kinder ohne "rechenBereiche" bekommen wie
-// bisher ein einzelnes Wochenblatt.
+// Kinder mit "rechenBereiche" und "lesen" !== false und ohne "englischLesen"
+// (aktuell TJ) bekommen pro Woche 2 Rechen-Arbeitsblätter (rotierend durch
+// rechenBereiche) + 1 Lesetext-Arbeitsblatt pro Eintrag in "interessen" (bei TJ
+// aktuell 2 Interessen = 2 Lesetexte), macht 4 Arbeitsblätter/Woche mit einer
+// ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe README, Abschnitt
+// "Wochenpensum"). Kinder mit "englischLesen: true" (aktuell MJ) bekommen
+// stattdessen ALLE rechenBereiche (keine Rotation) + 1 englischen
+// Detektiv-/Rätsel-Lesetext (bereich "lesen", sprache "englisch") – ebenfalls 4
+// Arbeitsblätter/Woche. Kinder mit "lesen: false" und ohne "englischLesen"
+// bekommen alle rechenBereiche + einen rotierend verdoppelten Bereich, ganz ohne
+// Lesetext (älteres Verhalten, aktuell von keinem Kind mehr genutzt). Dazu ein
+// wöchentliches Puzzle-Belohnungsbild (siehe README, Abschnitt
+// "Wochenbild-Puzzle"), dessen Stil über "bildStil" gewählt wird ("abenteuer" =
+// Standard, buntes Wallpaper; "ausmalbild" = druckbare A4-Ausmalseite). Kinder
+// ohne "rechenBereiche" bekommen wie bisher ein einzelnes Wochenblatt.
 //
 // Wird manuell aufgerufen (kein automatischer GitHub-Workflow):
 //   ANTHROPIC_API_KEY=sk-... node scripts/generate.js
@@ -38,13 +42,16 @@ const KIDS = [
     id: "kind2",
     name: "MJ",
     alter: 12,
-    // Alle 3 Bereiche kommen jede Woche vor (siehe generateBereicheForKid),
-    // da MJ (anders als TJ) keine Lesetexte bekommt und die Rechen-Bereiche
-    // allein die 4 Arbeitsblätter/Woche füllen müssen.
+    // Alle 3 Bereiche kommen jede Woche vor, ohne Rotation (siehe
+    // generateBereicheForKid) – das 4. Arbeitsblatt der Woche ist der
+    // englische Lesetext (siehe "englischLesen").
     rechenBereiche: ["kopfrechnen", "einmaleins", "geometrie"],
-    lesen: false,
-    // Dient hier nicht für Lesetexte (siehe "lesen: false"), sondern nur als
-    // Thema fürs Wochenbild (Ausmalbild).
+    // MJ bekommt statt eines Lesetexts zu einem Interessengebiet jede Woche
+    // eine eigene, generische Detektiv-/Rätselgeschichte auf Englisch
+    // (Sprache lernen, A2-Niveau) – siehe BEREICH_PROMPTS.englisch.
+    englischLesen: true,
+    // Dient hier nicht für Lesetexte, sondern nur als Thema fürs Wochenbild
+    // (Ausmalbild).
     interessen: ["Kreativität, Malen und Basteln"],
     bildStil: "ausmalbild",
   },
@@ -130,6 +137,27 @@ geschützten Figurennamen); bei realen Themen (z.B. ein Sportverein) nur allgeme
 bekannte Fakten in eigenen Worten. Danach genau 6 kurze Verständnisfragen mit
 eindeutigen, knappen Antworten (ein Wort/eine Zahl/ein kurzer Fakt), da die
 Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
+  },
+  englisch: {
+    format: `{
+  "titel": "<kurzer, englischer Titel>",
+  "sprache": "englisch",
+  "text": "<Detektiv-/Rätselgeschichte auf Englisch, 120-180 Wörter>",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "loesung": "<kurze, eindeutige Antwort auf Englisch>" }
+  ]
+}`,
+    anweisung: `Schreibe eine ORIGINELLE, generische Detektiv-/Rätselgeschichte auf Englisch
+(Genre: jugendliche Hobby-Detektive lösen ein kleines Rätsel, im Stil von "Die
+drei Fragezeichen" – aber KEINE Übernahme der geschützten Reihe: keine
+Figurennamen wie Justus, Peter oder Bob, keine wörtlich übernommenen Szenen,
+nur ein eigener Fall mit eigenen Namen). Sprachniveau A2 (wie im 6./7.
+Schuljahr): einfache Satzstrukturen, überwiegend Präsens/einfaches Präteritum,
+gängiger Wortschatz, keine komplexen Redewendungen oder Slang. Länge 120-180
+Wörter (kürzer als ein deutscher Lesetext, da Englisch für das Kind eine
+Fremdsprache ist). Danach genau 6 kurze Verständnisfragen AUF ENGLISCH mit
+knappen, eindeutigen englischen Antworten (ein Wort/eine Zahl/eine kurze
+Phrase), da die Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
   },
 };
 
@@ -295,8 +323,8 @@ function slugify(text) {
     .replace(/(^-|-$)/g, "");
 }
 
-async function generateWorksheet(kid, weekId, bereich, { fileName, interesse } = {}) {
-  const prompt = BEREICH_PROMPTS[bereich];
+async function generateWorksheet(kid, weekId, bereich, { fileName, interesse, promptKey } = {}) {
+  const prompt = BEREICH_PROMPTS[promptKey || bereich];
   const previous = findPreviousWorksheet(kid.id, weekId, bereich);
 
   const userMessage = `Alter: ${kid.alter}. Bereich: ${bereich}. Neue Kalenderwoche: ${weekId}.
@@ -333,16 +361,23 @@ ${prompt.anweisung}`;
 }
 
 // ---------- Kinder MIT rechenBereiche: Rechen-Arbeitsblätter (+ optional Lesetexte) + Wochenbild ----------
-// Bei "lesen" !== false (aktuell TJ): 2 von 3 Bereichen rotierend + 1 Lesetext pro
-// Interesse (~50:50, siehe README). Bei "lesen: false" (aktuell MJ): alle
-// rechenBereiche + ein rotierend verdoppelter Bereich, keine Lesetexte – ergibt in
-// beiden Fällen 4 Arbeitsblätter/Woche.
+// Bei "lesen" !== false und ohne "englischLesen" (aktuell TJ): 2 von 3 Bereichen
+// rotierend + 1 Lesetext pro Interesse (~50:50, siehe README). Bei
+// "englischLesen: true" (aktuell MJ): alle rechenBereiche (keine Rotation) + 1
+// englischer Detektiv-/Rätsel-Lesetext (bereich "lesen", sprache "englisch").
+// Bei "lesen: false" ohne "englischLesen" (aktuell ungenutzt): alle
+// rechenBereiche + ein rotierend verdoppelter Bereich, keine Lesetexte. Ergibt
+// in allen drei Fällen 4 Arbeitsblätter/Woche.
 async function generateBereicheForKid(kid, weekId) {
   const newFiles = [];
   const n = kid.rechenBereiche.length;
 
   let rechenBereicheDieseWoche;
-  if (kid.lesen === false) {
+  if (kid.englischLesen) {
+    // Alle Bereiche, jede Woche, keine Rotation nötig – das 4. Arbeitsblatt
+    // ist der englische Lesetext (siehe unten).
+    rechenBereicheDieseWoche = [...kid.rechenBereiche];
+  } else if (kid.lesen === false) {
     const doubledBereich = kid.rechenBereiche[isoWeekNumber(weekId) % n];
     rechenBereicheDieseWoche = [...kid.rechenBereiche, doubledBereich];
   } else {
@@ -359,8 +394,9 @@ async function generateBereicheForKid(kid, weekId) {
     if (fileName) newFiles.push(fileName);
   }
 
-  // 1 Lesetext pro Interesse, jede Woche (nur für Kinder ohne "lesen: false").
-  if (kid.lesen !== false) {
+  // 1 Lesetext pro Interesse, jede Woche (nur für Kinder ohne "lesen: false"
+  // und ohne "englischLesen" – die haben ihre eigene Lesetext-Logik).
+  if (kid.lesen !== false && !kid.englischLesen) {
     for (const interesse of kid.interessen || []) {
       const fileName = await generateWorksheet(kid, weekId, "lesen", {
         fileName: `${weekId}-lesen-${slugify(interesse)}.json`,
@@ -368,6 +404,17 @@ async function generateBereicheForKid(kid, weekId) {
       });
       if (fileName) newFiles.push(fileName);
     }
+  }
+
+  // 1 englischer Detektiv-/Rätsel-Lesetext pro Woche (nur für Kinder mit
+  // "englischLesen: true"). Gespeichert mit bereich "lesen" (für Icon/Label in
+  // app.js), aber promptKey "englisch" für den passenden Prompt.
+  if (kid.englischLesen) {
+    const fileName = await generateWorksheet(kid, weekId, "lesen", {
+      fileName: `${weekId}-englisch.json`,
+      promptKey: "englisch",
+    });
+    if (fileName) newFiles.push(fileName);
   }
 
   // Wochenbild: nur versuchen, wenn mindestens ein Arbeitsblatt erfolgreich war.
