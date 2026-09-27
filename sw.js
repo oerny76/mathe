@@ -1,10 +1,16 @@
-const CACHE_NAME = "mathe-pwa-v1";
+const CACHE_NAME = "mathe-pwa-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./manifest.json",
+  "./tj/",
+  "./tj/index.html",
+  "./tj/manifest.json",
+  "./mj/",
+  "./mj/index.html",
+  "./mj/manifest.json",
 ];
 
 self.addEventListener("install", (event) => {

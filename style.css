@@ -58,7 +58,7 @@ body {
   font-size: 0.95rem;
 }
 
-/* ---------- Kind-Auswahl (Namensschilder) ---------- */
+/* ---------- Kind-Auswahl (Landingpage-Links zu /tj/ und /mj/) ---------- */
 .kid-tabs {
   display: flex;
   gap: 12px;
@@ -68,24 +68,24 @@ body {
 }
 
 .kid-tab {
-  border: 2px dashed var(--chalk-white);
+  display: inline-block;
+  border: 2px solid var(--kid-color, var(--chalk-white));
   background: transparent;
   color: var(--chalk-white);
   font-family: var(--font-display);
   font-size: 1rem;
+  font-weight: bold;
   padding: 10px 22px;
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.kid-tab:hover { transform: translateY(-2px); }
-
-.kid-tab.active {
+.kid-tab:hover, .kid-tab:focus-visible {
+  transform: translateY(-2px);
   background: var(--kid-color, var(--chalk-yellow));
-  border-style: solid;
   color: #1e3a2f;
-  font-weight: bold;
 }
 
 /* ---------- Wochenbild-Puzzle (Gamification / Einstiegsseite) ---------- */

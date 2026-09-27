@@ -1,6 +1,6 @@
 ---
 name: mathe-woche
-description: Erzeugt wöchentliche Matheaufgaben-Arbeitsblätter (Rechnen + Lesetexte) und ein Belohnungs-Wochenbild für die Kinder-Lern-App "Mathe-Stunde" (github.com/oerny76/mathe) und committet die Dateien über den verbundenen GitHub-Connector direkt ins Repo. Verwende diesen Skill, wenn nach neuen Wochenaufgaben für TJ oder MJ gefragt wird, z.B. "TJ, Wochenaufgaben" oder "MJ, ein Arbeitsblatt auf Vorrat".
+description: Erzeugt wöchentliche Matheaufgaben-Arbeitsblätter (Rechnen + Lesetexte) und ein Belohnungs-Wochenbild für die Kinder-Lern-App "Mathe-Stunde" (github.com/oerny76/mathe) und committet die Dateien über den verbundenen GitHub-Connector direkt ins Repo. Verwende diesen Skill, wenn nach neuen Wochenaufgaben für Tim oder Marlene gefragt wird, z.B. "Tim, Wochenaufgaben" oder "Marlene, ein Arbeitsblatt auf Vorrat".
 ---
 
 # mathe-woche
@@ -16,7 +16,7 @@ Du bist ein Assistent, der für die Kinder-Matheübungs-App
 [`oerny76/mathe`](https://github.com/oerny76/mathe) wöchentliche
 Arbeitsblätter erzeugt und direkt über den verbundenen GitHub-Connector im
 Repository ablegt. Der Elternteil ruft dich typischerweise unterwegs vom Handy
-aus mit einer kurzen Nachricht auf, z.B. *„TJ, Wochenaufgaben“* oder *„MJ, 2
+aus mit einer kurzen Nachricht auf, z.B. *„Tim, Wochenaufgaben“* oder *„Marlene, 2
 Arbeitsblätter auf Vorrat“*. Fehlt eine Angabe (welches Kind, welche Woche),
 frage kurz nach oder nimm sinnvolle Standardwerte (aktuelles Kind aus dem
 Kontext, aktuelle ISO-Kalenderwoche).
@@ -25,8 +25,8 @@ Kontext, aktuelle ISO-Kalenderwoche).
 
 | Name | Ordner-ID | Alter | Rechen-Bereiche | Lesen? | Interessen | Bildstil |
 |------|-----------|-------|-----------------|--------|------------|----------|
-| TJ   | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja | FC Bayern München, Drachen | abenteuer (buntes Wallpaper, 3:4) |
-| MJ   | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | **nein** | Kreativität, Malen und Basteln | ausmalbild (Ausmalseite, A4) |
+| Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja | FC Bayern München, Drachen | abenteuer (buntes Wallpaper, 3:4) |
+| Marlene | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | **nein** | Kreativität, Malen und Basteln | ausmalbild (Ausmalseite, A4) |
 
 Diese Tabelle muss mit dem `KIDS`-Array in `scripts/generate.js` synchron
 bleiben. Wurde dort etwas geändert (neues Kind, neue Interessen, andere
@@ -34,11 +34,11 @@ Bereiche), zuerst dort **und** in dieser Skill-Datei aktualisieren, bevor du
 danach arbeitest.
 
 Beide Kinder haben inzwischen ein Bereichs-Modell. Der einzige Unterschied:
-TJ bekommt zusätzlich zu den Rechen-Arbeitsblättern Lesetexte (siehe Schritt 3
-unten), MJ **nicht** – MJs Interesse (Kreativität/Malen/Basteln) dient nur als
+Tim bekommt zusätzlich zu den Rechen-Arbeitsblättern Lesetexte (siehe Schritt 3
+unten), Marlene **nicht** – MJs Interesse (Kreativität/Malen/Basteln) dient nur als
 Thema für das Wochenbild (Schritt 4), nicht für einen Lesetext.
 
-## Ablauf für Kinder MIT Rechen-Bereichen (TJ und MJ)
+## Ablauf für Kinder MIT Rechen-Bereichen (Tim und Marlene)
 
 ### 1. Bestehenden Stand prüfen
 
@@ -61,23 +61,23 @@ Schwierigkeitssteigerung.
 Wie viele und welche Bereiche drankommen, hängt davon ab, ob das Kind auch
 Lesetexte bekommt (siehe Tabelle oben):
 
-- **TJ (Lesen: ja):** aus `rechenBereiche` (einmaleins, grundrechenarten,
+- **Tim (Lesen: ja):** aus `rechenBereiche` (einmaleins, grundrechenarten,
   kopfrechnen) werden **2 der 3** ausgewählt – der dritte fällt für diese
   Woche aus, rotierend über die Wochen (nicht zwei Wochen hintereinander
   denselben Bereich auslassen). Die restlichen 2 Arbeitsblätter der Woche
   kommen in Schritt 3 aus den Lesetexten.
-- **MJ (Lesen: nein):** **alle 3** `rechenBereiche` (kopfrechnen, einmaleins,
+- **Marlene (Lesen: nein):** **alle 3** `rechenBereiche` (kopfrechnen, einmaleins,
   geometrie) kommen jede Woche vor, plus ein **vierter, rotierend
   verdoppelter** Bereich (damit über die Zeit alle drei gleich oft doppelt
   vorkommen) – macht 4 Arbeitsblätter/Woche ohne Lesetexte. Schritt 3 entfällt
-  für MJ komplett.
+  für Marlene komplett.
 
 Für jeden Bereich, genau 6 Aufgaben, altersgerecht, Bearbeitungszeit
 ~15 Minuten, Schwierigkeit leicht über dem letzten Arbeitsblatt desselben
 Bereichs (falls vorhanden):
 
 - **einmaleins:** nur reine Einmaleins-/Teilen-Aufgaben (Malfolgen +
-  Umkehraufgaben als Teilen), keine Sach-/Textaufgaben. Bei MJ (12 Jahre)
+  Umkehraufgaben als Teilen), keine Sach-/Textaufgaben. Bei Marlene (12 Jahre)
   gerne über das kleine 1×1 hinausgehen (z.B. Faktoren bis 20,
   Quadratzahlen).
 - **grundrechenarten:** gemischt aus Addition, Subtraktion, Multiplikation,
@@ -85,9 +85,9 @@ Bereichs (falls vorhanden):
   optional einer Knobelaufgabe.
 - **kopfrechnen:** kurze, im Kopf lösbare Aufgaben (Verdoppeln/Halbieren,
   runde Zahlen, Ergänzen zu 100 etc.), keine Sachaufgaben, keine
-  mehrschrittigen Aufgaben. Bei MJ (12 Jahre) auch Prozentrechnen mit runden
+  mehrschrittigen Aufgaben. Bei Marlene (12 Jahre) auch Prozentrechnen mit runden
   Zahlen (z.B. „10% von 340?“) und Runden auf Hunderter/Tausender.
-- **geometrie** (aktuell nur MJ): Umfang/Fläche von Rechteck und Quadrat,
+- **geometrie** (aktuell nur Marlene): Umfang/Fläche von Rechteck und Quadrat,
   Eigenschaften von Winkeln (rechter/spitzer/stumpfer Winkel), Eckdaten von
   Würfel/Quader, Symmetrie. Antworten kurz und ohne Einheit (auch wenn die
   Frage eine Einheit nennt).
@@ -115,9 +115,9 @@ oder `"knobelaufgabe"` möglich. `"loesung"` immer ein knapper, eindeutiger
 String (die App vergleicht beim Auswerten exakt, nur Groß-/Kleinschreibung
 wird ignoriert) – keine Einheiten, keine Zusatztexte.
 
-### 3. Ein Lese-Arbeitsblatt pro Interesse erzeugen (nur TJ, für MJ überspringen)
+### 3. Ein Lese-Arbeitsblatt pro Interesse erzeugen (nur Tim, für Marlene überspringen)
 
-Für **jedes** Interessengebiet aus der Kinder-Konfiguration (bei TJ also 2:
+Für **jedes** Interessengebiet aus der Kinder-Konfiguration (bei Tim also 2:
 FC Bayern München und Drachen) ein eigenes Lese-Arbeitsblatt – damit ergeben
 sich zusammen mit den 2 Rechen-Blättern **4 Arbeitsblätter/Woche, ~50:50
 zwischen Lesen und Rechnen** (wie vom Elternteil gewünscht).
@@ -138,7 +138,7 @@ geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
 
 ```json
 {
-  "kind": "TJ",
+  "kind": "Tim",
   "alter": 9,
   "erstellt": "<heutiges Datum, JJJJ-MM-TT>",
   "woche": "<woche>",
@@ -153,10 +153,10 @@ geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
 
 ### 4. Wochenbild (Puzzle-Belohnungsbild) erzeugen
 
-Ein SVG-Bild für die ganze Woche (nicht pro Arbeitsblatt). Bei TJ rotiert das
+Ein SVG-Bild für die ganze Woche (nicht pro Arbeitsblatt). Bei Tim rotiert das
 Thema durch die Interessen (diese Woche FC Bayern München, nächste Woche
 Drachen usw. – unabhängig davon, dass in Schritt 3 immer beide Lesetexte
-erzeugt werden); bei MJ ist das Thema immer „Kreativität, Malen und Basteln“
+erzeugt werden); bei Marlene ist das Thema immer „Kreativität, Malen und Basteln“
 (einziger Eintrag). Das Bild ist die **Einstiegsseite** des Kindes: nach der
 Namensschild-Auswahl steht dort nur noch dieses Bild, aufgeteilt in 4
 anklickbare Teile (eins pro Arbeitsblatt der Woche). Jedes Teil wird nicht
@@ -167,7 +167,7 @@ Kind das Bild als hochauflösendes PNG herunterladen.
 
 Der Bildstil hängt vom Kind ab (Spalte „Bildstil“ in der Tabelle oben):
 
-**TJ – Stil „abenteuer“ (buntes Wallpaper zum Speichern als iPad-Hintergrund):**
+**Tim – Stil „abenteuer“ (buntes Wallpaper zum Speichern als iPad-Hintergrund):**
 dynamisch/abenteuerlich, NICHT niedlich-kindlich. Denk an eine
 Fantasy-Abenteuer-Szene: dramatische Silhouetten, Dämmerungs-/
 Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe), Gegenlicht, Bewegung/
@@ -177,7 +177,7 @@ durch, bevor du ein neues Bild baust, und orientiere dich stilistisch daran
 (aber nicht 1:1 kopieren, jede Woche ein neues Motiv). **Hochformat,
 Seitenverhältnis 3:4**, z.B. `viewBox="0 0 1200 1600"`.
 
-**MJ – Stil „ausmalbild“ (druckbare Ausmalseite in A4):** reine
+**Marlene – Stil „ausmalbild“ (druckbare Ausmalseite in A4):** reine
 Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild eines
 Tieres – schwarze Konturen (`stroke="#1a1a1a"`, `fill="none"`), nur ein
 weißer Hintergrund-`<rect>` mit `fill="#ffffff"`, ruhig und symmetrisch statt

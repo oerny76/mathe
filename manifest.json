@@ -1,6 +1,6 @@
 {
-  "name": "Mathe-Stunde",
-  "short_name": "Mathe",
+  "name": "Dein Arbeitsblatt für diese Woche",
+  "short_name": "Arbeitsblatt",
   "description": "Wöchentliche Mathe-Übungen für zu Hause",
   "start_url": "./index.html",
   "scope": "./",

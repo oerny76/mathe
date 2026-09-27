@@ -1,12 +1,16 @@
 // ---------- Konfiguration ----------
 // Hier die beiden Kinder eintragen. "id" muss zum Ordnernamen unter /data passen.
 const KIDS = [
-  { id: "kind1", name: "TJ", color: "var(--chalk-pink)" },
-  { id: "kind2", name: "MJ", color: "var(--chalk-blue)" },
+  { id: "kind1", name: "Tim", color: "var(--chalk-pink)" },
+  { id: "kind2", name: "Marlene", color: "var(--chalk-blue)" },
 ];
 
+// Jede Kind-Seite (/tj/, /mj/) lädt dieses Skript per relativem Pfad – die
+// Basis-URL (Repo-Root) wird daraus abgeleitet, damit "data/..."-Fetches
+// unabhängig vom aufrufenden Unterordner immer die Root-Daten treffen.
+const APP_BASE = new URL(".", document.currentScript.src);
+
 const els = {
-  tabs: document.getElementById("kid-tabs"),
   picker: document.getElementById("worksheet-picker"),
   pickerHint: document.getElementById("picker-hint"),
   worksheetList: document.getElementById("worksheet-list"),
@@ -94,29 +98,9 @@ function loadProgress(kidId, file) {
   }
 }
 
-// ---------- Namensschilder (Tabs) rendern ----------
-function renderTabs() {
-  els.tabs.innerHTML = "";
-  KIDS.forEach((kid) => {
-    const btn = document.createElement("button");
-    btn.className = "kid-tab";
-    btn.style.setProperty("--kid-color", kid.color);
-    btn.textContent = kid.name;
-    btn.addEventListener("click", () => selectKid(kid));
-    els.tabs.appendChild(btn);
-  });
-}
-
-function setActiveTab(kidId) {
-  [...els.tabs.children].forEach((btn, i) => {
-    btn.classList.toggle("active", KIDS[i].id === kidId);
-  });
-}
-
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
 async function selectKid(kid) {
   currentKid = kid;
-  setActiveTab(kid.id);
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -124,7 +108,7 @@ async function selectKid(kid) {
   els.pickerHint.textContent = "Aufgaben werden geladen …";
   els.worksheetList.innerHTML = "";
 
-  const indexPath = `data/${kid.id}/index.json`;
+  const indexPath = new URL(`data/${kid.id}/index.json`, APP_BASE);
 
   try {
     const res = await fetch(indexPath, { cache: "no-store" });
@@ -141,7 +125,7 @@ async function selectKid(kid) {
     const worksheets = await Promise.all(
       files.map(async (file) => {
         try {
-          const wRes = await fetch(`data/${kid.id}/${file}`, { cache: "no-store" });
+          const wRes = await fetch(new URL(`data/${kid.id}/${file}`, APP_BASE), { cache: "no-store" });
           const wJson = await wRes.json();
           worksheetCache[file] = wJson;
           const progress = loadProgress(kid.id, file);
@@ -174,7 +158,7 @@ async function setupPickerView(kid, index, worksheets) {
 
   if (index.aktuellesBild) {
     try {
-      const res = await fetch(`data/${kid.id}/${index.aktuellesBild}`, { cache: "no-store" });
+      const res = await fetch(new URL(`data/${kid.id}/${index.aktuellesBild}`, APP_BASE), { cache: "no-store" });
       if (!res.ok) throw new Error("Kein Wochenbild gefunden");
       currentBild = await res.json();
     } catch {
@@ -205,7 +189,7 @@ async function setupPickerView(kid, index, worksheets) {
     els.pickerHint.textContent = "Weitere Übungen zum Vertiefen:";
     renderWorksheetList(backlog);
   } else {
-    // Fallback: kein Wochenbild vorhanden (z.B. MJ) -> klassische Liste wie bisher.
+    // Fallback: kein Wochenbild vorhanden (z.B. Marlene) -> klassische Liste wie bisher.
     els.puzzlePicker.hidden = true;
     els.classicPicker.hidden = false;
     els.backlogToggle.hidden = true;
@@ -505,4 +489,7 @@ els.backlogToggle.addEventListener("click", () => {
 });
 
 // ---------- Start ----------
-renderTabs();
+// Jede Kind-Seite trägt ihre feste Kind-ID am <body> (data-kid-id) statt einer
+// Namensschild-Auswahl – so hat jedes Kind seine eigene Seite (/tj/, /mj/).
+const activeKid = KIDS.find((k) => k.id === document.body.dataset.kidId);
+selectKid(activeKid);

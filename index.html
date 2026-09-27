@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#1e3a2f" />
-  <title>Mathe-Stunde</title>
+  <title>Dein Arbeitsblatt für diese Woche</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
@@ -12,56 +12,19 @@
 <body>
 
   <header class="board">
-    <h1>✏️ Mathe&#8209;Stunde</h1>
-    <p class="subtitle">Wähle dein Namensschild und leg los!</p>
+    <h1>✏️ Dein Arbeitsblatt für diese Woche</h1>
+    <p class="subtitle">Wessen Aufgaben?</p>
   </header>
 
-  <nav id="kid-tabs" class="kid-tabs"></nav>
-  <canvas id="puzzle-canvas" hidden></canvas>
-
-  <main id="app">
-    <section id="worksheet-picker" class="worksheet-picker" hidden>
-      <div id="puzzle-picker" class="puzzle-picker" hidden>
-        <div class="puzzle-frame" id="puzzle-frame">
-          <div class="puzzle-image" id="puzzle-image"></div>
-          <div class="puzzle-grid" id="puzzle-grid"></div>
-        </div>
-        <div class="puzzle-actions">
-          <button id="puzzle-download" class="chalk-button ghost small" hidden>📥 Bild herunterladen</button>
-          <button id="backlog-toggle" class="chalk-button ghost small" hidden>📚 Weitere Übungen</button>
-        </div>
-      </div>
-
-      <div id="classic-picker">
-        <p class="subtitle" id="picker-hint"></p>
-        <div id="worksheet-list" class="worksheet-list"></div>
-      </div>
-    </section>
-
-    <section id="worksheet-view" hidden>
-      <button id="back-btn" class="chalk-button ghost small">← Andere Aufgabe wählen</button>
-
-      <section id="status-panel" class="status-panel">
-        <span id="week-label"></span>
-        <span id="progress-label"></span>
-      </section>
-
-      <div id="task-list" class="task-list"></div>
-
-      <div class="actions">
-        <button id="check-btn" class="chalk-button" hidden>Fertig – prüfen!</button>
-        <button id="retry-btn" class="chalk-button ghost" hidden>Nochmal versuchen</button>
-      </div>
-
-      <div id="result-banner" class="result-banner" hidden></div>
-    </section>
-  </main>
+  <nav class="kid-tabs">
+    <a class="kid-tab" href="tj/" style="--kid-color: var(--chalk-pink)">Tim</a>
+    <a class="kid-tab" href="mj/" style="--kid-color: var(--chalk-blue)">Marlene</a>
+  </nav>
 
   <footer class="board-footer">
-    <p>Viel Erfolg &amp; viel Spaß beim Rechnen! 🧮</p>
+    <p>Viel Erfolg &amp; viel Spaß dabei! 🧮📖</p>
   </footer>
 
-  <script src="app.js" defer></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

@@ -1,10 +1,10 @@
 // scripts/generate.js
 // Erzeugt für jedes Kind die Aufgaben-JSON-Dateien für die aktuelle Kalenderwoche.
-// Kinder mit "rechenBereiche" und "lesen" !== false (aktuell TJ) bekommen pro Woche
+// Kinder mit "rechenBereiche" und "lesen" !== false (aktuell Tim) bekommen pro Woche
 // 2 Rechen-Arbeitsblätter (rotierend durch rechenBereiche) + 1 Lesetext-Arbeitsblatt
-// pro Eintrag in "interessen" (bei TJ aktuell 2 Interessen = 2 Lesetexte), macht 4
+// pro Eintrag in "interessen" (bei Tim aktuell 2 Interessen = 2 Lesetexte), macht 4
 // Arbeitsblätter/Woche mit einer ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe
-// README, Abschnitt "Wochenpensum"). Kinder mit "lesen: false" (aktuell MJ) bekommen
+// README, Abschnitt "Wochenpensum"). Kinder mit "lesen: false" (aktuell Marlene) bekommen
 // stattdessen alle rechenBereiche + einen rotierend verdoppelten Bereich (ebenfalls 4
 // Arbeitsblätter/Woche, aber ohne Lesetexte). Dazu ein wöchentliches
 // Puzzle-Belohnungsbild (siehe README, Abschnitt "Wochenbild-Puzzle"), dessen Stil
@@ -22,7 +22,7 @@ import path from "path";
 const KIDS = [
   {
     id: "kind1",
-    name: "TJ",
+    name: "Tim",
     alter: 9,
     // Pro Woche werden 2 dieser 3 Bereiche ausgewählt (rotierend), damit über die
     // Zeit alle drei drankommen. Reihenfolge ist sonst egal (Puzzle-Teile richten
@@ -36,10 +36,10 @@ const KIDS = [
   },
   {
     id: "kind2",
-    name: "MJ",
+    name: "Marlene",
     alter: 12,
     // Alle 3 Bereiche kommen jede Woche vor (siehe generateBereicheForKid),
-    // da MJ (anders als TJ) keine Lesetexte bekommt und die Rechen-Bereiche
+    // da Marlene (anders als Tim) keine Lesetexte bekommt und die Rechen-Bereiche
     // allein die 4 Arbeitsblätter/Woche füllen müssen.
     rechenBereiche: ["kopfrechnen", "einmaleins", "geometrie"],
     lesen: false,
@@ -154,7 +154,7 @@ Exaktes Ausgabeformat:
 }`;
 
 const BILD_SYSTEM_PROMPTS = {
-  // Buntes "Abenteuer"-Wallpaper zum Speichern als iPad-Hintergrund (aktuell TJ).
+  // Buntes "Abenteuer"-Wallpaper zum Speichern als iPad-Hintergrund (aktuell Tim).
   abenteuer: (alter) => `Du erstellst ein stimmungsvolles, "cooles" Vektor-Bild (SVG) als
 Wochen-Belohnungsbild für ein ${alter}-jähriges Kind, das seine Matheaufgaben erledigt hat.
 
@@ -172,7 +172,7 @@ gesetzt).
 
 ${BILD_GEMEINSAME_VORGABEN}`,
 
-  // Druckbares Ausmalbild im A4-Format (aktuell MJ).
+  // Druckbares Ausmalbild im A4-Format (aktuell Marlene).
   ausmalbild: (alter) => `Du erstellst ein Ausmalbild (Mandala oder possierliches Tier) als
 Wochen-Belohnungsbild für ein ${alter}-jähriges Kind, das seine Matheaufgaben
 erledigt hat. Das Bild wird am Ende in A4 ausgedruckt und mit Stiften
@@ -333,8 +333,8 @@ ${prompt.anweisung}`;
 }
 
 // ---------- Kinder MIT rechenBereiche: Rechen-Arbeitsblätter (+ optional Lesetexte) + Wochenbild ----------
-// Bei "lesen" !== false (aktuell TJ): 2 von 3 Bereichen rotierend + 1 Lesetext pro
-// Interesse (~50:50, siehe README). Bei "lesen: false" (aktuell MJ): alle
+// Bei "lesen" !== false (aktuell Tim): 2 von 3 Bereichen rotierend + 1 Lesetext pro
+// Interesse (~50:50, siehe README). Bei "lesen: false" (aktuell Marlene): alle
 // rechenBereiche + ein rotierend verdoppelter Bereich, keine Lesetexte – ergibt in
 // beiden Fällen 4 Arbeitsblätter/Woche.
 async function generateBereicheForKid(kid, weekId) {

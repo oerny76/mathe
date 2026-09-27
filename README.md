@@ -12,18 +12,21 @@ Antworten im Browser aus – kein Server nötig.
    den optionalen automatisierten Generator (siehe „Automatisierung“).
 2. Jedes Arbeitsblatt liegt als JSON-Datei unter `data/<kindId>/<Dateiname>.json`.
    Welche Arbeitsblätter zur Auswahl stehen, steht in `data/<kindId>/index.json`.
-3. Die Web-App zeigt beim Öffnen zuerst das Namensschild-Auswahlmenü, danach
-   pro Kind eine Liste aller verfügbaren, noch nicht/bereits erledigten
+3. Jedes Kind hat seine **eigene Unterseite** (`/tj/` bzw. `/mj/`) statt einer
+   Namensschild-Auswahl – dort steht direkt das eigene Wochenbild bzw. die
+   eigene Liste aller verfügbaren, noch nicht/bereits erledigten
    Arbeitsblätter. Das Kind wählt eins aus, bearbeitet es und bekommt sofort
-   eine Auswertung.
-4. Über GitHub Pages gehostet, lässt sie sich auf dem iPad über Safari
-   „Zum Home-Bildschirm hinzufügen“ wie eine echte App installieren.
+   eine Auswertung. Die Root-Seite (`/`) ist nur eine kleine Linkseite zu
+   beiden Unterseiten.
+4. Über GitHub Pages gehostet, lässt sich `/tj/` bzw. `/mj/` auf dem iPad über
+   Safari „Zum Home-Bildschirm hinzufügen“ wie eine echte, eigenständige App
+   pro Kind installieren.
 
 ## Arbeitsblätter erstellen (empfohlener Weg: Skill)
 
 1. In einem Claude-Chat (claude.ai) den Skill `mathe-woche` einmalig
    installieren (`mathe-woche.skill` → „Save skill“).
-2. Danach einfach z.B. schreiben: *„TJ, 9 Jahre, 2 Arbeitsblätter auf
+2. Danach einfach z.B. schreiben: *„Tim, 9 Jahre, 2 Arbeitsblätter auf
    Vorrat“*. Der Skill fragt fehlende Angaben nach, zeigt eine kurze
    Themen-Übersicht zur Bestätigung und liefert am Ende:
    - für jedes Arbeitsblatt einen JSON-Code-Block + Dateipfad
@@ -57,7 +60,7 @@ data/
 Arbeitsblatt-JSON (Format, das der Skill erzeugt):
 ```json
 {
-  "kind": "TJ",
+  "kind": "Tim",
   "alter": 9,
   "erstellt": "2026-08-05",
   "titel": "Taschengeld & Zehnerübergang",
@@ -82,8 +85,8 @@ Bekannte Bereiche mit fester Reihenfolge/Icon in `app.js` (`BEREICH_LABELS`):
 den bekannten angezeigt.
 
 Aktuell genutzte Bereiche pro Kind:
-- **TJ:** `einmaleins`, `grundrechenarten`, `kopfrechnen`, `lesen`.
-- **MJ:** `einmaleins`, `kopfrechnen`, `geometrie` – bewusst **kein** `lesen`
+- **Tim:** `einmaleins`, `grundrechenarten`, `kopfrechnen`, `lesen`.
+- **Marlene:** `einmaleins`, `kopfrechnen`, `geometrie` – bewusst **kein** `lesen`
   (MJs Interesse liegt bei Kreativität/Malen/Basteln statt Lesetexten).
 
 Für Lese-Arbeitsblätter gibt es zusätzlich ein optionales Feld `"text"` auf
@@ -94,7 +97,7 @@ wird ignoriert):
 
 ```json
 {
-  "kind": "TJ",
+  "kind": "Tim",
   "alter": 9,
   "erstellt": "2026-09-27",
   "bereich": "lesen",
@@ -111,14 +114,14 @@ wird ignoriert):
 Beide Kinder mit Bereichen bekommen **4 Arbeitsblätter pro Woche**, aber mit
 unterschiedlicher Aufteilung, je nach Interessen:
 
-**TJ – ~50:50 Lesen und Rechnen:**
+**Tim – ~50:50 Lesen und Rechnen:**
 - **2 Rechen-Arbeitsblätter**, rotierend aus den Rechen-Bereichen (aktuell
   Einmaleins/Grundrechenarten/Kopfrechnen – pro Woche werden 2 der 3
   ausgewählt, damit langfristig alle drankommen).
 - **2 Lese-Arbeitsblätter**, eins pro Interessengebiet des Kindes (aktuell FC
   Bayern München und Drachen) – so kommen beide Interessen jede Woche vor.
 
-**MJ – nur Rechnen, kein Lesen:**
+**Marlene – nur Rechnen, kein Lesen:**
 - **4 Rechen-Arbeitsblätter**, aus den Bereichen Kopfrechnen/Einmaleins/
   Geometrie: alle drei kommen jede Woche vor, plus ein vierter, rotierend
   verdoppelter Bereich (damit über die Zeit alle drei gleich oft doppelt
@@ -140,7 +143,7 @@ ins Wochenbild ein – sie bleiben aber ganz normal spielbar.
 
 ### Wochenbild-Puzzle (Gamification, Einstiegsseite)
 
-Für Kinder mit Wochenbild (aktuell TJ und MJ) **ist das Bild die
+Für Kinder mit Wochenbild (aktuell Tim und Marlene) **ist das Bild die
 Einstiegsseite**: nach der Namensschild-Auswahl steht dort nur noch das große
 Hochformat-Bild, aufgeteilt in 4 anklickbare Teile – eins pro Arbeitsblatt der
 aktuellen Woche. Das Seitenverhältnis des Rahmens wird automatisch aus dem
@@ -168,8 +171,8 @@ Sind alle 4 Teile fertig, bekommt der Bildrahmen einen goldenen Schimmer und
 ein Button erscheint, um das Bild als **hochauflösendes PNG** herunterzuladen
 (Seitenverhältnis und Auflösung werden automatisch aus dem `viewBox` des SVG
 abgeleitet, Ziel-Langseite ca. 3300px – direkt im Browser aus dem SVG
-gerendert, kein Server nötig) – bei TJ zum Speichern als iPad-Hintergrundbild,
-bei MJ zum Ausdrucken in A4 und Ausmalen mit Stiften.
+gerendert, kein Server nötig) – bei Tim zum Speichern als iPad-Hintergrundbild,
+bei Marlene zum Ausdrucken in A4 und Ausmalen mit Stiften.
 
 Dafür trägt `index.json` zusätzlich ein, welches Bild aktuell gilt:
 
@@ -208,13 +211,13 @@ Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
 
 Zwei Bild-Varianten sind im Einsatz, je nach Interesse des Kindes:
 
-**„Abenteuer"-Wallpaper (aktuell TJ):** Hochformat-`viewBox` im Verhältnis 3:4
+**„Abenteuer"-Wallpaper (aktuell Tim):** Hochformat-`viewBox` im Verhältnis 3:4
 (z.B. `viewBox="0 0 1200 1600"`), zum Speichern als iPad-Hintergrund. Stil:
 dynamisch/abenteuerlich statt niedlich-kindlich – Silhouetten vor einem
 Dämmerungs-/Sonnenuntergangs-Verlauf wirken deutlich "cooler" als flache
 Cartoon-Farben (siehe `data/kind1/2026-W39-bild.json` als Beispiel).
 
-**Ausmalbild (aktuell MJ):** Hochformat-`viewBox` im A4-Verhältnis (z.B.
+**Ausmalbild (aktuell Marlene):** Hochformat-`viewBox` im A4-Verhältnis (z.B.
 `viewBox="0 0 2100 2970"`), zum Ausdrucken und Ausmalen mit Stiften. Stil:
 reine Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild
 eines Tieres – schwarze Konturen (`stroke`, `fill="none"`), nur ein weißer
@@ -225,18 +228,23 @@ eignen sich `<use>`-Referenzen mit `transform="translate(...) scale(-1,1)"`
 zum Spiegeln einer Körperhälfte.
 
 Ohne `"aktuellesBild"` in `index.json` bleibt das Puzzle einfach ausgeblendet
-(z.B. bei MJ aktuell der Fall).
+(z.B. bei Marlene aktuell der Fall).
 
 ## Einrichtung (einmalig)
 
 ### 1. Kinder konfigurieren
 In `app.js` das Array `KIDS` anpassen (Namen, Farben). Die Ordner-IDs
-(`kind1`, `kind2`) müssen dazu passen.
+(`kind1`, `kind2`) müssen zu den Datenordnern unter `data/` passen. Für ein
+drittes Kind zusätzlich einen neuen Unterordner nach dem Vorbild von `tj/`
+anlegen (`index.html` + `manifest.json`, `data-kid-id` und Texte anpassen) und
+in der Linkliste in der Root-`index.html` ergänzen.
 
 ### 2. GitHub Pages aktivieren
 **Settings → Pages** → Branch `main`, Ordner `/ (root)` auswählen → Speichern.
 Nach ein bis zwei Minuten ist die App unter
-`https://<dein-username>.github.io/<repo-name>/` erreichbar.
+`https://<dein-username>.github.io/<repo-name>/` erreichbar – GitHub Pages
+liefert Unterordner wie `tj/` und `mj/` automatisch als eigene Seiten mit,
+ganz normales statisches Hosting, keine Zusatzkonfiguration nötig.
 
 ### 3. Icons ergänzen (optional, aber empfohlen)
 Zwei PNG-Icons unter `icons/icon-192.png` und `icons/icon-512.png` ablegen,
@@ -248,10 +256,11 @@ kannst.
 
 ## Auf dem iPad installieren
 
-1. Seite in Safari öffnen (die GitHub-Pages-URL).
-2. Teilen-Symbol → „Zum Home-Bildschirm“.
+1. Die **eigene** Unterseite des Kindes in Safari öffnen, z.B.
+   `https://<dein-username>.github.io/<repo-name>/tj/`.
+2. Teilen-Symbol → „Zum Home-Bildschirm”.
 3. Ab jetzt öffnet sich die App wie eine normale App, per Fingertipp,
-   auch ohne Adressleiste.
+   auch ohne Adressleiste – jedes Kind bekommt so sein eigenes App-Icon.
 
 ## Automatisierung (optional, nicht der empfohlene Standardweg)
 
@@ -264,15 +273,15 @@ ANTHROPIC_API_KEY=sk-... npm run generate
 ```
 
 Für Kinder mit `rechenBereiche` in der `KIDS`-Konfiguration im Skript (aktuell
-TJ und MJ) erzeugt der Lauf pro Woche Rechen-Arbeitsblätter aus
+Tim und Marlene) erzeugt der Lauf pro Woche Rechen-Arbeitsblätter aus
 `rechenBereiche`, getaggt mit `bereich` + `woche`, sowie ein passendes
 Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben). Ob dazu noch
 Lesetexte kommen, steuert das Feld `lesen` (Standard: `true`):
-- **`lesen` nicht gesetzt oder `true` (aktuell TJ):** 2 der 3
+- **`lesen` nicht gesetzt oder `true` (aktuell Tim):** 2 der 3
   `rechenBereiche` rotierend pro Woche + 1 Lese-Arbeitsblatt pro Eintrag in
   `interessen` (~50:50, siehe „Wochenpensum“ oben). Bildthema rotiert durch
   `interessen`, Bildstil `bildStil: "abenteuer"` (Standard).
-- **`lesen: false` (aktuell MJ):** alle `rechenBereiche` jede Woche + ein
+- **`lesen: false` (aktuell Marlene):** alle `rechenBereiche` jede Woche + ein
   vierter, rotierend verdoppelter Bereich (macht 4 Arbeitsblätter/Woche ohne
   Lesetexte). `interessen` dient hier nur als Bildthema (z.B. `["Kreativität,
   Malen und Basteln"]`), Bildstil `bildStil: "ausmalbild"` erzeugt ein
@@ -304,7 +313,7 @@ lassen kannst, läuft das über die claude.ai-App:
    unter [`docs/mathe-woche/SKILL.md`](docs/mathe-woche/SKILL.md) in diesem
    Repo – beim Anlegen/Bearbeiten des Skills auf claude.ai hochladen bzw.
    deren Inhalt einfügen.
-3. Danach reicht in der claude.ai-App (auch auf dem Handy) z.B.: *„TJ,
+3. Danach reicht in der claude.ai-App (auch auf dem Handy) z.B.: *„Tim,
    Wochenaufgaben für diese Woche“* – der Skill erzeugt die 4 Arbeitsblätter +
    das Wochenbild passend zum aktuellen Format (Bereiche, `woche`, 50:50-
    Aufteilung, Wochenbild-Puzzle) und committet sie über den GitHub-Connector
@@ -320,4 +329,5 @@ muss diese Datei mit aktualisiert und auf claude.ai neu hochgeladen werden.
 - **Alte Arbeitsblätter aufräumen:** erledigte, alte Dateien aus `index.json`
   entfernen (die JSON-Datei selbst kann im Repo bleiben).
 - **Mehr Kinder:** weitere Einträge in `KIDS` (`app.js` und
-  `scripts/generate.js`) und passende Datenordner samt `index.json` ergänzen.
+  `scripts/generate.js`), einen neuen Unterordner nach Vorbild von `tj/`/`mj/`
+  sowie passende Datenordner samt `index.json` ergänzen.
