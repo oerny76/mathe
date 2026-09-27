@@ -143,6 +143,44 @@ body {
   font-family: var(--font-display);
 }
 
+.bereich-heading {
+  font-family: var(--font-display);
+  color: var(--chalk-yellow);
+  font-size: 1rem;
+  margin: 18px 0 0;
+}
+
+.bereich-heading:first-child {
+  margin-top: 0;
+}
+
+.bereich-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* ---------- Lesetext ---------- */
+.reading-text {
+  background: var(--board-bg-2);
+  border: 2px dashed var(--chalk-yellow);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.reading-text-title {
+  font-family: var(--font-display);
+  color: var(--chalk-yellow);
+  margin: 0 0 8px;
+}
+
+.reading-text p:last-child {
+  margin-bottom: 0;
+}
+
 .chalk-button.small {
   padding: 8px 16px;
   font-size: 0.85rem;

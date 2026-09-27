@@ -1,0 +1,15 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "bereich": "lesen",
+  "titel": "Lesetext: Der FC Bayern München",
+  "text": "Der FC Bayern München ist einer der bekanntesten Fußballvereine in Deutschland. Er wurde im Jahr 1900 gegründet – das ist schon sehr lange her! Die Spieler tragen meistens ein rotes Trikot, deshalb nennt man den Verein auch „die Roten“.\n\nIhr Stadion heißt Allianz Arena und liegt in München. Wenn der FC Bayern dort ein Heimspiel hat, leuchtet das Stadion oft in Rot. Der FC Bayern hat schon sehr viele Meisterschaften in der Bundesliga gewonnen – öfter als jeder andere deutsche Verein.\n\nAuch international war der Verein erfolgreich und hat mehrmals die Champions League gewonnen, das wichtigste Fußballturnier für Vereine in Europa. Fans aus der ganzen Welt unterstützen den Verein und singen bei den Spielen laut mit.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "In welchem Jahr wurde der FC Bayern München gegründet?", "loesung": "1900" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Welche Farbe haben die Trikots meistens?", "loesung": "rot" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Wie heißt das Stadion des FC Bayern München?", "loesung": "Allianz Arena" },
+    { "id": 4, "typ": "leseverstehen", "frage": "In welcher Stadt liegt das Stadion?", "loesung": "München" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Wie heißt das wichtigste europäische Vereinsturnier, das im Text genannt wird?", "loesung": "Champions League" }
+  ]
+}

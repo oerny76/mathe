@@ -2,6 +2,7 @@
   "kind": "TJ",
   "alter": 9,
   "erstellt": "2026-08-06",
+  "bereich": "grundrechenarten",
   "titel": "Malreihen & Teilen – Murmeln in der Pause",
   "aufgaben": [
     { "id": 1, "typ": "rechnen", "frage": "68 + 57 = ?", "loesung": "125" },

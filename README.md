@@ -67,6 +67,40 @@ Arbeitsblatt-JSON (Format, das der Skill erzeugt):
 }
 ```
 
+### Optionale Felder: Bereiche & Lesetexte
+
+Damit Kinder mit unterschiedlichem Förderbedarf (z.B. verschiedene Jahrgänge)
+eigene, thematisch sortierte Übungsblöcke bekommen, kann jedes Arbeitsblatt
+zusätzlich ein Feld `"bereich"` bekommen. Die App gruppiert die
+Arbeitsblatt-Auswahl dann automatisch nach Bereich (mit Überschrift), statt
+alles in einer Liste zu zeigen. Ohne `"bereich"`-Feld bleibt die Ansicht wie
+bisher flach (z.B. bei MJ aktuell der Fall).
+
+Bekannte Bereiche mit fester Reihenfolge/Icon in `app.js` (`BEREICH_LABELS`):
+`"einmaleins"`, `"grundrechenarten"`, `"kopfrechnen"`, `"lesen"`. Weitere,
+frei gewählte Bereichs-Strings werden alphabetisch nach den bekannten
+angezeigt.
+
+Für Lese-Arbeitsblätter gibt es zusätzlich ein optionales Feld `"text"` auf
+oberster Ebene: ein Lesetext, der über den Aufgaben angezeigt wird. Die
+`aufgaben` sind dann Verständnisfragen (Typ `"leseverstehen"`) mit kurzen,
+eindeutigen Antworten (die Auswertung vergleicht exakt, Groß-/Kleinschreibung
+wird ignoriert):
+
+```json
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "bereich": "lesen",
+  "titel": "Lesetext: ...",
+  "text": "Ein kurzer, altersgerechter Text, gerne zu einem Interessengebiet des Kindes (z.B. Lieblingsverein, Lieblingsbuch/-serie) – das macht Lesen leichter.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Worum ging es im Text?", "loesung": "kurze, eindeutige Antwort" }
+  ]
+}
+```
+
 ## Einrichtung (einmalig)
 
 ### 1. Kinder konfigurieren
