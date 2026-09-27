@@ -10,11 +10,7 @@
     { "id": 2, "typ": "rechnen", "frage": "100 − 60 = ?", "loesung": "40" },
     { "id": 3, "typ": "rechnen", "frage": "Verdopple 23. Wie viel ist das?", "loesung": "46" },
     { "id": 4, "typ": "rechnen", "frage": "Halbiere 36. Wie viel ist das?", "loesung": "18" },
-    { "id": 5, "typ": "rechnen", "frage": "8 + 7 = ?", "loesung": "15" },
-    { "id": 6, "typ": "rechnen", "frage": "90 − 35 = ?", "loesung": "55" },
-    { "id": 7, "typ": "rechnen", "frage": "6 × 10 = ?", "loesung": "60" },
-    { "id": 8, "typ": "rechnen", "frage": "Das Doppelte von 45 ist?", "loesung": "90" },
-    { "id": 9, "typ": "rechnen", "frage": "120 − 20 = ?", "loesung": "100" },
-    { "id": 10, "typ": "rechnen", "frage": "Wie viel sind 9 × 10?", "loesung": "90" }
+    { "id": 5, "typ": "rechnen", "frage": "90 − 35 = ?", "loesung": "55" },
+    { "id": 6, "typ": "rechnen", "frage": "Wie viel sind 9 × 10?", "loesung": "90" }
   ]
 }

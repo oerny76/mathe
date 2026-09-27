@@ -101,15 +101,22 @@ wird ignoriert):
 }
 ```
 
-### Wochenpensum: ein Arbeitsblatt pro Bereich
+### Wochenpensum: ~50:50 Lesen und Rechnen
 
-Für Kinder mit Bereichen (aktuell TJ) gilt: **pro Woche ein Arbeitsblatt je
-Bereich** (also 4 Stück bei den 4 bekannten Bereichen), jeweils für ~15 Minuten
-ausgelegt. Das Kind sucht sich daraus täglich eins aus – an manchen Tagen ggf.
-auch einen Bereich doppelt, falls die Woche mehr Tage als Bereiche hat. Damit
-mehrere Arbeitsblätter *derselben* Woche erkennbar zusammengehören (fürs
-Wochenbild-Puzzle, siehe unten), bekommen sie zusätzlich ein Feld `"woche"`
-mit der ISO-Kalenderwoche (z.B. `"2026-W39"`):
+Für Kinder mit Bereichen (aktuell TJ) gilt: **4 Arbeitsblätter pro Woche**,
+ungefähr hälftig zwischen Lesen und Rechnen aufgeteilt:
+- **2 Rechen-Arbeitsblätter**, rotierend aus den Rechen-Bereichen (aktuell
+  Einmaleins/Grundrechenarten/Kopfrechnen – pro Woche werden 2 der 3
+  ausgewählt, damit langfristig alle drankommen).
+- **2 Lese-Arbeitsblätter**, eins pro Interessengebiet des Kindes (aktuell FC
+  Bayern München und Drachen) – so kommen beide Interessen jede Woche vor.
+
+Jedes Arbeitsblatt ist für ~15 Minuten ausgelegt (6 Aufgaben bei Rechen-
+Blättern, 6 Verständnisfragen zu einem Lesetext bei Lese-Blättern). Das Kind
+sucht sich daraus täglich eins aus. Damit mehrere Arbeitsblätter *derselben*
+Woche erkennbar zusammengehören (fürs Wochenbild-Puzzle, siehe unten),
+bekommen sie zusätzlich ein Feld `"woche"` mit der ISO-Kalenderwoche (z.B.
+`"2026-W39"`):
 
 ```json
 { "bereich": "einmaleins", "woche": "2026-W39", "titel": "...", "aufgaben": [ /* ... */ ] }
@@ -137,7 +144,7 @@ Die referenzierte Datei (`data/<kindId>/2026-W39-bild.json`) sieht so aus:
 ```json
 {
   "woche": "2026-W39",
-  "titel": "Der freundliche Drache",
+  "titel": "Drachenflug im Abendrot",
   "thema": "Drachen",
   "svg": "<svg viewBox=\"0 0 800 800\" xmlns=\"http://www.w3.org/2000/svg\">...</svg>"
 }
@@ -151,12 +158,19 @@ Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
 - nur einfache Formen (`rect`, `circle`, `ellipse`, `path`, `polygon`,
   Gradients in `defs`), **keine** `<text>`-Elemente (Schriftladen kann beim
   Rasterisieren scheitern) und keine `<filter>`
+- **Stil:** dynamisch/abenteuerlich statt niedlich-kindlich – Silhouetten vor
+  einem Dämmerungs-/Sonnenuntergangs-Verlauf wirken deutlich "cooler" als
+  flache Cartoon-Farben (siehe `data/kind1/2026-W39-bild.json` als Beispiel).
+  Keine Nachbildung konkreter, urheberrechtlich geschützter Figuren-Designs
+  (z.B. keine 1:1-Kopie einer bestimmten Film-/Buchfigur) – nur eine eigene,
+  generische Interpretation des Themas/Genres.
 - das Motiv passt idealerweise zu einem Interessengebiet des Kindes und zeigt
   in allen vier Quadranten (oben-links/-rechts, unten-links/-rechts) etwas
   Erkennbares, da es als 2×2-Puzzle aufgedeckt wird
-- die Zuordnung Bereich → Quadrant folgt der festen Reihenfolge aus
-  `BEREICH_ORDER` in `app.js` (aktuell: Einmaleins oben-links,
-  Grundrechenarten oben-rechts, Kopfrechnen unten-links, Lesen unten-rechts)
+- die Puzzle-Teile entsprechen den tatsächlichen Arbeitsblättern der Woche (in
+  alphabetischer Dateinamen-Reihenfolge auf die 4 Positionen verteilt) – nicht
+  einer festen Bereichs-Zuordnung, da eine Woche z.B. 2 Lese- + 2
+  Rechen-Arbeitsblätter statt 4 verschiedener Bereiche enthalten kann
 
 Ohne `"aktuellesBild"` in `index.json` bleibt das Puzzle einfach ausgeblendet
 (z.B. bei MJ aktuell der Fall).
@@ -197,13 +211,13 @@ passende `index.json`:
 ANTHROPIC_API_KEY=sk-... npm run generate
 ```
 
-Für Kinder mit `bereiche` in der `KIDS`-Konfiguration im Skript (aktuell TJ)
-erzeugt der Lauf pro Bereich ein eigenes ~15-Minuten-Arbeitsblatt für die
-aktuelle Kalenderwoche (getaggt mit `bereich` + `woche`) sowie ein passendes
-Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben) – die
-Lesetexte und das Bildthema rotieren dabei durch das Array `interessen` des
-Kindes. Kinder ohne `bereiche` (aktuell MJ) bekommen wie bisher ein einzelnes
-Wochenblatt ohne Bereich/Bild.
+Für Kinder mit `rechenBereiche` in der `KIDS`-Konfiguration im Skript (aktuell
+TJ) erzeugt der Lauf pro Woche 2 Rechen-Arbeitsblätter (rotierend aus
+`rechenBereiche`) + 1 Lese-Arbeitsblatt pro Eintrag in `interessen` (~50:50,
+siehe „Wochenpensum“ oben), alle getaggt mit `bereich` + `woche`, sowie ein
+passendes Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben) –
+das Bildthema rotiert dabei durch `interessen`. Kinder ohne `rechenBereiche`
+(aktuell MJ) bekommen wie bisher ein einzelnes Wochenblatt ohne Bereich/Bild.
 
 Das Skript läuft **nicht automatisch** (es gibt bewusst keinen
 GitHub-Actions-Workflow dafür) – du rufst es bei Bedarf lokal auf und
@@ -212,12 +226,32 @@ committest die neu erzeugten Dateien wie gewohnt. Das Wochenbild ist
 SVG, werden trotzdem alle Arbeitsblätter des Laufs geschrieben, nur eben ohne
 neues Puzzle-Bild für diese Woche.
 
-Für den Alltag ist der Skill-Weg oben weiterhin einfacher und du behältst die
-volle Kontrolle über jede einzelne Aufgabe. Hinweis: Der Chat-Skill
-`mathe-woche` selbst liegt nicht in diesem Repo (er wird separat auf claude.ai
-gepflegt) – die obigen Formate (`bereich`, `woche`, `text`, Wochenbild) sind
-der Vertrag, den du in die Skill-Instruktionen auf claude.ai übernehmen
-solltest, damit der Skill dieselben Dateien erzeugt wie `scripts/generate.js`.
+Für unterwegs (z.B. vom Handy aus) ist der Skill-Weg praktikabler als dieses
+Skript – siehe „Von unterwegs: Skill + GitHub-Connector“ direkt im Anschluss.
+
+## Von unterwegs: Skill + GitHub-Connector
+
+Damit du auch vom Handy aus (ohne Laptop, ohne `ANTHROPIC_API_KEY` lokal)
+jederzeit neue Arbeitsblätter erzeugen und **automatisch ins Repo committen**
+lassen kannst, läuft das über die claude.ai-App:
+
+1. In den claude.ai-Einstellungen einen **GitHub-Connector** verbinden und ihm
+   Zugriff auf das Repo `oerny76/mathe` geben (Connectors → GitHub → Repo
+   auswählen).
+2. Den Skill `mathe-woche` auf claude.ai einmalig aktualisieren: Die
+   vollständigen, aktuellen Instruktionen dafür liegen in
+   [`docs/mathe-woche-skill.md`](docs/mathe-woche-skill.md) in diesem Repo –
+   Inhalt kopieren und als Skill-Text auf claude.ai einfügen/speichern.
+3. Danach reicht in der claude.ai-App (auch auf dem Handy) z.B.: *„TJ,
+   Wochenaufgaben für diese Woche“* – der Skill erzeugt die 4 Arbeitsblätter +
+   das Wochenbild passend zum aktuellen Format (Bereiche, `woche`, 50:50-
+   Aufteilung, Wochenbild-Puzzle) und committet sie über den GitHub-Connector
+   direkt in `main`. Kein manuelles Kopieren mehr nötig.
+
+`docs/mathe-woche-skill.md` ist der **Vertrag** zwischen Skill und App: immer
+wenn sich an den Datenformaten hier im Repo etwas ändert (neue Felder, neue
+Bereiche, anderes Verhältnis Lesen/Rechnen), muss diese Datei mit aktualisiert
+und der Skill-Text auf claude.ai neu eingefügt werden.
 
 ## Anpassungsideen für später
 
@@ -226,5 +260,5 @@ solltest, damit der Skill dieselben Dateien erzeugt wie `scripts/generate.js`.
 - **Mehr Kinder:** weitere Einträge in `KIDS` (`app.js` und
   `scripts/generate.js`) und passende Datenordner samt `index.json` ergänzen.
 - **Bereiche auch für MJ:** in `scripts/generate.js` und beim manuellen
-  Erstellen einfach ebenfalls `bereiche`/`interessen` vergeben, dann bekommt
-  MJ dieselbe Bereichs-Gruppierung und das Wochenbild-Puzzle.
+  Erstellen einfach ebenfalls `rechenBereiche`/`interessen` vergeben, dann
+  bekommt MJ dieselbe Bereichs-Gruppierung und das Wochenbild-Puzzle.

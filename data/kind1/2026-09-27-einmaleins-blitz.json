@@ -2,21 +2,14 @@
   "kind": "TJ",
   "alter": 9,
   "erstellt": "2026-09-27",
-  "woche": "2026-W39",
   "bereich": "einmaleins",
   "titel": "Einmaleins-Blitz ⚡",
   "aufgaben": [
     { "id": 1, "typ": "rechnen", "frage": "6 × 7 = ?", "loesung": "42" },
     { "id": 2, "typ": "rechnen", "frage": "8 × 4 = ?", "loesung": "32" },
-    { "id": 3, "typ": "rechnen", "frage": "9 × 6 = ?", "loesung": "54" },
-    { "id": 4, "typ": "rechnen", "frage": "7 × 8 = ?", "loesung": "56" },
-    { "id": 5, "typ": "rechnen", "frage": "5 × 9 = ?", "loesung": "45" },
-    { "id": 6, "typ": "rechnen", "frage": "45 : 9 = ?", "loesung": "5" },
-    { "id": 7, "typ": "rechnen", "frage": "63 : 7 = ?", "loesung": "9" },
-    { "id": 8, "typ": "rechnen", "frage": "4 × 9 = ?", "loesung": "36" },
-    { "id": 9, "typ": "rechnen", "frage": "8 × 6 = ?", "loesung": "48" },
-    { "id": 10, "typ": "rechnen", "frage": "56 : 8 = ?", "loesung": "7" },
-    { "id": 11, "typ": "rechnen", "frage": "9 × 9 = ?", "loesung": "81" },
-    { "id": 12, "typ": "rechnen", "frage": "72 : 9 = ?", "loesung": "8" }
+    { "id": 3, "typ": "rechnen", "frage": "45 : 9 = ?", "loesung": "5" },
+    { "id": 4, "typ": "rechnen", "frage": "63 : 7 = ?", "loesung": "9" },
+    { "id": 5, "typ": "rechnen", "frage": "8 × 6 = ?", "loesung": "48" },
+    { "id": 6, "typ": "rechnen", "frage": "9 × 9 = ?", "loesung": "81" }
   ]
 }
