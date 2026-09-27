@@ -24,7 +24,21 @@ const els = {
 let currentKid = null;
 let currentFile = null;
 let currentTasks = [];
+let currentWorksheet = null;
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
+
+// ---------- Bereiche (Themen-Kategorien) ----------
+const BEREICH_ORDER = ["einmaleins", "grundrechenarten", "kopfrechnen", "lesen"];
+const BEREICH_LABELS = {
+  einmaleins: "✖️ Einmaleins",
+  grundrechenarten: "➕➖ Grundrechenarten",
+  kopfrechnen: "🧠 Kopfrechnen",
+  lesen: "📖 Lesen",
+};
+
+function bereichLabel(bereich) {
+  return BEREICH_LABELS[bereich] || bereich;
+}
 
 // ---------- Fortschritt (localStorage) ----------
 function progressKey(kidId, file) {
@@ -102,6 +116,7 @@ async function selectKid(kid) {
             titel: wJson.titel || file,
             erstellt: wJson.erstellt || wJson.woche || "",
             anzahl: (wJson.aufgaben || []).length,
+            bereich: wJson.bereich || null,
             erledigt: progress ? progress.correctCount === progress.total : false,
           };
         } catch {
@@ -118,18 +133,49 @@ async function selectKid(kid) {
   }
 }
 
+function renderWorksheetCard(ws) {
+  const card = document.createElement("button");
+  card.className = "worksheet-card" + (ws.erledigt ? " done" : "");
+  card.innerHTML = `
+    <span class="worksheet-title">${escapeHtml(ws.titel)}</span>
+    <span class="worksheet-meta">${ws.anzahl} Aufgaben${ws.erstellt ? " · " + escapeHtml(ws.erstellt) : ""}</span>
+    ${ws.erledigt ? '<span class="worksheet-badge">✔ erledigt</span>' : ""}
+  `;
+  card.addEventListener("click", () => openWorksheet(ws.file));
+  return card;
+}
+
 function renderWorksheetList(worksheets) {
   els.worksheetList.innerHTML = "";
+
+  const hasBereiche = worksheets.some((ws) => ws.bereich);
+  if (!hasBereiche) {
+    worksheets.forEach((ws) => els.worksheetList.appendChild(renderWorksheetCard(ws)));
+    return;
+  }
+
+  const groups = new Map();
   worksheets.forEach((ws) => {
-    const card = document.createElement("button");
-    card.className = "worksheet-card" + (ws.erledigt ? " done" : "");
-    card.innerHTML = `
-      <span class="worksheet-title">${escapeHtml(ws.titel)}</span>
-      <span class="worksheet-meta">${ws.anzahl} Aufgaben${ws.erstellt ? " · " + escapeHtml(ws.erstellt) : ""}</span>
-      ${ws.erledigt ? '<span class="worksheet-badge">✔ erledigt</span>' : ""}
-    `;
-    card.addEventListener("click", () => openWorksheet(ws.file));
-    els.worksheetList.appendChild(card);
+    const key = ws.bereich || "sonstiges";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(ws);
+  });
+
+  const orderedKeys = [
+    ...BEREICH_ORDER.filter((key) => groups.has(key)),
+    ...[...groups.keys()].filter((key) => !BEREICH_ORDER.includes(key)).sort(),
+  ];
+
+  orderedKeys.forEach((key) => {
+    const heading = document.createElement("h2");
+    heading.className = "bereich-heading";
+    heading.textContent = key === "sonstiges" ? "Weitere Aufgaben" : bereichLabel(key);
+    els.worksheetList.appendChild(heading);
+
+    const group = document.createElement("div");
+    group.className = "bereich-group";
+    groups.get(key).forEach((ws) => group.appendChild(renderWorksheetCard(ws)));
+    els.worksheetList.appendChild(group);
   });
 }
 
@@ -137,6 +183,7 @@ function renderWorksheetList(worksheets) {
 function openWorksheet(file) {
   currentFile = file;
   const json = worksheetCache[file];
+  currentWorksheet = json;
   currentTasks = json.aufgaben || [];
 
   els.weekLabel.textContent = `📄 ${json.titel || file}`;
@@ -146,6 +193,7 @@ function openWorksheet(file) {
 
 function backToPicker() {
   currentFile = null;
+  currentWorksheet = null;
   showPicker();
 }
 
@@ -165,6 +213,13 @@ function showView() {
 function renderTasks() {
   els.taskList.innerHTML = "";
   const saved = loadProgress(currentKid.id, currentFile);
+
+  if (currentWorksheet?.text) {
+    const readingBox = document.createElement("div");
+    readingBox.className = "reading-text";
+    readingBox.innerHTML = `<p class="reading-text-title">📖 Lies zuerst den Text:</p><p>${escapeHtml(currentWorksheet.text).replace(/\n+/g, "</p><p>")}</p>`;
+    els.taskList.appendChild(readingBox);
+  }
 
   currentTasks.forEach((task, index) => {
     const card = document.createElement("div");

@@ -2,6 +2,7 @@
   "kind": "TJ",
   "alter": 9,
   "erstellt": "2026-08-06",
+  "bereich": "grundrechenarten",
   "titel": "Zehnerübergang & Einmaleins – Runde 2",
   "aufgaben": [
     { "id": 1, "typ": "rechnen", "frage": "56 + 37 = ?", "loesung": "93" },

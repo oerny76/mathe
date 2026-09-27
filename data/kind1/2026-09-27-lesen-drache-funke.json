@@ -1,0 +1,15 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "bereich": "lesen",
+  "titel": "Lesetext: Der kleine Drache Funke",
+  "text": "Auf einer kleinen Insel im Norden lebte ein Junge namens Finn. Er wohnte in einem Dorf, in dem viele Menschen Angst vor Drachen hatten.\n\nEines Morgens fand Finn am Strand ein kleines, verletztes Wesen: einen jungen Drachen mit grünen Schuppen. Der Drache konnte nicht fliegen, weil sein Flügel verletzt war. Finn hatte eigentlich auch ein bisschen Angst, aber der Drache sah traurig aus und tat ihm leid. Er brachte ihm heimlich Fisch zu essen und baute ihm aus Ästen eine kleine Höhle.\n\nNach ein paar Tagen vertraute der Drache Finn und ließ sich sogar streicheln. Finn nannte ihn Funke, weil seine Augen manchmal wie kleine Funken leuchteten. Jeden Tag übte Finn mit Funke, bis der Flügel wieder heilte.\n\nAls Funke zum ersten Mal wieder fliegen konnte, hob er Finn vorsichtig mit den Krallen hoch und flog eine Runde über das Dorf. Seitdem sind Finn und Funke die besten Freunde und fliegen jeden Nachmittag gemeinsam über das Meer.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Wie heißt der Junge in der Geschichte?", "loesung": "Finn" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Wie heißt der Drache in der Geschichte?", "loesung": "Funke" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Welche Farbe hatten die Schuppen des Drachen?", "loesung": "grün" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Was hat Finn dem Drachen zu essen gebracht?", "loesung": "Fisch" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Welcher Körperteil des Drachen war verletzt?", "loesung": "Flügel" }
+  ]
+}
