@@ -1,0 +1,16 @@
+{
+  "kind": "MJ",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W39",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis ✖️",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "12 × 13 = ?", "loesung": "156" },
+    { "id": 2, "typ": "rechnen", "frage": "15 × 15 = ?", "loesung": "225" },
+    { "id": 3, "typ": "rechnen", "frage": "144 : 12 = ?", "loesung": "12" },
+    { "id": 4, "typ": "rechnen", "frage": "17 × 4 = ?", "loesung": "68" },
+    { "id": 5, "typ": "rechnen", "frage": "13 × 13 = ?", "loesung": "169" },
+    { "id": 6, "typ": "rechnen", "frage": "168 : 14 = ?", "loesung": "12" }
+  ]
+}

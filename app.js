@@ -38,22 +38,38 @@ let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Woche
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 
 // ---------- Bereiche (Themen-Kategorien) ----------
-const BEREICH_ORDER = ["einmaleins", "grundrechenarten", "kopfrechnen", "lesen"];
+const BEREICH_ORDER = ["einmaleins", "grundrechenarten", "kopfrechnen", "geometrie", "lesen"];
 const BEREICH_LABELS = {
   einmaleins: "✖️ Einmaleins",
   grundrechenarten: "➕➖ Grundrechenarten",
   kopfrechnen: "🧠 Kopfrechnen",
+  geometrie: "📐 Geometrie",
   lesen: "📖 Lesen",
 };
 const BEREICH_ICONS = {
   einmaleins: "✖️",
   grundrechenarten: "➕➖",
   kopfrechnen: "🧠",
+  geometrie: "📐",
   lesen: "📖",
 };
 
 function bereichLabel(bereich) {
   return BEREICH_LABELS[bereich] || bereich;
+}
+
+// Seitenverhältnis eines Wochenbilds aus seinem SVG-viewBox ableiten (z.B. 3:4
+// fürs iPad-Hintergrundbild oder A4-Hochformat fürs Ausmalbild), statt es
+// hart zu verdrahten – Fallback 3:4, falls kein viewBox gefunden wird.
+function parseViewBox(svg) {
+  const match = svg && svg.match(/viewBox="([\d.\s]+)"/);
+  if (match) {
+    const parts = match[1].trim().split(/\s+/).map(Number);
+    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+      return { width: parts[2], height: parts[3] };
+    }
+  }
+  return { width: 1200, height: 1600 };
 }
 
 // ---------- Fortschritt (localStorage) ----------
@@ -178,6 +194,8 @@ async function setupPickerView(kid, index, worksheets) {
     // Bild-Einstiegsseite: nur das Bild, Aufgaben stecken in den anklickbaren Teilen.
     els.puzzlePicker.hidden = false;
     els.puzzleImage.innerHTML = currentBild.svg || "";
+    const vb = parseViewBox(currentBild.svg);
+    els.puzzleFrame.style.aspectRatio = `${vb.width} / ${vb.height}`;
     renderPuzzleGrid();
 
     const backlog = worksheets.filter((ws) => !currentWeekFiles.includes(ws));
@@ -232,20 +250,9 @@ function renderPuzzleGrid() {
 function downloadPuzzleImage() {
   if (!currentBild?.svg || !currentKid) return;
 
-  // Ziel-Seitenverhältnis aus dem viewBox des SVG ableiten (aktuell 3:4, passend
-  // als iPad-Hintergrundbild), statt es hart zu verdrahten.
-  const viewBoxMatch = currentBild.svg.match(/viewBox="([\d.\s]+)"/);
-  let vbWidth = 1200;
-  let vbHeight = 1600;
-  if (viewBoxMatch) {
-    const parts = viewBoxMatch[1].trim().split(/\s+/).map(Number);
-    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
-      vbWidth = parts[2];
-      vbHeight = parts[3];
-    }
-  }
+  const { width: vbWidth, height: vbHeight } = parseViewBox(currentBild.svg);
 
-  const targetLongSide = 2732; // hochauflösend genug für iPad-Hintergrundbilder
+  const targetLongSide = 3300; // hochauflösend genug für iPad-Hintergrund oder A4-Druck (~280dpi)
   const scale = targetLongSide / Math.max(vbWidth, vbHeight);
   const width = Math.round(vbWidth * scale);
   const height = Math.round(vbHeight * scale);
@@ -266,7 +273,7 @@ function downloadPuzzleImage() {
     canvas.toBlob((blob) => {
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `${currentKid.name}-hintergrundbild-${currentBild.woche || "aktuell"}.png`;
+      link.download = `${currentKid.name}-bild-${currentBild.woche || "aktuell"}.png`;
       link.click();
       URL.revokeObjectURL(link.href);
     }, "image/png");

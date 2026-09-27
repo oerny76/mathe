@@ -1,0 +1,16 @@
+{
+  "kind": "MJ",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W39",
+  "bereich": "geometrie",
+  "titel": "Geometrie: Formen & Winkel 📐",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "Ein Rechteck ist 8 cm lang und 5 cm breit. Wie groß ist sein Umfang in cm?", "loesung": "26" },
+    { "id": 2, "typ": "rechnen", "frage": "Ein Quadrat hat eine Seitenlänge von 7 cm. Wie groß ist seine Fläche in cm²?", "loesung": "49" },
+    { "id": 3, "typ": "rechnen", "frage": "Wie viele Grad hat ein rechter Winkel?", "loesung": "90" },
+    { "id": 4, "typ": "rechnen", "frage": "Ein Rechteck ist 12 cm lang und 4 cm breit. Wie groß ist seine Fläche in cm²?", "loesung": "48" },
+    { "id": 5, "typ": "knobelaufgabe", "frage": "Ein Winkel ist größer als 90° und kleiner als 180°. Wie nennt man so einen Winkel? (ein Wort)", "loesung": "stumpf" },
+    { "id": 6, "typ": "rechnen", "frage": "Ein Würfel hat 6 Seiten. Wie viele Kanten hat er?", "loesung": "12" }
+  ]
+}

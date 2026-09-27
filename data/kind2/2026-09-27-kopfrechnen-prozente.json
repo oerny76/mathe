@@ -1,0 +1,16 @@
+{
+  "kind": "MJ",
+  "alter": 12,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W39",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Runden & Prozente 🧠",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "Verdopple 145. Wie viel ist das?", "loesung": "290" },
+    { "id": 2, "typ": "rechnen", "frage": "Halbiere 96. Wie viel ist das?", "loesung": "48" },
+    { "id": 3, "typ": "rechnen", "frage": "10% von 340 = ?", "loesung": "34" },
+    { "id": 4, "typ": "rechnen", "frage": "Wie viel sind 25% von 200?", "loesung": "50" },
+    { "id": 5, "typ": "rechnen", "frage": "9 × 11 = ?", "loesung": "99" },
+    { "id": 6, "typ": "rechnen", "frage": "Runde 3872 auf die nächsten Hundert.", "loesung": "3900" }
+  ]
+}

@@ -74,12 +74,17 @@ eigene, thematisch sortierte Übungsblöcke bekommen, kann jedes Arbeitsblatt
 zusätzlich ein Feld `"bereich"` bekommen. Die App gruppiert die
 Arbeitsblatt-Auswahl dann automatisch nach Bereich (mit Überschrift), statt
 alles in einer Liste zu zeigen. Ohne `"bereich"`-Feld bleibt die Ansicht wie
-bisher flach (z.B. bei MJ aktuell der Fall).
+bisher flach.
 
 Bekannte Bereiche mit fester Reihenfolge/Icon in `app.js` (`BEREICH_LABELS`):
-`"einmaleins"`, `"grundrechenarten"`, `"kopfrechnen"`, `"lesen"`. Weitere,
-frei gewählte Bereichs-Strings werden alphabetisch nach den bekannten
-angezeigt.
+`"einmaleins"`, `"grundrechenarten"`, `"kopfrechnen"`, `"geometrie"`,
+`"lesen"`. Weitere, frei gewählte Bereichs-Strings werden alphabetisch nach
+den bekannten angezeigt.
+
+Aktuell genutzte Bereiche pro Kind:
+- **TJ:** `einmaleins`, `grundrechenarten`, `kopfrechnen`, `lesen`.
+- **MJ:** `einmaleins`, `kopfrechnen`, `geometrie` – bewusst **kein** `lesen`
+  (MJs Interesse liegt bei Kreativität/Malen/Basteln statt Lesetexten).
 
 Für Lese-Arbeitsblätter gibt es zusätzlich ein optionales Feld `"text"` auf
 oberster Ebene: ein Lesetext, der über den Aufgaben angezeigt wird. Die
@@ -101,15 +106,23 @@ wird ignoriert):
 }
 ```
 
-### Wochenpensum: ~50:50 Lesen und Rechnen
+### Wochenpensum
 
-Für Kinder mit Bereichen (aktuell TJ) gilt: **4 Arbeitsblätter pro Woche**,
-ungefähr hälftig zwischen Lesen und Rechnen aufgeteilt:
+Beide Kinder mit Bereichen bekommen **4 Arbeitsblätter pro Woche**, aber mit
+unterschiedlicher Aufteilung, je nach Interessen:
+
+**TJ – ~50:50 Lesen und Rechnen:**
 - **2 Rechen-Arbeitsblätter**, rotierend aus den Rechen-Bereichen (aktuell
   Einmaleins/Grundrechenarten/Kopfrechnen – pro Woche werden 2 der 3
   ausgewählt, damit langfristig alle drankommen).
 - **2 Lese-Arbeitsblätter**, eins pro Interessengebiet des Kindes (aktuell FC
   Bayern München und Drachen) – so kommen beide Interessen jede Woche vor.
+
+**MJ – nur Rechnen, kein Lesen:**
+- **4 Rechen-Arbeitsblätter**, aus den Bereichen Kopfrechnen/Einmaleins/
+  Geometrie: alle drei kommen jede Woche vor, plus ein vierter, rotierend
+  verdoppelter Bereich (damit über die Zeit alle drei gleich oft doppelt
+  vorkommen).
 
 Jedes Arbeitsblatt ist für ~15 Minuten ausgelegt (6 Aufgaben bei Rechen-
 Blättern, 6 Verständnisfragen zu einem Lesetext bei Lese-Blättern). Das Kind
@@ -127,10 +140,13 @@ ins Wochenbild ein – sie bleiben aber ganz normal spielbar.
 
 ### Wochenbild-Puzzle (Gamification, Einstiegsseite)
 
-Für Kinder mit Wochenbild (aktuell TJ) **ist das Bild die Einstiegsseite**:
-nach der Namensschild-Auswahl steht dort nur noch das große Hochformat-Bild
-(Seitenverhältnis 3:4, geeignet als iPad-Hintergrundbild), aufgeteilt in 4
-anklickbare Teile – eins pro Arbeitsblatt der aktuellen Woche. Ein Tippen auf
+Für Kinder mit Wochenbild (aktuell TJ und MJ) **ist das Bild die
+Einstiegsseite**: nach der Namensschild-Auswahl steht dort nur noch das große
+Hochformat-Bild, aufgeteilt in 4 anklickbare Teile – eins pro Arbeitsblatt der
+aktuellen Woche. Das Seitenverhältnis des Rahmens wird automatisch aus dem
+`viewBox` des jeweiligen Bildes abgeleitet (siehe unten, zwei Bild-Varianten
+mit unterschiedlichem Format) – muss also nicht im Code angepasst werden. Ein
+Tippen auf
 ein Teil öffnet direkt das zugehörige Arbeitsblatt (die Kachel trägt Icon,
 Kurzlabel und Punktestand als Orientierung, auch wenn das Bild darunter noch
 kaum zu sehen ist).
@@ -151,8 +167,9 @@ unter dem Bild blendet sie bei Bedarf als klassische Liste ein.
 Sind alle 4 Teile fertig, bekommt der Bildrahmen einen goldenen Schimmer und
 ein Button erscheint, um das Bild als **hochauflösendes PNG** herunterzuladen
 (Seitenverhältnis und Auflösung werden automatisch aus dem `viewBox` des SVG
-abgeleitet, aktuell ca. 2049×2732px – direkt im Browser aus dem SVG gerendert,
-kein Server nötig), zum Speichern als Hintergrundbild auf dem iPad.
+abgeleitet, Ziel-Langseite ca. 3300px – direkt im Browser aus dem SVG
+gerendert, kein Server nötig) – bei TJ zum Speichern als iPad-Hintergrundbild,
+bei MJ zum Ausdrucken in A4 und Ausmalen mit Stiften.
 
 Dafür trägt `index.json` zusätzlich ein, welches Bild aktuell gilt:
 
@@ -172,18 +189,13 @@ Die referenzierte Datei (`data/<kindId>/2026-W39-bild.json`) sieht so aus:
 ```
 
 Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
-`scripts/generate.js` erzeugt:
-- in sich geschlossen, **Hochformat-`viewBox` im Verhältnis 3:4** (z.B.
-  `viewBox="0 0 1200 1600"` – passend als iPad-Hintergrundbild), keine
-  externen Referenzen (keine Bilder/Fonts/URLs) – muss offline aus dem
-  Browser heraus als PNG rasterisierbar sein
-- nur einfache Formen (`rect`, `circle`, `ellipse`, `path`, `polygon`,
-  Gradients in `defs`), **keine** `<text>`-Elemente (Schriftladen kann beim
-  Rasterisieren scheitern) und keine `<filter>`
-- **Stil:** dynamisch/abenteuerlich statt niedlich-kindlich – Silhouetten vor
-  einem Dämmerungs-/Sonnenuntergangs-Verlauf wirken deutlich "cooler" als
-  flache Cartoon-Farben (siehe `data/kind1/2026-W39-bild.json` als Beispiel).
-  Keine Nachbildung konkreter, urheberrechtlich geschützter Figuren-Designs
+`scripts/generate.js` erzeugt – unabhängig vom Stil (siehe unten):
+- in sich geschlossen, keine externen Referenzen (keine Bilder/Fonts/URLs) –
+  muss offline aus dem Browser heraus als PNG rasterisierbar sein
+- nur einfache Formen (`rect`, `circle`, `ellipse`, `path`, `polygon`, `g`,
+  `use`, Gradients in `defs`), **keine** `<text>`-Elemente (Schriftladen kann
+  beim Rasterisieren scheitern) und keine `<filter>`
+- Keine Nachbildung konkreter, urheberrechtlich geschützter Figuren-Designs
   (z.B. keine 1:1-Kopie einer bestimmten Film-/Buchfigur) – nur eine eigene,
   generische Interpretation des Themas/Genres.
 - das Motiv passt idealerweise zu einem Interessengebiet des Kindes und zeigt
@@ -193,6 +205,24 @@ Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
   alphabetischer Dateinamen-Reihenfolge auf die 4 Positionen verteilt) – nicht
   einer festen Bereichs-Zuordnung, da eine Woche z.B. 2 Lese- + 2
   Rechen-Arbeitsblätter statt 4 verschiedener Bereiche enthalten kann
+
+Zwei Bild-Varianten sind im Einsatz, je nach Interesse des Kindes:
+
+**„Abenteuer"-Wallpaper (aktuell TJ):** Hochformat-`viewBox` im Verhältnis 3:4
+(z.B. `viewBox="0 0 1200 1600"`), zum Speichern als iPad-Hintergrund. Stil:
+dynamisch/abenteuerlich statt niedlich-kindlich – Silhouetten vor einem
+Dämmerungs-/Sonnenuntergangs-Verlauf wirken deutlich "cooler" als flache
+Cartoon-Farben (siehe `data/kind1/2026-W39-bild.json` als Beispiel).
+
+**Ausmalbild (aktuell MJ):** Hochformat-`viewBox` im A4-Verhältnis (z.B.
+`viewBox="0 0 2100 2970"`), zum Ausdrucken und Ausmalen mit Stiften. Stil:
+reine Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild
+eines Tieres – schwarze Konturen (`stroke`, `fill="none"`), nur ein weißer
+Hintergrund-`rect` mit `fill`, ruhig und symmetrisch statt bunt (siehe
+`data/kind2/2026-W39-bild.json` als Beispiel: eine Schmetterlings-Mandala).
+Passend zu Interessen wie Kreativität/Malen/Basteln; für exakte Symmetrie
+eignen sich `<use>`-Referenzen mit `transform="translate(...) scale(-1,1)"`
+zum Spiegeln einer Körperhälfte.
 
 Ohne `"aktuellesBild"` in `index.json` bleibt das Puzzle einfach ausgeblendet
 (z.B. bei MJ aktuell der Fall).
@@ -234,12 +264,19 @@ ANTHROPIC_API_KEY=sk-... npm run generate
 ```
 
 Für Kinder mit `rechenBereiche` in der `KIDS`-Konfiguration im Skript (aktuell
-TJ) erzeugt der Lauf pro Woche 2 Rechen-Arbeitsblätter (rotierend aus
-`rechenBereiche`) + 1 Lese-Arbeitsblatt pro Eintrag in `interessen` (~50:50,
-siehe „Wochenpensum“ oben), alle getaggt mit `bereich` + `woche`, sowie ein
-passendes Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben) –
-das Bildthema rotiert dabei durch `interessen`. Kinder ohne `rechenBereiche`
-(aktuell MJ) bekommen wie bisher ein einzelnes Wochenblatt ohne Bereich/Bild.
+TJ und MJ) erzeugt der Lauf pro Woche Rechen-Arbeitsblätter aus
+`rechenBereiche`, getaggt mit `bereich` + `woche`, sowie ein passendes
+Wochenbild (`<woche>-bild.json`, siehe „Wochenbild-Puzzle“ oben). Ob dazu noch
+Lesetexte kommen, steuert das Feld `lesen` (Standard: `true`):
+- **`lesen` nicht gesetzt oder `true` (aktuell TJ):** 2 der 3
+  `rechenBereiche` rotierend pro Woche + 1 Lese-Arbeitsblatt pro Eintrag in
+  `interessen` (~50:50, siehe „Wochenpensum“ oben). Bildthema rotiert durch
+  `interessen`, Bildstil `bildStil: "abenteuer"` (Standard).
+- **`lesen: false` (aktuell MJ):** alle `rechenBereiche` jede Woche + ein
+  vierter, rotierend verdoppelter Bereich (macht 4 Arbeitsblätter/Woche ohne
+  Lesetexte). `interessen` dient hier nur als Bildthema (z.B. `["Kreativität,
+  Malen und Basteln"]`), Bildstil `bildStil: "ausmalbild"` erzeugt ein
+  druckbares Ausmalbild im A4-Format statt des Abenteuer-Wallpapers.
 
 Das Skript läuft **nicht automatisch** (es gibt bewusst keinen
 GitHub-Actions-Workflow dafür) – du rufst es bei Bedarf lokal auf und
@@ -284,6 +321,3 @@ muss diese Datei mit aktualisiert und auf claude.ai neu hochgeladen werden.
   entfernen (die JSON-Datei selbst kann im Repo bleiben).
 - **Mehr Kinder:** weitere Einträge in `KIDS` (`app.js` und
   `scripts/generate.js`) und passende Datenordner samt `index.json` ergänzen.
-- **Bereiche auch für MJ:** in `scripts/generate.js` und beim manuellen
-  Erstellen einfach ebenfalls `rechenBereiche`/`interessen` vergeben, dann
-  bekommt MJ dieselbe Bereichs-Gruppierung und das Wochenbild-Puzzle.

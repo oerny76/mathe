@@ -1,12 +1,16 @@
 // scripts/generate.js
 // Erzeugt für jedes Kind die Aufgaben-JSON-Dateien für die aktuelle Kalenderwoche.
-// Kinder mit "rechenBereiche" bekommen pro Woche 2 Rechen-Arbeitsblätter (rotierend
-// durch rechenBereiche) + 1 Lesetext-Arbeitsblatt pro Eintrag in "interessen" (bei
-// TJ aktuell 2 Interessen = 2 Lesetexte), macht 4 Arbeitsblätter/Woche mit einer
-// ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe README, Abschnitt "Wochenpensum").
-// Dazu ein wöchentliches Puzzle-Belohnungsbild (siehe README, Abschnitt
-// "Wochenbild-Puzzle"). Kinder ohne "rechenBereiche" bekommen wie bisher ein
-// einzelnes Wochenblatt.
+// Kinder mit "rechenBereiche" und "lesen" !== false (aktuell TJ) bekommen pro Woche
+// 2 Rechen-Arbeitsblätter (rotierend durch rechenBereiche) + 1 Lesetext-Arbeitsblatt
+// pro Eintrag in "interessen" (bei TJ aktuell 2 Interessen = 2 Lesetexte), macht 4
+// Arbeitsblätter/Woche mit einer ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe
+// README, Abschnitt "Wochenpensum"). Kinder mit "lesen: false" (aktuell MJ) bekommen
+// stattdessen alle rechenBereiche + einen rotierend verdoppelten Bereich (ebenfalls 4
+// Arbeitsblätter/Woche, aber ohne Lesetexte). Dazu ein wöchentliches
+// Puzzle-Belohnungsbild (siehe README, Abschnitt "Wochenbild-Puzzle"), dessen Stil
+// über "bildStil" gewählt wird ("abenteuer" = Standard, buntes Wallpaper;
+// "ausmalbild" = druckbare A4-Ausmalseite). Kinder ohne "rechenBereiche" bekommen wie
+// bisher ein einzelnes Wochenblatt.
 //
 // Wird manuell aufgerufen (kein automatischer GitHub-Workflow):
 //   ANTHROPIC_API_KEY=sk-... node scripts/generate.js
@@ -30,7 +34,20 @@ const KIDS = [
     // durch diese Liste.
     interessen: ["FC Bayern München", "Drachen"],
   },
-  { id: "kind2", name: "MJ", alter: 12 },
+  {
+    id: "kind2",
+    name: "MJ",
+    alter: 12,
+    // Alle 3 Bereiche kommen jede Woche vor (siehe generateBereicheForKid),
+    // da MJ (anders als TJ) keine Lesetexte bekommt und die Rechen-Bereiche
+    // allein die 4 Arbeitsblätter/Woche füllen müssen.
+    rechenBereiche: ["kopfrechnen", "einmaleins", "geometrie"],
+    lesen: false,
+    // Dient hier nicht für Lesetexte (siehe "lesen: false"), sondern nur als
+    // Thema fürs Wochenbild (Ausmalbild).
+    interessen: ["Kreativität, Malen und Basteln"],
+    bildStil: "ausmalbild",
+  },
 ];
 
 const MODEL = "claude-sonnet-5";
@@ -86,6 +103,18 @@ inklusive 1-2 Sachaufgaben und optional einer Knobelaufgabe.`,
 Verdoppeln/Halbieren, runde Zahlen addieren/subtrahieren, kleine 1x1-Aufgaben,
 Ergänzen zu 100 etc. Keine Sachaufgaben, keine mehrschrittigen Aufgaben.`,
   },
+  geometrie: {
+    format: `{
+  "titel": "<kurzer, ansprechender Titel>",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen|knobelaufgabe", "frage": "<Aufgabentext>", "loesung": "<Lösung als String, ohne Einheit>" }
+  ]
+}`,
+    anweisung: `Erzeuge genau 6 Geometrie-Aufgaben passend zum Alter (z.B. Umfang/Fläche von
+Rechteck und Quadrat, Eigenschaften von Winkeln, Eckdaten von Würfel/Quader,
+Symmetrie). Antworten sind kurze, eindeutige Strings ohne Einheit (auch wenn
+die Frage eine Einheit nennt), da die Auswertung exakt vergleicht.`,
+  },
   lesen: {
     format: `{
   "titel": "<kurzer, ansprechender Titel, z.B. \\"Lesetext: ...\\">",
@@ -104,23 +133,12 @@ Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
   },
 };
 
-const BILD_SYSTEM_PROMPT = `Du erstellst ein stimmungsvolles, "cooles" Vektor-Bild (SVG) als
-Wochen-Belohnungsbild für ein 9-jähriges Kind, das seine Matheaufgaben erledigt hat.
-
-Stil: dynamisch und abenteuerlich statt niedlich/kindlich – denk an das Gefühl
-einer Fantasy-Abenteuergeschichte (z.B. Drachenreiter-Szenen): dramatische
-Silhouetten, Dämmerungs-/Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe),
-Gegenlicht, Bewegung/Dynamik in der Pose statt eines statischen, lächelnden
-Cartoon-Charakters. KEINE Übernahme konkreter, urheberrechtlich geschützter
-Figuren-Designs (z.B. keine Nachbildung einer bestimmten Film-/Buch-Figur) –
-nur eine eigenständige, generische Interpretation des Themas/Genres.
-
-Strikte technische Vorgaben:
+const BILD_GEMEINSAME_VORGABEN = `Strikte technische Vorgaben:
 - Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt, ohne Markdown-Codeblock.
-- Das Feld "svg" enthält ein vollständiges, in sich geschlossenes SVG
-  (viewBox="0 0 800 800", xmlns-Attribut gesetzt).
 - Nur einfache Formen: <rect>, <circle>, <ellipse>, <path>, <polygon>, <g>,
-  <linearGradient>/<radialGradient> in <defs>. Farben als Hex-Codes.
+  <use> (mit href, z.B. für symmetrisches Spiegeln via
+  transform="translate(...) scale(-1,1)"), <linearGradient>/<radialGradient>
+  in <defs>. Farben als Hex-Codes.
 - KEINE <text>-Elemente, KEINE <image>/<foreignObject>, KEINE <filter>, KEINE
   externen Referenzen (keine URLs, keine Google Fonts o.ä.) – das Bild muss
   offline und ohne externe Ressourcen in jedem Browser rasterisierbar sein.
@@ -134,6 +152,45 @@ Exaktes Ausgabeformat:
   "thema": "<Interessengebiet>",
   "svg": "<vollständiger SVG-String>"
 }`;
+
+const BILD_SYSTEM_PROMPTS = {
+  // Buntes "Abenteuer"-Wallpaper zum Speichern als iPad-Hintergrund (aktuell TJ).
+  abenteuer: (alter) => `Du erstellst ein stimmungsvolles, "cooles" Vektor-Bild (SVG) als
+Wochen-Belohnungsbild für ein ${alter}-jähriges Kind, das seine Matheaufgaben erledigt hat.
+
+Stil: dynamisch und abenteuerlich statt niedlich/kindlich – denk an das Gefühl
+einer Fantasy-Abenteuergeschichte (z.B. Drachenreiter-Szenen): dramatische
+Silhouetten, Dämmerungs-/Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe),
+Gegenlicht, Bewegung/Dynamik in der Pose statt eines statischen, lächelnden
+Cartoon-Charakters. KEINE Übernahme konkreter, urheberrechtlich geschützter
+Figuren-Designs (z.B. keine Nachbildung einer bestimmten Film-/Buch-Figur) –
+nur eine eigenständige, generische Interpretation des Themas/Genres.
+
+Das Feld "svg" enthält ein vollständiges, in sich geschlossenes SVG im
+Hochformat, Seitenverhältnis 3:4 (viewBox="0 0 1200 1600", xmlns-Attribut
+gesetzt).
+
+${BILD_GEMEINSAME_VORGABEN}`,
+
+  // Druckbares Ausmalbild im A4-Format (aktuell MJ).
+  ausmalbild: (alter) => `Du erstellst ein Ausmalbild (Mandala oder possierliches Tier) als
+Wochen-Belohnungsbild für ein ${alter}-jähriges Kind, das seine Matheaufgaben
+erledigt hat. Das Bild wird am Ende in A4 ausgedruckt und mit Stiften
+ausgemalt.
+
+Stil: reine Umriss-/Linienzeichnung wie ein klassisches Mandala oder
+Ausmalbild – schwarze Konturen (stroke="#1a1a1a", fill="none"), nur ein
+weißer Hintergrund-<rect> mit fill="#ffffff", ruhig und symmetrisch statt
+bunt/comic-haft. Gerne mit floralen/dekorativen Mustern, passend zu Interessen
+wie Malen, Basteln, Kreativität. KEINE Übernahme konkreter, urheberrechtlich
+geschützter Figuren-Designs – nur eine eigenständige, generische
+Interpretation des Themas.
+
+Das Feld "svg" enthält ein vollständiges, in sich geschlossenes SVG im
+A4-Hochformat (viewBox="0 0 2100 2970", xmlns-Attribut gesetzt).
+
+${BILD_GEMEINSAME_VORGABEN}`,
+};
 
 function getIsoWeekId(date = new Date()) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -275,37 +332,52 @@ ${prompt.anweisung}`;
   return fileName;
 }
 
-// ---------- Kinder MIT rechenBereiche: 2 Rechen- + 1 Lesetext pro Interesse + Wochenbild ----------
-// Ergibt bei 2 Interessen 2 Rechen- + 2 Lese-Arbeitsblätter/Woche (~50:50, siehe README).
+// ---------- Kinder MIT rechenBereiche: Rechen-Arbeitsblätter (+ optional Lesetexte) + Wochenbild ----------
+// Bei "lesen" !== false (aktuell TJ): 2 von 3 Bereichen rotierend + 1 Lesetext pro
+// Interesse (~50:50, siehe README). Bei "lesen: false" (aktuell MJ): alle
+// rechenBereiche + ein rotierend verdoppelter Bereich, keine Lesetexte – ergibt in
+// beiden Fällen 4 Arbeitsblätter/Woche.
 async function generateBereicheForKid(kid, weekId) {
   const newFiles = [];
-
-  // 2 von 3 Rechen-Bereichen, rotierend pro Woche (damit langfristig alle drankommen).
   const n = kid.rechenBereiche.length;
-  const skipIndex = isoWeekNumber(weekId) % n;
-  const rechenBereicheDieseWoche = kid.rechenBereiche.filter((_, i) => i !== skipIndex);
 
+  let rechenBereicheDieseWoche;
+  if (kid.lesen === false) {
+    const doubledBereich = kid.rechenBereiche[isoWeekNumber(weekId) % n];
+    rechenBereicheDieseWoche = [...kid.rechenBereiche, doubledBereich];
+  } else {
+    // 2 von 3 Rechen-Bereichen, rotierend pro Woche (damit langfristig alle drankommen).
+    const skipIndex = isoWeekNumber(weekId) % n;
+    rechenBereicheDieseWoche = kid.rechenBereiche.filter((_, i) => i !== skipIndex);
+  }
+
+  const bereichCounts = {};
   for (const bereich of rechenBereicheDieseWoche) {
-    const fileName = await generateWorksheet(kid, weekId, bereich, { fileName: `${weekId}-${bereich}.json` });
+    bereichCounts[bereich] = (bereichCounts[bereich] || 0) + 1;
+    const suffix = bereichCounts[bereich] > 1 ? `-${bereichCounts[bereich]}` : "";
+    const fileName = await generateWorksheet(kid, weekId, bereich, { fileName: `${weekId}-${bereich}${suffix}.json` });
     if (fileName) newFiles.push(fileName);
   }
 
-  // 1 Lesetext pro Interesse, jede Woche.
-  for (const interesse of kid.interessen || []) {
-    const fileName = await generateWorksheet(kid, weekId, "lesen", {
-      fileName: `${weekId}-lesen-${slugify(interesse)}.json`,
-      interesse,
-    });
-    if (fileName) newFiles.push(fileName);
+  // 1 Lesetext pro Interesse, jede Woche (nur für Kinder ohne "lesen: false").
+  if (kid.lesen !== false) {
+    for (const interesse of kid.interessen || []) {
+      const fileName = await generateWorksheet(kid, weekId, "lesen", {
+        fileName: `${weekId}-lesen-${slugify(interesse)}.json`,
+        interesse,
+      });
+      if (fileName) newFiles.push(fileName);
+    }
   }
 
   // Wochenbild: nur versuchen, wenn mindestens ein Arbeitsblatt erfolgreich war.
   let bildFile = null;
   if (newFiles.length > 0 && kid.interessen?.length) {
     const thema = kid.interessen[isoWeekNumber(weekId) % kid.interessen.length];
+    const bildStil = kid.bildStil || "abenteuer";
     try {
       const bild = await callClaude(
-        BILD_SYSTEM_PROMPT,
+        BILD_SYSTEM_PROMPTS[bildStil](kid.alter),
         `Interessengebiet: ${thema}. Alter des Kindes: ${kid.alter}. Kalenderwoche: ${weekId}.`
       );
       if (typeof bild.svg === "string" && bild.svg.includes("<svg")) {
