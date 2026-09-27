@@ -19,12 +19,21 @@ const els = {
   checkBtn: document.getElementById("check-btn"),
   retryBtn: document.getElementById("retry-btn"),
   resultBanner: document.getElementById("result-banner"),
+  puzzleSection: document.getElementById("puzzle"),
+  puzzleTitle: document.getElementById("puzzle-title"),
+  puzzleImage: document.getElementById("puzzle-image"),
+  puzzleGrid: document.getElementById("puzzle-grid"),
+  puzzleStatus: document.getElementById("puzzle-status"),
+  puzzleDownloadBtn: document.getElementById("puzzle-download"),
+  puzzleCanvas: document.getElementById("puzzle-canvas"),
 };
 
 let currentKid = null;
 let currentFile = null;
 let currentTasks = [];
 let currentWorksheet = null;
+let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
+let currentWeekMap = {}; // bereich -> file, das zum aktuellen Wochenbild gehört
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 
 // ---------- Bereiche (Themen-Kategorien) ----------
@@ -34,6 +43,12 @@ const BEREICH_LABELS = {
   grundrechenarten: "➕➖ Grundrechenarten",
   kopfrechnen: "🧠 Kopfrechnen",
   lesen: "📖 Lesen",
+};
+const BEREICH_ICONS = {
+  einmaleins: "✖️",
+  grundrechenarten: "➕➖",
+  kopfrechnen: "🧠",
+  lesen: "📖",
 };
 
 function bereichLabel(bereich) {
@@ -117,6 +132,7 @@ async function selectKid(kid) {
             erstellt: wJson.erstellt || wJson.woche || "",
             anzahl: (wJson.aufgaben || []).length,
             bereich: wJson.bereich || null,
+            woche: wJson.woche || null,
             erledigt: progress ? progress.correctCount === progress.total : false,
           };
         } catch {
@@ -128,9 +144,108 @@ async function selectKid(kid) {
     const valid = worksheets.filter(Boolean).sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
     els.pickerHint.textContent = "Wähle eine Aufgabe aus:";
     renderWorksheetList(valid);
+    await loadPuzzle(kid, index, valid);
   } catch (err) {
     els.pickerHint.textContent = "Für dich sind noch keine Aufgaben vorbereitet. Frag einen Erwachsenen! 🙈";
+    els.puzzleSection.hidden = true;
   }
+}
+
+// ---------- Wochenbild-Puzzle (Gamification) ----------
+async function loadPuzzle(kid, index, worksheets) {
+  currentBild = null;
+  currentWeekMap = {};
+
+  if (!index.aktuellesBild) {
+    els.puzzleSection.hidden = true;
+    return;
+  }
+
+  try {
+    const res = await fetch(`data/${kid.id}/${index.aktuellesBild}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Kein Wochenbild gefunden");
+    currentBild = await res.json();
+  } catch {
+    els.puzzleSection.hidden = true;
+    return;
+  }
+
+  BEREICH_ORDER.forEach((key) => {
+    const match = worksheets.find((ws) => ws.bereich === key && ws.woche === currentBild.woche);
+    if (match) currentWeekMap[key] = match.file;
+  });
+
+  if (Object.keys(currentWeekMap).length === 0) {
+    els.puzzleSection.hidden = true;
+    return;
+  }
+
+  els.puzzleSection.hidden = false;
+  els.puzzleTitle.textContent = `🧩 ${currentBild.titel || "Dein Wochenbild"}`;
+  els.puzzleImage.innerHTML = currentBild.svg || "";
+  renderPuzzleGrid();
+}
+
+function renderPuzzleGrid() {
+  if (!currentBild) return;
+
+  const keys = BEREICH_ORDER.filter((key) => currentWeekMap[key]);
+  els.puzzleGrid.innerHTML = "";
+  let doneCount = 0;
+
+  keys.forEach((key) => {
+    const file = currentWeekMap[key];
+    const total = (worksheetCache[file]?.aufgaben || []).length;
+    const progress = loadProgress(currentKid.id, file);
+    const erledigt = progress ? progress.correctCount === total : false;
+    if (erledigt) doneCount++;
+
+    const tile = document.createElement("div");
+    tile.className = "puzzle-tile" + (erledigt ? " revealed" : "");
+    tile.innerHTML = `
+      <span>${BEREICH_ICONS[key] || "❓"}</span>
+      <span class="puzzle-tile-label">${escapeHtml(bereichLabel(key).replace(/^\S+\s/, ""))}</span>
+    `;
+    els.puzzleGrid.appendChild(tile);
+  });
+
+  const total = keys.length;
+  els.puzzleStatus.textContent =
+    doneCount === total
+      ? "🎉 Alle Teile aufgedeckt – dein Bild ist fertig!"
+      : `${doneCount} von ${total} Teilen aufgedeckt`;
+
+  els.puzzleSection.classList.toggle("complete", doneCount === total && total > 0);
+  els.puzzleDownloadBtn.hidden = !(doneCount === total && total > 0);
+}
+
+function downloadPuzzleImage() {
+  if (!currentBild?.svg || !currentKid) return;
+
+  const svgBlob = new Blob([currentBild.svg], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+
+  img.onload = () => {
+    const size = 2000;
+    const canvas = els.puzzleCanvas;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+
+    canvas.toBlob((blob) => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${currentKid.name}-wochenbild-${currentBild.woche || "aktuell"}.png`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }, "image/png");
+  };
+
+  img.src = url;
 }
 
 function renderWorksheetCard(ws) {
@@ -314,6 +429,8 @@ function checkAnswers() {
   showResult(correctCount, currentTasks.length);
   els.checkBtn.hidden = true;
   els.retryBtn.hidden = false;
+
+  if (currentBild) renderPuzzleGrid();
 }
 
 function showResult(correct, total) {
@@ -338,6 +455,7 @@ function retry() {
 els.checkBtn.addEventListener("click", checkAnswers);
 els.retryBtn.addEventListener("click", retry);
 els.backBtn.addEventListener("click", backToPicker);
+els.puzzleDownloadBtn.addEventListener("click", downloadPuzzleImage);
 
 // ---------- Start ----------
 renderTabs();
