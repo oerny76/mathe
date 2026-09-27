@@ -221,8 +221,8 @@ body {
 .task-card.correct { border-color: var(--chalk-green); }
 .task-card.wrong { border-color: var(--chalk-red); }
 
-.task-card.correct .task-mark::after { content: "âœ”"; color: var(--chalk-green); }
-.task-card.wrong .task-mark::after { content: "âœ•"; color: var(--chalk-red); }
+.task-card.correct .task-mark::after { content: "✔"; color: var(--chalk-green); }
+.task-card.wrong .task-mark::after { content: "✕"; color: var(--chalk-red); }
 
 /* ---------- Notizfeld (Rechenfeld) ---------- */
 .scratch-toggle {
