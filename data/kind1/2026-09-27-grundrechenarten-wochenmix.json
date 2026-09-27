@@ -1,0 +1,16 @@
+{
+  "kind": "TJ",
+  "alter": 9,
+  "erstellt": "2026-09-27",
+  "woche": "2026-W39",
+  "bereich": "grundrechenarten",
+  "titel": "Grundrechenarten-Mix der Woche",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "58 + 27 = ?", "loesung": "85" },
+    { "id": 2, "typ": "rechnen", "frage": "94 − 38 = ?", "loesung": "56" },
+    { "id": 3, "typ": "rechnen", "frage": "7 × 8 = ?", "loesung": "56" },
+    { "id": 4, "typ": "rechnen", "frage": "81 : 9 = ?", "loesung": "9" },
+    { "id": 5, "typ": "sachaufgabe", "frage": "Finn hat 45 Süßigkeiten. Er verschenkt 18 an seine Freunde und bekommt danach von seiner Oma noch 12 dazu. Wie viele Süßigkeiten hat er jetzt?", "loesung": "39" },
+    { "id": 6, "typ": "knobelaufgabe", "frage": "Ich bin eine Zahl zwischen 50 und 60. Addiere ich meine beiden Ziffern, erhalte ich 11. Welche Zahl bin ich?", "loesung": "56" }
+  ]
+}
