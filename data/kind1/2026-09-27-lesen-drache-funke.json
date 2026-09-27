@@ -11,6 +11,7 @@
     { "id": 2, "typ": "leseverstehen", "frage": "Wie heißt der Drache in der Geschichte?", "loesung": "Funke" },
     { "id": 3, "typ": "leseverstehen", "frage": "Welche Farbe hatten die Schuppen des Drachen?", "loesung": "grün" },
     { "id": 4, "typ": "leseverstehen", "frage": "Was hat Finn dem Drachen zu essen gebracht?", "loesung": "Fisch" },
-    { "id": 5, "typ": "leseverstehen", "frage": "Welcher Körperteil des Drachen war verletzt?", "loesung": "Flügel" }
+    { "id": 5, "typ": "leseverstehen", "frage": "Welcher Körperteil des Drachen war verletzt?", "loesung": "Flügel" },
+    { "id": 6, "typ": "leseverstehen", "frage": "Wo hat Finn den verletzten Drachen gefunden?", "loesung": "am Strand" }
   ]
 }

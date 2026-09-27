@@ -1,9 +1,12 @@
 // scripts/generate.js
 // Erzeugt für jedes Kind die Aufgaben-JSON-Dateien für die aktuelle Kalenderwoche.
-// Kinder mit "bereiche" bekommen pro Bereich ein eigenes ~15-Minuten-Arbeitsblatt
-// (siehe README, Abschnitt "Optionale Felder: Bereiche & Lesetexte") plus ein
-// wöchentliches Puzzle-Belohnungsbild (siehe README, Abschnitt "Wochenbild-Puzzle").
-// Kinder ohne "bereiche" bekommen wie bisher ein einzelnes Wochenblatt.
+// Kinder mit "rechenBereiche" bekommen pro Woche 2 Rechen-Arbeitsblätter (rotierend
+// durch rechenBereiche) + 1 Lesetext-Arbeitsblatt pro Eintrag in "interessen" (bei
+// TJ aktuell 2 Interessen = 2 Lesetexte), macht 4 Arbeitsblätter/Woche mit einer
+// ungefähren 50:50-Aufteilung Rechnen/Lesen (siehe README, Abschnitt "Wochenpensum").
+// Dazu ein wöchentliches Puzzle-Belohnungsbild (siehe README, Abschnitt
+// "Wochenbild-Puzzle"). Kinder ohne "rechenBereiche" bekommen wie bisher ein
+// einzelnes Wochenblatt.
 //
 // Wird manuell aufgerufen (kein automatischer GitHub-Workflow):
 //   ANTHROPIC_API_KEY=sk-... node scripts/generate.js
@@ -17,10 +20,14 @@ const KIDS = [
     id: "kind1",
     name: "TJ",
     alter: 9,
-    // Reihenfolge der Bereiche = Reihenfolge der Puzzle-Teile (siehe app.js BEREICH_ORDER).
-    bereiche: ["einmaleins", "grundrechenarten", "kopfrechnen", "lesen"],
-    // Für die Lesetexte & das Wochenbild: rotiert wöchentlich durch diese Liste,
-    // damit Lesen (und Bild) zu TJs Interessen passen und leichter fallen.
+    // Pro Woche werden 2 dieser 3 Bereiche ausgewählt (rotierend), damit über die
+    // Zeit alle drei drankommen. Reihenfolge ist sonst egal (Puzzle-Teile richten
+    // sich nach den tatsächlichen Arbeitsblättern der Woche, nicht nach dieser Liste).
+    rechenBereiche: ["einmaleins", "grundrechenarten", "kopfrechnen"],
+    // Jedes Interessengebiet bekommt JEDE Woche einen eigenen Lesetext (bei 2
+    // Einträgen also 2 Lesetext-Arbeitsblätter/Woche, für die 50:50-Aufteilung
+    // mit den 2 Rechen-Arbeitsblättern). Das Wochenbild-Thema rotiert ebenfalls
+    // durch diese Liste.
     interessen: ["FC Bayern München", "Drachen"],
   },
   { id: "kind2", name: "MJ", alter: 12 },
@@ -52,7 +59,7 @@ const BEREICH_PROMPTS = {
     { "id": 1, "typ": "rechnen", "frage": "6 × 7 = ?", "loesung": "42" }
   ]
 }`,
-    anweisung: `Erzeuge 10 bis 12 reine Einmaleins-/Teilen-Aufgaben (Malfolgen und die
+    anweisung: `Erzeuge genau 6 reine Einmaleins-/Teilen-Aufgaben (Malfolgen und die
 dazugehörigen Umkehraufgaben als Teilen), passend zum Alter. Keine Sachaufgaben,
 keine Textaufgaben – nur kurze Rechenaufgaben, die schnell im Kopf oder schriftlich
 gelöst werden können.`,
@@ -64,7 +71,7 @@ gelöst werden können.`,
     { "id": 1, "typ": "rechnen|sachaufgabe|knobelaufgabe", "frage": "<Aufgabentext>", "loesung": "<Lösung als String>" }
   ]
 }`,
-    anweisung: `Erzeuge 6 bis 8 Aufgaben, gemischt aus Addition, Subtraktion, Multiplikation
+    anweisung: `Erzeuge genau 6 Aufgaben, gemischt aus Addition, Subtraktion, Multiplikation
 und Division (auch mit Zehnerübergang bzw. mehrstelligen Zahlen je nach Alter),
 inklusive 1-2 Sachaufgaben und optional einer Knobelaufgabe.`,
   },
@@ -75,7 +82,7 @@ inklusive 1-2 Sachaufgaben und optional einer Knobelaufgabe.`,
     { "id": 1, "typ": "rechnen", "frage": "Verdopple 23. Wie viel ist das?", "loesung": "46" }
   ]
 }`,
-    anweisung: `Erzeuge 8 bis 10 kurze Kopfrechen-Aufgaben, lösbar ohne schriftliches Rechnen:
+    anweisung: `Erzeuge genau 6 kurze Kopfrechen-Aufgaben, lösbar ohne schriftliches Rechnen:
 Verdoppeln/Halbieren, runde Zahlen addieren/subtrahieren, kleine 1x1-Aufgaben,
 Ergänzen zu 100 etc. Keine Sachaufgaben, keine mehrschrittigen Aufgaben.`,
   },
@@ -87,18 +94,26 @@ Ergänzen zu 100 etc. Keine Sachaufgaben, keine mehrschrittigen Aufgaben.`,
     { "id": 1, "typ": "leseverstehen", "frage": "<Verständnisfrage>", "loesung": "<kurze, eindeutige Antwort, ein Wort oder wenige Worte>" }
   ]
 }`,
-    anweisung: `Schreibe einen ORIGINELLEN, altersgerechten Lesetext (150-220 Wörter) zum
+    anweisung: `Schreibe einen ORIGINELLEN, altersgerechten Lesetext (180-260 Wörter) zum
 angegebenen Interessengebiet des Kindes – KEINE Übernahme von urheberrechtlich
 geschütztem Text (keine wörtlichen Zitate aus Büchern/Filmen/Liedern, keine
 geschützten Figurennamen); bei realen Themen (z.B. ein Sportverein) nur allgemein
-bekannte Fakten in eigenen Worten. Danach 5 kurze Verständnisfragen mit eindeutigen,
-knappen Antworten (ein Wort/eine Zahl/ein kurzer Fakt), da die Auswertung exakt
-(ohne Groß-/Kleinschreibung) vergleicht.`,
+bekannte Fakten in eigenen Worten. Danach genau 6 kurze Verständnisfragen mit
+eindeutigen, knappen Antworten (ein Wort/eine Zahl/ein kurzer Fakt), da die
+Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
   },
 };
 
-const BILD_SYSTEM_PROMPT = `Du erstellst ein einfaches, fröhliches Vektor-Bild (SVG) als
-Wochen-Belohnungsbild für ein Kind, das seine Matheaufgaben erledigt hat.
+const BILD_SYSTEM_PROMPT = `Du erstellst ein stimmungsvolles, "cooles" Vektor-Bild (SVG) als
+Wochen-Belohnungsbild für ein 9-jähriges Kind, das seine Matheaufgaben erledigt hat.
+
+Stil: dynamisch und abenteuerlich statt niedlich/kindlich – denk an das Gefühl
+einer Fantasy-Abenteuergeschichte (z.B. Drachenreiter-Szenen): dramatische
+Silhouetten, Dämmerungs-/Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe),
+Gegenlicht, Bewegung/Dynamik in der Pose statt eines statischen, lächelnden
+Cartoon-Charakters. KEINE Übernahme konkreter, urheberrechtlich geschützter
+Figuren-Designs (z.B. keine Nachbildung einer bestimmten Film-/Buch-Figur) –
+nur eine eigenständige, generische Interpretation des Themas/Genres.
 
 Strikte technische Vorgaben:
 - Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt, ohne Markdown-Codeblock.
@@ -109,10 +124,9 @@ Strikte technische Vorgaben:
 - KEINE <text>-Elemente, KEINE <image>/<foreignObject>, KEINE <filter>, KEINE
   externen Referenzen (keine URLs, keine Google Fonts o.ä.) – das Bild muss
   offline und ohne externe Ressourcen in jedem Browser rasterisierbar sein.
-- Das Motiv soll zum angegebenen Interessengebiet passen, kindgerecht/freundlich
-  wirken und in vier Quadranten (oben-links, oben-rechts, unten-links,
-  unten-rechts) jeweils etwas Erkennbares zeigen, da das Bild stückweise als
-  2x2-Puzzle aufgedeckt wird.
+- Das Motiv soll zum angegebenen Interessengebiet passen und in vier Quadranten
+  (oben-links, oben-rechts, unten-links, unten-rechts) jeweils etwas
+  Erkennbares zeigen, da das Bild stückweise als 2x2-Puzzle aufgedeckt wird.
 
 Exaktes Ausgabeformat:
 {
@@ -215,52 +229,74 @@ function updateIndex(kidId, { addFiles = [], aktuellesBild } = {}) {
   console.log(`✓ Index aktualisiert: ${indexPath}`);
 }
 
-// ---------- Kinder MIT Bereichen: 1 Arbeitsblatt pro Bereich + Wochenbild ----------
-async function generateBereicheForKid(kid, weekId) {
-  const newFiles = [];
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // Umlaute/Akzente entfernen
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
-  for (const bereich of kid.bereiche) {
-    const prompt = BEREICH_PROMPTS[bereich];
-    if (!prompt) {
-      console.warn(`⚠ Kein Prompt für Bereich "${bereich}" hinterlegt, überspringe.`);
-      continue;
-    }
+async function generateWorksheet(kid, weekId, bereich, { fileName, interesse } = {}) {
+  const prompt = BEREICH_PROMPTS[bereich];
+  const previous = findPreviousWorksheet(kid.id, weekId, bereich);
 
-    const previous = findPreviousWorksheet(kid.id, weekId, bereich);
-    const interesse = kid.interessen?.[isoWeekNumber(weekId) % kid.interessen.length];
-
-    const userMessage = `Alter: ${kid.alter}. Bereich: ${bereich}. Neue Kalenderwoche: ${weekId}.
-${bereich === "lesen" && interesse ? `Interessengebiet für den Lesetext: ${interesse}.\n` : ""}${
-      previous
-        ? `Das war das letzte Arbeitsblatt in diesem Bereich (Schwierigkeit leicht daran anpassen, nicht 1:1 wiederholen):\n${JSON.stringify(previous)}`
-        : "Dies ist das erste Arbeitsblatt in diesem Bereich, bitte mit relativ einfachen Aufgaben beginnen."
-    }
+  const userMessage = `Alter: ${kid.alter}. Bereich: ${bereich}. Neue Kalenderwoche: ${weekId}.
+${interesse ? `Interessengebiet für den Lesetext: ${interesse}.\n` : ""}${
+    previous
+      ? `Das war das letzte Arbeitsblatt in diesem Bereich (Schwierigkeit leicht daran anpassen, nicht 1:1 wiederholen):\n${JSON.stringify(previous)}`
+      : "Dies ist das erste Arbeitsblatt in diesem Bereich, bitte mit relativ einfachen Aufgaben beginnen."
+  }
 
 Exaktes Ausgabeformat (ohne "kind"/"alter"/"erstellt"/"bereich"/"woche" – die ergänze ich selbst):
 ${prompt.format}
 
 ${prompt.anweisung}`;
 
-    let generated;
-    try {
-      generated = await callClaude(BASE_SYSTEM_PROMPT, userMessage);
-    } catch (err) {
-      console.error(`✗ Bereich "${bereich}" für ${kid.id} fehlgeschlagen:`, err.message);
-      continue;
-    }
+  let generated;
+  try {
+    generated = await callClaude(BASE_SYSTEM_PROMPT, userMessage);
+  } catch (err) {
+    console.error(`✗ Bereich "${bereich}" (${fileName}) für ${kid.id} fehlgeschlagen:`, err.message);
+    return null;
+  }
 
-    const json = {
-      kind: kid.name,
-      alter: kid.alter,
-      erstellt: new Date().toISOString().slice(0, 10),
-      woche: weekId,
-      bereich,
-      ...generated,
-    };
+  const json = {
+    kind: kid.name,
+    alter: kid.alter,
+    erstellt: new Date().toISOString().slice(0, 10),
+    woche: weekId,
+    bereich,
+    ...generated,
+  };
 
-    const fileName = `${weekId}-${bereich}.json`;
-    writeWorksheet(kid.id, fileName, json);
-    newFiles.push(fileName);
+  writeWorksheet(kid.id, fileName, json);
+  return fileName;
+}
+
+// ---------- Kinder MIT rechenBereiche: 2 Rechen- + 1 Lesetext pro Interesse + Wochenbild ----------
+// Ergibt bei 2 Interessen 2 Rechen- + 2 Lese-Arbeitsblätter/Woche (~50:50, siehe README).
+async function generateBereicheForKid(kid, weekId) {
+  const newFiles = [];
+
+  // 2 von 3 Rechen-Bereichen, rotierend pro Woche (damit langfristig alle drankommen).
+  const n = kid.rechenBereiche.length;
+  const skipIndex = isoWeekNumber(weekId) % n;
+  const rechenBereicheDieseWoche = kid.rechenBereiche.filter((_, i) => i !== skipIndex);
+
+  for (const bereich of rechenBereicheDieseWoche) {
+    const fileName = await generateWorksheet(kid, weekId, bereich, { fileName: `${weekId}-${bereich}.json` });
+    if (fileName) newFiles.push(fileName);
+  }
+
+  // 1 Lesetext pro Interesse, jede Woche.
+  for (const interesse of kid.interessen || []) {
+    const fileName = await generateWorksheet(kid, weekId, "lesen", {
+      fileName: `${weekId}-lesen-${slugify(interesse)}.json`,
+      interesse,
+    });
+    if (fileName) newFiles.push(fileName);
   }
 
   // Wochenbild: nur versuchen, wenn mindestens ein Arbeitsblatt erfolgreich war.
@@ -334,7 +370,7 @@ async function main() {
   const weekId = getIsoWeekId();
 
   for (const kid of KIDS) {
-    if (kid.bereiche?.length) {
+    if (kid.rechenBereiche?.length) {
       await generateBereicheForKid(kid, weekId);
     } else {
       await generateSingleForKid(kid, weekId);

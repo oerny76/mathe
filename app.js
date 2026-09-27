@@ -33,7 +33,7 @@ let currentFile = null;
 let currentTasks = [];
 let currentWorksheet = null;
 let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
-let currentWeekMap = {}; // bereich -> file, das zum aktuellen Wochenbild gehört
+let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Wochenbild-Woche, ein Eintrag pro Puzzle-Teil
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 
 // ---------- Bereiche (Themen-Kategorien) ----------
@@ -154,7 +154,7 @@ async function selectKid(kid) {
 // ---------- Wochenbild-Puzzle (Gamification) ----------
 async function loadPuzzle(kid, index, worksheets) {
   currentBild = null;
-  currentWeekMap = {};
+  currentWeekFiles = [];
 
   if (!index.aktuellesBild) {
     els.puzzleSection.hidden = true;
@@ -170,12 +170,13 @@ async function loadPuzzle(kid, index, worksheets) {
     return;
   }
 
-  BEREICH_ORDER.forEach((key) => {
-    const match = worksheets.find((ws) => ws.bereich === key && ws.woche === currentBild.woche);
-    if (match) currentWeekMap[key] = match.file;
-  });
+  // Jedes Arbeitsblatt dieser Woche ist ein Puzzle-Teil – unabhängig davon, wie
+  // sich die Woche auf die Bereiche verteilt (z.B. 2 Lesen + 2 Rechnen).
+  currentWeekFiles = worksheets
+    .filter((ws) => ws.woche === currentBild.woche)
+    .sort((a, b) => a.file.localeCompare(b.file));
 
-  if (Object.keys(currentWeekMap).length === 0) {
+  if (currentWeekFiles.length === 0) {
     els.puzzleSection.hidden = true;
     return;
   }
@@ -189,27 +190,25 @@ async function loadPuzzle(kid, index, worksheets) {
 function renderPuzzleGrid() {
   if (!currentBild) return;
 
-  const keys = BEREICH_ORDER.filter((key) => currentWeekMap[key]);
   els.puzzleGrid.innerHTML = "";
   let doneCount = 0;
 
-  keys.forEach((key) => {
-    const file = currentWeekMap[key];
-    const total = (worksheetCache[file]?.aufgaben || []).length;
-    const progress = loadProgress(currentKid.id, file);
+  currentWeekFiles.forEach((ws) => {
+    const total = (worksheetCache[ws.file]?.aufgaben || []).length;
+    const progress = loadProgress(currentKid.id, ws.file);
     const erledigt = progress ? progress.correctCount === total : false;
     if (erledigt) doneCount++;
 
     const tile = document.createElement("div");
     tile.className = "puzzle-tile" + (erledigt ? " revealed" : "");
     tile.innerHTML = `
-      <span>${BEREICH_ICONS[key] || "❓"}</span>
-      <span class="puzzle-tile-label">${escapeHtml(bereichLabel(key).replace(/^\S+\s/, ""))}</span>
+      <span>${BEREICH_ICONS[ws.bereich] || "❓"}</span>
+      <span class="puzzle-tile-label">${escapeHtml(bereichLabel(ws.bereich).replace(/^\S+\s/, ""))}</span>
     `;
     els.puzzleGrid.appendChild(tile);
   });
 
-  const total = keys.length;
+  const total = currentWeekFiles.length;
   els.puzzleStatus.textContent =
     doneCount === total
       ? "🎉 Alle Teile aufgedeckt – dein Bild ist fertig!"
