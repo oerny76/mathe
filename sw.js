@@ -1,4 +1,4 @@
-const CACHE_NAME = "mathe-pwa-v4";
+const CACHE_NAME = "mathe-pwa-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -47,8 +47,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // App-Shell: cache-first
+  // App-Shell (HTML/JS/CSS/Manifest): immer zuerst versuchen, aus dem Netz zu
+  // holen, damit ein neuer Deploy sofort ankommt (sonst kann ein alter,
+  // gecachter app.js gegen neues HTML laufen und mit einer leeren Seite
+  // abstürzen) – Cache nur als Fallback ohne Netz.
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

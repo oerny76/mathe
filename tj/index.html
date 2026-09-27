@@ -66,6 +66,15 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('../sw.js').catch(console.error);
       });
+      // Läd die Seite einmal neu, sobald ein neuer Service Worker (= neuer
+      // Deploy) die Kontrolle übernimmt – verhindert, dass alter, gecachter
+      // app.js-Code gegen neues HTML läuft und mit einer leeren Seite abstürzt.
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
     }
   </script>
 </body>
