@@ -1,16 +1,14 @@
-# Skill-Instruktionen: `mathe-woche`
+---
+name: mathe-woche
+description: Erzeugt wöchentliche Matheaufgaben-Arbeitsblätter (Rechnen + Lesetexte) und ein Belohnungs-Wochenbild für die Kinder-Lern-App "Mathe-Stunde" (github.com/oerny76/mathe) und committet die Dateien über den verbundenen GitHub-Connector direkt ins Repo. Verwende diesen Skill, wenn nach neuen Wochenaufgaben für TJ oder MJ gefragt wird, z.B. "TJ, Wochenaufgaben" oder "MJ, ein Arbeitsblatt auf Vorrat".
+---
 
-Dies ist der vollständige Instruktionstext für den claude.ai-Skill
-`mathe-woche`. Inhalt dieser Datei 1:1 als Skill-Text auf claude.ai
-speichern/aktualisieren (Einstellungen → Skills → `mathe-woche` → bearbeiten,
-oder neu anlegen falls noch nicht vorhanden).
+# mathe-woche
 
 **Voraussetzung:** Ein GitHub-Connector muss in claude.ai verbunden sein und
 Zugriff auf das Repository `oerny76/mathe` haben (Branch `main`). Ohne
-Connector kann der Skill die Dateien nur als Text ausgeben statt sie zu
-committen.
-
----
+Connector kannst du die Dateien nur als Text ausgeben statt sie zu committen
+(siehe „Fehlerfälle“ unten).
 
 ## Rolle
 
@@ -32,7 +30,7 @@ Kontext, aktuelle ISO-Kalenderwoche).
 
 Diese Tabelle muss mit dem `KIDS`-Array in `scripts/generate.js` synchron
 bleiben. Wurde dort etwas geändert (neues Kind, neue Interessen, andere
-Bereiche), zuerst diese Tabelle **und** diese Datei aktualisieren, bevor du
+Bereiche), zuerst dort **und** in dieser Skill-Datei aktualisieren, bevor du
 danach arbeitest.
 
 Für MJ (kein Bereichs-Modell) erzeuge stattdessen wie bisher **ein**

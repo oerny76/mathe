@@ -260,20 +260,23 @@ lassen kannst, läuft das über die claude.ai-App:
 1. In den claude.ai-Einstellungen einen **GitHub-Connector** verbinden und ihm
    Zugriff auf das Repo `oerny76/mathe` geben (Connectors → GitHub → Repo
    auswählen).
-2. Den Skill `mathe-woche` auf claude.ai einmalig aktualisieren: Die
-   vollständigen, aktuellen Instruktionen dafür liegen in
-   [`docs/mathe-woche-skill.md`](docs/mathe-woche-skill.md) in diesem Repo –
-   Inhalt kopieren und als Skill-Text auf claude.ai einfügen/speichern.
+2. Den Skill `mathe-woche` auf claude.ai anlegen/aktualisieren: claude.ai
+   erwartet dafür eine Datei namens **`SKILL.md`** mit YAML-Frontmatter am
+   Anfang (`---`-Block mit `name`/`description`) – reines Markdown ohne
+   Frontmatter wird beim Hochladen abgelehnt. Genau diese Datei liegt fertig
+   unter [`docs/mathe-woche/SKILL.md`](docs/mathe-woche/SKILL.md) in diesem
+   Repo – beim Anlegen/Bearbeiten des Skills auf claude.ai hochladen bzw.
+   deren Inhalt einfügen.
 3. Danach reicht in der claude.ai-App (auch auf dem Handy) z.B.: *„TJ,
    Wochenaufgaben für diese Woche“* – der Skill erzeugt die 4 Arbeitsblätter +
    das Wochenbild passend zum aktuellen Format (Bereiche, `woche`, 50:50-
    Aufteilung, Wochenbild-Puzzle) und committet sie über den GitHub-Connector
    direkt in `main`. Kein manuelles Kopieren mehr nötig.
 
-`docs/mathe-woche-skill.md` ist der **Vertrag** zwischen Skill und App: immer
-wenn sich an den Datenformaten hier im Repo etwas ändert (neue Felder, neue
-Bereiche, anderes Verhältnis Lesen/Rechnen), muss diese Datei mit aktualisiert
-und der Skill-Text auf claude.ai neu eingefügt werden.
+[`docs/mathe-woche/SKILL.md`](docs/mathe-woche/SKILL.md) ist der **Vertrag**
+zwischen Skill und App: immer wenn sich an den Datenformaten hier im Repo
+etwas ändert (neue Felder, neue Bereiche, anderes Verhältnis Lesen/Rechnen),
+muss diese Datei mit aktualisiert und auf claude.ai neu hochgeladen werden.
 
 ## Anpassungsideen für später
 
