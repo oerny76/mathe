@@ -406,6 +406,68 @@ body {
   display: none;
 }
 
+/* ---------- Eltern-Korrektur ---------- */
+.parent-override {
+  display: none;
+  margin-top: 10px;
+}
+
+.task-card.wrong .parent-override {
+  display: block;
+}
+
+.parent-override-toggle {
+  background: none;
+  border: none;
+  color: var(--chalk-red);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-decoration: underline dotted;
+  cursor: pointer;
+  padding: 4px 0;
+  opacity: 0.85;
+}
+
+.parent-override-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.parent-override-form[hidden] {
+  display: none;
+}
+
+.parent-override-code {
+  width: 70px;
+  font-size: 1rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: var(--chalk-white);
+  color: #1e3a2f;
+  font-family: var(--font-body);
+  letter-spacing: 2px;
+}
+
+.parent-override-confirm {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--chalk-yellow);
+  color: #1e3a2f;
+  cursor: pointer;
+}
+
+.parent-override-error {
+  color: var(--chalk-red);
+  font-size: 0.8rem;
+}
+
 /* ---------- Buttons ---------- */
 .actions {
   display: flex;

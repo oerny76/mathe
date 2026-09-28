@@ -29,6 +29,12 @@ const els = {
   classicPicker: document.getElementById("classic-picker"),
 };
 
+// Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
+// (z.B. wenn die Auto-Prüfung eine korrekte Eingabe fälschlich ablehnt). Zum
+// Ändern hier direkt im Code (in GitHub editierbar) einen neuen vierstelligen
+// Zahlencode eintragen.
+const PARENT_OVERRIDE_CODE = "1234";
+
 let currentKid = null;
 let currentFile = null;
 let currentTasks = [];
@@ -383,7 +389,8 @@ function renderTasks() {
     // ohne extra "Fertig"-Klick und ohne die Eingabe zu sperren.
     let initialState = "";
     if (savedAnswer !== "") {
-      initialState = normalizeAnswer(savedAnswer) === normalizeAnswer(task.loesung) ? " correct" : " wrong";
+      const isCorrect = normalizeAnswer(savedAnswer) === normalizeAnswer(task.loesung) || !!saved?.overrides?.[task.id];
+      initialState = isCorrect ? " correct" : " wrong";
     }
     card.className = "task-card" + initialState;
 
@@ -408,6 +415,14 @@ function renderTasks() {
         rows="3"
         hidden
       ></textarea>
+      <div class="parent-override">
+        <button type="button" class="parent-override-toggle" data-task-id="${task.id}">👪 Eltern: als richtig werten</button>
+        <div class="parent-override-form" hidden>
+          <input type="text" inputmode="numeric" maxlength="4" placeholder="Code" class="parent-override-code" />
+          <button type="button" class="parent-override-confirm">OK</button>
+          <span class="parent-override-error" hidden>Falscher Code</span>
+        </div>
+      </div>
     `;
     els.taskList.appendChild(card);
   });
@@ -423,6 +438,24 @@ function renderTasks() {
         pad.setAttribute("hidden", "");
         btn.textContent = "✏️ Rechenfeld";
       }
+    });
+  });
+
+  els.taskList.querySelectorAll(".parent-override-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const form = btn.nextElementSibling;
+      form.hidden = !form.hidden;
+      if (!form.hidden) form.querySelector(".parent-override-code").focus();
+    });
+  });
+
+  els.taskList.querySelectorAll(".parent-override-confirm").forEach((btn) => {
+    btn.addEventListener("click", () => confirmParentOverride(btn));
+  });
+
+  els.taskList.querySelectorAll(".parent-override-code").forEach((input) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") confirmParentOverride(input.closest(".parent-override-form").querySelector(".parent-override-confirm"));
     });
   });
 
@@ -442,6 +475,12 @@ function normalizeAnswer(value) {
 }
 
 function checkAnswers() {
+  // Frühere Eltern-Korrekturen (siehe applyParentOverride) bleiben auch über
+  // ein "Nochmal versuchen" hinweg als richtig gewertet, solange die Aufgabe
+  // nicht neu beantwortet wird.
+  const previous = loadProgress(currentKid.id, currentFile);
+  const overrides = { ...(previous?.overrides || {}) };
+
   let correctCount = 0;
   const answers = {};
 
@@ -454,7 +493,7 @@ function checkAnswers() {
     answers[task.id] = input.value;
 
     card.classList.remove("correct", "wrong");
-    if (given !== "" && given === expected) {
+    if ((given !== "" && given === expected) || overrides[task.id]) {
       card.classList.add("correct");
       correctCount++;
     } else {
@@ -465,6 +504,7 @@ function checkAnswers() {
 
   const progress = {
     answers,
+    overrides,
     correctCount,
     total: currentTasks.length,
     completedAt: new Date().toISOString(),
@@ -476,6 +516,55 @@ function checkAnswers() {
   els.checkBtn.hidden = true;
   els.retryBtn.hidden = false;
 
+  if (currentBild) renderPuzzleGrid();
+}
+
+// ---------- Eltern-Korrektur einzelner Antworten ----------
+// Fällt eine eigentlich richtige Antwort z.B. durch einen Eingabe-/Vergleichsfehler
+// als "falsch" auf, können Eltern direkt an dieser Aufgabe mit dem festen Code
+// (siehe PARENT_OVERRIDE_CODE oben) manuell auf "richtig" umstellen.
+function confirmParentOverride(confirmBtn) {
+  const form = confirmBtn.closest(".parent-override-form");
+  const codeInput = form.querySelector(".parent-override-code");
+  const errorEl = form.querySelector(".parent-override-error");
+  const card = confirmBtn.closest(".task-card");
+  const taskId = card.dataset.taskId;
+
+  if (codeInput.value.trim() !== PARENT_OVERRIDE_CODE) {
+    errorEl.hidden = false;
+    codeInput.value = "";
+    codeInput.focus();
+    return;
+  }
+
+  errorEl.hidden = true;
+  form.hidden = true;
+  codeInput.value = "";
+  card.classList.remove("wrong");
+  card.classList.add("correct");
+  applyParentOverride(taskId);
+}
+
+function applyParentOverride(taskId) {
+  const progress = loadProgress(currentKid.id, currentFile) || {
+    answers: {},
+    correctCount: 0,
+    total: currentTasks.length,
+  };
+  progress.overrides = progress.overrides || {};
+  if (progress.overrides[taskId]) return; // bereits als richtig gewertet
+
+  progress.overrides[taskId] = true;
+  progress.correctCount = (progress.correctCount || 0) + 1;
+  progress.total = currentTasks.length;
+  progress.completedAt = new Date().toISOString();
+
+  saveProgress(currentKid.id, currentFile, progress);
+  syncAttempt(currentKid.id, currentFile, currentWorksheet, progress);
+
+  if (!els.resultBanner.hidden) {
+    showResult(progress.correctCount, progress.total);
+  }
   if (currentBild) renderPuzzleGrid();
 }
 
