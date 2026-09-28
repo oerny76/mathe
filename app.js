@@ -1,9 +1,5 @@
-// ---------- Konfiguration ----------
-// Hier die beiden Kinder eintragen. "id" muss zum Ordnernamen unter /data passen.
-const KIDS = [
-  { id: "kind1", name: "Tim", color: "var(--chalk-pink)" },
-  { id: "kind2", name: "Marlene", color: "var(--chalk-blue)" },
-];
+// KIDS, Bereiche und der Supabase-Client kommen aus shared.js (vor diesem
+// Skript geladen).
 
 // Jede Kind-Seite (/tj/, /mj/) lädt dieses Skript per relativem Pfad – die
 // Basis-URL (Repo-Root) wird daraus abgeleitet, damit "data/..."-Fetches
@@ -41,27 +37,6 @@ let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
 let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Wochenbild-Woche, ein Eintrag pro Puzzle-Teil
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 
-// ---------- Bereiche (Themen-Kategorien) ----------
-const BEREICH_ORDER = ["einmaleins", "grundrechenarten", "kopfrechnen", "geometrie", "lesen"];
-const BEREICH_LABELS = {
-  einmaleins: "✖️ Einmaleins",
-  grundrechenarten: "➕➖ Grundrechenarten",
-  kopfrechnen: "🧠 Kopfrechnen",
-  geometrie: "📐 Geometrie",
-  lesen: "📖 Lesen",
-};
-const BEREICH_ICONS = {
-  einmaleins: "✖️",
-  grundrechenarten: "➕➖",
-  kopfrechnen: "🧠",
-  geometrie: "📐",
-  lesen: "📖",
-};
-
-function bereichLabel(bereich) {
-  return BEREICH_LABELS[bereich] || bereich;
-}
-
 // Seitenverhältnis eines Wochenbilds aus seinem SVG-viewBox ableiten (z.B. 3:4
 // fürs iPad-Hintergrundbild oder A4-Hochformat fürs Ausmalbild), statt es
 // hart zu verdrahten – Fallback 3:4, falls kein viewBox gefunden wird.
@@ -96,6 +71,28 @@ function loadProgress(kidId, file) {
   } catch (e) {
     return null;
   }
+}
+
+// Zusätzlich zu localStorage (offline, sofort verfügbar) auch nach Supabase
+// schreiben, damit Eltern den Fortschritt geräteübergreifend sehen können.
+// Fire-and-forget: schlägt der Sync fehl (z.B. kein Netz), bleibt die App für
+// das Kind trotzdem voll nutzbar, es fehlt nur der Eltern-Seite dieser Versuch.
+function syncAttempt(correctCount, total, answers) {
+  if (!supabaseClient) return;
+  supabaseClient
+    .from("attempts")
+    .insert({
+      kid_id: currentKid.id,
+      worksheet_file: currentFile,
+      bereich: currentWorksheet?.bereich || null,
+      woche: currentWorksheet?.woche || null,
+      correct_count: correctCount,
+      total,
+      answers,
+    })
+    .then(({ error }) => {
+      if (error) console.warn("Konnte Ergebnis nicht synchronisieren:", error);
+    });
 }
 
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
@@ -451,6 +448,7 @@ function checkAnswers() {
     total: currentTasks.length,
     completedAt: new Date().toISOString(),
   });
+  syncAttempt(correctCount, currentTasks.length, answers);
 
   showResult(correctCount, currentTasks.length);
   els.checkBtn.hidden = true;

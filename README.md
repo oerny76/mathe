@@ -333,6 +333,39 @@ zwischen Skill und App: immer wenn sich an den Datenformaten hier im Repo
 etwas ändert (neue Felder, neue Bereiche, anderes Verhältnis Lesen/Rechnen),
 muss diese Datei mit aktualisiert und auf claude.ai neu hochgeladen werden.
 
+## Eltern-Übersicht & geräteübergreifender Fortschritt
+
+Der Fortschritt eines Kindes liegt weiterhin primär in `localStorage` (offline,
+sofort verfügbar, keine Abhängigkeit von Internet). Zusätzlich schreibt die
+App bei jedem Klick auf „Fertig – prüfen!“ denselben Versuch (Kind, Datei,
+Bereich, Woche, Punktestand, Zeitpunkt) in eine Supabase-Postgres-Tabelle
+(`attempts`) – so lässt sich der Stand geräteübergreifend einsehen, ohne
+localStorage von Gerät zu Gerät synchronisieren zu müssen. Schlägt der
+Schreibvorgang fehl (z.B. kein Netz), bleibt die App fürs Kind trotzdem voll
+nutzbar, es fehlt nur dieser eine Versuch in der Eltern-Ansicht.
+
+`shared.js` (von `app.js` und `eltern/app.js` per klassischem `<script>`-Tag
+eingebunden, kein Build-Schritt) enthält `KIDS`, die Bereichs-Konstanten sowie
+den Supabase-Client. Projekt: `oerny76's Project` (Region `eu-central-1`,
+Frankfurt), Projekt-ID `gkqpgnwmmwvdtpdcqwye`. Der dort verwendete
+`publishable`-Key ist bewusst öffentlich im Client-Code – abgesichert wird
+über Row-Level-Security-Policies auf der `attempts`-Tabelle (nur `insert` +
+`select` für `anon`, kein `update`/`delete`, `kid_id` und Scores per
+Check-Constraint validiert), nicht über Geheimhaltung des Keys.
+
+**`/eltern/`** ist eine eigene, kind-freie Unterseite (verlinkt unten auf der
+Root-Seite): pro Kind eine Karte mit Wochenfortschritt und
+Durchschnitts-Erfolgsquote, darunter alle Arbeitsblätter gruppiert nach
+Bereich mit Status (⚪ offen / 🔶 in Arbeit / ✅ erledigt), aktueller
+Erfolgsquote, Anzahl der Versuche und Zeitpunkt des letzten Versuchs. Ein Klick
+auf eine Zeile klappt die volle Versuchs-Historie auf (z.B. „2/6 → 4/6 → 6/6“),
+um sichtbar zu machen, wann und wie oft ein Kind ein Arbeitsblatt überarbeitet
+hat.
+
+Fortschritt, der vor Einführung dieser Tabelle bereits nur in `localStorage`
+eines Geräts stand, taucht in der Eltern-Ansicht nicht rückwirkend auf – nur
+neue Versuche ab jetzt werden synchronisiert.
+
 ## Anpassungsideen für später
 
 - **Alte Arbeitsblätter aufräumen:** erledigte, alte Dateien aus `index.json`

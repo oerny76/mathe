@@ -450,6 +450,105 @@ body {
   border-color: var(--chalk-red);
 }
 
+/* ---------- Eltern-Übersicht ---------- */
+.eltern-kids {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 16px 20px;
+}
+
+.eltern-kid-card {
+  background: var(--board-bg-2);
+  border: 2px solid var(--kid-color, var(--line));
+  border-radius: var(--radius);
+  padding: 16px 18px 20px;
+}
+
+.eltern-kid-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.eltern-kid-name {
+  font-family: var(--font-display);
+  color: var(--kid-color, var(--chalk-white));
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.eltern-kid-summary {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.eltern-worksheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.eltern-row-main {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  align-items: center;
+  gap: 8px 12px;
+  text-align: left;
+  background: rgba(245, 245, 240, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.eltern-row-main:disabled {
+  cursor: default;
+}
+
+.eltern-row-main.done { border-color: var(--chalk-green); }
+.eltern-row-main.partial { border-color: var(--chalk-yellow); }
+.eltern-row-main.open { opacity: 0.7; }
+
+.eltern-row-title {
+  font-size: 0.95rem;
+}
+
+.eltern-row-status,
+.eltern-row-quote,
+.eltern-row-attempts,
+.eltern-row-when {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.eltern-row-history {
+  margin: 4px 4px 0;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  opacity: 0.85;
+  border-left: 2px dashed var(--chalk-yellow);
+}
+
+.eltern-back-link {
+  color: var(--chalk-white);
+  opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+  .eltern-row-main {
+    grid-template-columns: 1fr auto;
+  }
+}
+
 /* ---------- Footer ---------- */
 .board-footer {
   text-align: center;
