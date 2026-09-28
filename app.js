@@ -77,22 +77,42 @@ function loadProgress(kidId, file) {
 // schreiben, damit Eltern den Fortschritt geräteübergreifend sehen können.
 // Fire-and-forget: schlägt der Sync fehl (z.B. kein Netz), bleibt die App für
 // das Kind trotzdem voll nutzbar, es fehlt nur der Eltern-Seite dieser Versuch.
-function syncAttempt(correctCount, total, answers) {
+// Nur bei Erfolg wird "synced" im localStorage-Eintrag gesetzt – das macht
+// backfillUnsyncedProgress() unten sicher wiederholbar (kein doppelter Upload).
+function syncAttempt(kidId, file, worksheetMeta, progress) {
   if (!supabaseClient) return;
   supabaseClient
     .from("attempts")
     .insert({
-      kid_id: currentKid.id,
-      worksheet_file: currentFile,
-      bereich: currentWorksheet?.bereich || null,
-      woche: currentWorksheet?.woche || null,
-      correct_count: correctCount,
-      total,
-      answers,
+      kid_id: kidId,
+      worksheet_file: file,
+      bereich: worksheetMeta?.bereich || null,
+      woche: worksheetMeta?.woche || null,
+      correct_count: progress.correctCount,
+      total: progress.total,
+      answers: progress.answers,
+      completed_at: progress.completedAt || new Date().toISOString(),
     })
     .then(({ error }) => {
-      if (error) console.warn("Konnte Ergebnis nicht synchronisieren:", error);
+      if (error) {
+        console.warn("Konnte Ergebnis nicht synchronisieren:", error);
+        return;
+      }
+      saveProgress(kidId, file, { ...progress, synced: true });
     });
+}
+
+// Fortschritt nachträglich hochladen, der lokal schon fertig ist, aber noch
+// nie erfolgreich synchronisiert wurde – z.B. weil ein Kind heute schon
+// Aufgaben gelöst hat, bevor dieses Update (oder eine Internetverbindung)
+// auf dem Tablet verfügbar war. Läuft bei jedem Öffnen der Kind-Seite mit
+// und ist dank des "synced"-Flags idempotent, also gefahrlos wiederholbar.
+function backfillUnsyncedProgress(kidId, worksheets) {
+  worksheets.forEach((ws) => {
+    const progress = loadProgress(kidId, ws.file);
+    if (!progress || progress.synced || !progress.total || progress.correctCount == null) return;
+    syncAttempt(kidId, ws.file, { bereich: ws.bereich, woche: ws.woche }, progress);
+  });
 }
 
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
@@ -142,6 +162,7 @@ async function selectKid(kid) {
     );
 
     const valid = worksheets.filter(Boolean).sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
+    backfillUnsyncedProgress(kid.id, valid);
     await setupPickerView(kid, index, valid);
   } catch (err) {
     els.pickerHint.textContent = "Für dich sind noch keine Aufgaben vorbereitet. Frag einen Erwachsenen! 🙈";
@@ -442,13 +463,14 @@ function checkAnswers() {
     input.disabled = true;
   });
 
-  saveProgress(currentKid.id, currentFile, {
+  const progress = {
     answers,
     correctCount,
     total: currentTasks.length,
     completedAt: new Date().toISOString(),
-  });
-  syncAttempt(correctCount, currentTasks.length, answers);
+  };
+  saveProgress(currentKid.id, currentFile, progress);
+  syncAttempt(currentKid.id, currentFile, currentWorksheet, progress);
 
   showResult(correctCount, currentTasks.length);
   els.checkBtn.hidden = true;
