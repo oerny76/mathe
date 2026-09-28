@@ -33,7 +33,7 @@ const els = {
 // (z.B. wenn die Auto-Prüfung eine korrekte Eingabe fälschlich ablehnt). Zum
 // Ändern hier direkt im Code (in GitHub editierbar) einen neuen vierstelligen
 // Zahlencode eintragen.
-const PARENT_OVERRIDE_CODE = "1234";
+const PARENT_OVERRIDE_CODE = "4711";
 
 let currentKid = null;
 let currentFile = null;
