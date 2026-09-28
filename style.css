@@ -513,6 +513,42 @@ body {
 }
 
 /* ---------- Eltern-Übersicht ---------- */
+.eltern-week-toggle {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 4px;
+  background: rgba(245, 245, 240, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.eltern-week-btn {
+  background: none;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--chalk-white);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.eltern-week-btn.is-active {
+  background: var(--chalk-yellow);
+  color: var(--board-bg);
+  opacity: 1;
+  font-weight: 600;
+}
+
+.eltern-week-heading {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--chalk-yellow);
+  margin: 14px 0 2px;
+}
+
 .eltern-kids {
   display: flex;
   flex-direction: column;
