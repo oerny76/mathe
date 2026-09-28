@@ -5,7 +5,11 @@ const APP_BASE = new URL("..", document.currentScript.src);
 const els = {
   summary: document.getElementById("summary"),
   kidsContainer: document.getElementById("kids"),
+  weekButtons: document.querySelectorAll(".eltern-week-btn"),
 };
+
+let viewMode = "current"; // "current" | "history"
+let kidsData = []; // { kid, worksheets, attemptsByFile }
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -23,6 +27,22 @@ function isoWeekString(date) {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+}
+
+// Ermittelt die Woche eines Arbeitsblatts: nutzt das "woche"-Feld, sonst das
+// Datum am Anfang des Dateinamens (z.B. "2026-09-27-einmaleins-blitz.json"),
+// damit auch ältere, nicht wochen-getaggte Blätter einsortiert werden können.
+function effectiveWoche(ws) {
+  if (ws.woche) return ws.woche;
+  const match = ws.file.match(/^(\d{4}-\d{2}-\d{2})-/);
+  if (match) return isoWeekString(new Date(match[1]));
+  return null;
+}
+
+function weekLabel(woche) {
+  const match = woche.match(/^(\d{4})-W(\d{2})$/);
+  if (!match) return woche;
+  return `KW ${match[2]} · ${match[1]}`;
 }
 
 function formatWhen(iso) {
@@ -141,13 +161,40 @@ function renderWorksheetRow(ws, history) {
   return row;
 }
 
-function renderKidCard(kid, worksheets, attemptsByFile) {
+// Rendert eine Liste von Arbeitsblättern gruppiert nach Bereich in "container".
+function renderBereichGroups(container, worksheets, attemptsByFile) {
+  const groups = new Map();
+  worksheets.forEach((ws) => {
+    const key = ws.bereich || "sonstiges";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(ws);
+  });
+
+  const orderedKeys = [
+    ...BEREICH_ORDER.filter((key) => groups.has(key)),
+    ...[...groups.keys()].filter((key) => !BEREICH_ORDER.includes(key)).sort(),
+  ];
+
+  orderedKeys.forEach((key) => {
+    const heading = document.createElement("h3");
+    heading.className = "bereich-heading";
+    heading.textContent = key === "sonstiges" ? "Weitere Aufgaben" : bereichLabel(key);
+    container.appendChild(heading);
+
+    const list = document.createElement("div");
+    list.className = "eltern-worksheet-list";
+    groups.get(key).forEach((ws) => list.appendChild(renderWorksheetRow(ws, attemptsByFile.get(ws.file) || [])));
+    container.appendChild(list);
+  });
+}
+
+function renderKidCard(kid, worksheets, attemptsByFile, mode) {
   const card = document.createElement("section");
   card.className = "eltern-kid-card";
   card.style.setProperty("--kid-color", kid.color);
 
   const currentWeek = isoWeekString(new Date());
-  const weekWorksheets = worksheets.filter((ws) => ws.woche === currentWeek);
+  const weekWorksheets = worksheets.filter((ws) => effectiveWoche(ws) === currentWeek);
   const weekDone = weekWorksheets.filter((ws) => {
     const latest = (attemptsByFile.get(ws.file) || []).at(-1);
     return latest && latest.correct_count === latest.total;
@@ -183,31 +230,59 @@ function renderKidCard(kid, worksheets, attemptsByFile) {
     return card;
   }
 
-  const groups = new Map();
-  worksheets.forEach((ws) => {
-    const key = ws.bereich || "sonstiges";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(ws);
-  });
+  if (mode === "current") {
+    if (weekWorksheets.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "subtitle";
+      empty.textContent = "Für die aktuelle Woche sind noch keine Arbeitsblätter hinterlegt.";
+      card.appendChild(empty);
+      return card;
+    }
+    renderBereichGroups(card, weekWorksheets, attemptsByFile);
+    return card;
+  }
 
-  const orderedKeys = [
-    ...BEREICH_ORDER.filter((key) => groups.has(key)),
-    ...[...groups.keys()].filter((key) => !BEREICH_ORDER.includes(key)).sort(),
-  ];
+  // mode === "history": alle Wochen außer der aktuellen, neueste zuerst.
+  const pastWeeks = new Map();
+  worksheets
+    .filter((ws) => effectiveWoche(ws) !== currentWeek)
+    .forEach((ws) => {
+      const key = effectiveWoche(ws) || "unbekannt";
+      if (!pastWeeks.has(key)) pastWeeks.set(key, []);
+      pastWeeks.get(key).push(ws);
+    });
 
-  orderedKeys.forEach((key) => {
+  if (pastWeeks.size === 0) {
+    const empty = document.createElement("p");
+    empty.className = "subtitle";
+    empty.textContent = "Keine Arbeitsblätter aus früheren Wochen vorhanden.";
+    card.appendChild(empty);
+    return card;
+  }
+
+  const orderedWeeks = [...pastWeeks.keys()].sort().reverse();
+  orderedWeeks.forEach((week) => {
     const heading = document.createElement("h3");
-    heading.className = "bereich-heading";
-    heading.textContent = key === "sonstiges" ? "Weitere Aufgaben" : bereichLabel(key);
+    heading.className = "eltern-week-heading";
+    heading.textContent = week === "unbekannt" ? "Ohne Woche" : weekLabel(week);
     card.appendChild(heading);
-
-    const list = document.createElement("div");
-    list.className = "eltern-worksheet-list";
-    groups.get(key).forEach((ws) => list.appendChild(renderWorksheetRow(ws, attemptsByFile.get(ws.file) || [])));
-    card.appendChild(list);
+    renderBereichGroups(card, pastWeeks.get(week), attemptsByFile);
   });
 
   return card;
+}
+
+function renderAll() {
+  els.kidsContainer.innerHTML = "";
+  kidsData.forEach(({ kid, worksheets, attemptsByFile }) => {
+    els.kidsContainer.appendChild(renderKidCard(kid, worksheets, attemptsByFile, viewMode));
+  });
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  els.weekButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.mode === mode));
+  renderAll();
 }
 
 async function init() {
@@ -219,11 +294,16 @@ async function init() {
   els.summary.textContent = "Lädt …";
   els.kidsContainer.innerHTML = "";
 
+  els.weekButtons.forEach((btn) => {
+    btn.addEventListener("click", () => setViewMode(btn.dataset.mode));
+  });
+
   for (const kid of KIDS) {
     const [worksheets, attempts] = await Promise.all([loadKidWorksheets(kid), loadAttempts(kid)]);
-    els.kidsContainer.appendChild(renderKidCard(kid, worksheets, groupByFile(attempts)));
+    kidsData.push({ kid, worksheets, attemptsByFile: groupByFile(attempts) });
   }
 
+  renderAll();
   els.summary.textContent = "";
 }
 
