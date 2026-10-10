@@ -27,6 +27,9 @@ const els = {
   puzzleCanvas: document.getElementById("puzzle-canvas"),
   backlogToggle: document.getElementById("backlog-toggle"),
   classicPicker: document.getElementById("classic-picker"),
+  lueckenToggle: document.getElementById("luecken-toggle"),
+  lueckenPanel: document.getElementById("luecken-panel"),
+  lueckenList: document.getElementById("luecken-list"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -42,6 +45,7 @@ let currentWorksheet = null;
 let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
 let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Wochenbild-Woche, ein Eintrag pro Puzzle-Teil
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
+let lueckenByFile = new Map(); // file -> {bereich, correct_count, total}, für die "Wo stehe ich?"-Übersicht
 
 // Seitenverhältnis eines Wochenbilds aus seinem SVG-viewBox ableiten (z.B. 3:4
 // fürs iPad-Hintergrundbild oder A4-Hochformat fürs Ausmalbild), statt es
@@ -121,9 +125,94 @@ function backfillUnsyncedProgress(kidId, worksheets) {
   });
 }
 
+// ---------- "Wo stehe ich?": Erfolgsquote pro Bereich (Lücken-Übersicht) ----------
+// Nutzt dieselbe Supabase-Tabelle wie die Eltern-Übersicht, aber aggregiert nach
+// Bereich statt nach Arbeitsblatt, damit das Kind sieht, wo es schon stark ist
+// und wo sich Üben lohnt – unabhängig davon, ob das jeweilige Arbeitsblatt noch
+// in der aktuellen Wochenauswahl steht oder längst aus index.json verschwunden ist.
+async function loadAttempts(kid) {
+  if (!supabaseClient) return [];
+  const { data, error } = await supabaseClient
+    .from("attempts")
+    .select("worksheet_file, bereich, correct_count, total, completed_at")
+    .eq("kid_id", kid.id)
+    .order("completed_at", { ascending: true });
+
+  if (error) {
+    console.warn("Konnte Lücken-Übersicht nicht laden:", error);
+    return [];
+  }
+  return data || [];
+}
+
+function computeBereichStats(latestByFile) {
+  const sums = new Map();
+  latestByFile.forEach((entry) => {
+    if (!entry.bereich || !entry.total) return;
+    const s = sums.get(entry.bereich) || { correct: 0, total: 0 };
+    s.correct += entry.correct_count;
+    s.total += entry.total;
+    sums.set(entry.bereich, s);
+  });
+
+  const orderedKeys = [
+    ...BEREICH_ORDER.filter((key) => sums.has(key)),
+    ...[...sums.keys()].filter((key) => !BEREICH_ORDER.includes(key)).sort(),
+  ];
+
+  return orderedKeys.map((key) => {
+    const { correct, total } = sums.get(key);
+    return { bereich: key, correct, total, pct: Math.round((correct / total) * 100) };
+  });
+}
+
+function lueckenLevel(pct) {
+  if (pct >= 85) return { level: "strong", emoji: "💪", text: "Stark!" };
+  if (pct >= 60) return { level: "mid", emoji: "🙂", text: "Auf gutem Weg" };
+  return { level: "weak", emoji: "🌱", text: "Hier üben wir noch" };
+}
+
+function renderLueckenPanel(stats) {
+  els.lueckenList.innerHTML = "";
+
+  // Schwächster Bereich zuerst, damit das Kind sofort sieht, wo Üben sich lohnt.
+  [...stats]
+    .sort((a, b) => a.pct - b.pct)
+    .forEach((s) => {
+      const tag = lueckenLevel(s.pct);
+      const row = document.createElement("div");
+      row.className = "luecken-row";
+      row.innerHTML = `
+        <div class="luecken-row-head">
+          <span class="luecken-row-label">${BEREICH_ICONS[s.bereich] || "❓"} ${escapeHtml(
+            bereichLabel(s.bereich).replace(/^\S+\s/, "")
+          )}</span>
+          <span class="luecken-row-tag">${tag.emoji} ${tag.text}</span>
+        </div>
+        <div class="luecken-bar"><div class="luecken-bar-fill ${tag.level}" style="width: ${s.pct}%"></div></div>
+      `;
+      els.lueckenList.appendChild(row);
+    });
+}
+
+function updateLueckenPanel() {
+  const stats = computeBereichStats(lueckenByFile);
+  renderLueckenPanel(stats);
+  els.lueckenToggle.hidden = stats.length === 0;
+}
+
+async function initLueckenPanel(kid) {
+  const attempts = await loadAttempts(kid);
+  attempts.forEach((a) => {
+    lueckenByFile.set(a.worksheet_file, { bereich: a.bereich, correct_count: a.correct_count, total: a.total });
+  });
+  updateLueckenPanel();
+}
+
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
 async function selectKid(kid) {
   currentKid = kid;
+  initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -511,6 +600,12 @@ function checkAnswers() {
   };
   saveProgress(currentKid.id, currentFile, progress);
   syncAttempt(currentKid.id, currentFile, currentWorksheet, progress);
+  lueckenByFile.set(currentFile, {
+    bereich: currentWorksheet?.bereich || null,
+    correct_count: correctCount,
+    total: currentTasks.length,
+  });
+  updateLueckenPanel();
 
   showResult(correctCount, currentTasks.length);
   els.checkBtn.hidden = true;
@@ -561,6 +656,12 @@ function applyParentOverride(taskId) {
 
   saveProgress(currentKid.id, currentFile, progress);
   syncAttempt(currentKid.id, currentFile, currentWorksheet, progress);
+  lueckenByFile.set(currentFile, {
+    bereich: currentWorksheet?.bereich || null,
+    correct_count: progress.correctCount,
+    total: progress.total,
+  });
+  updateLueckenPanel();
 
   if (!els.resultBanner.hidden) {
     showResult(progress.correctCount, progress.total);
@@ -595,6 +696,11 @@ els.backlogToggle.addEventListener("click", () => {
   const nowHidden = !els.classicPicker.hidden;
   els.classicPicker.hidden = nowHidden;
   els.backlogToggle.textContent = nowHidden ? "📚 Weitere Übungen" : "🧩 Übungen ausblenden";
+});
+els.lueckenToggle.addEventListener("click", () => {
+  const nowHidden = !els.lueckenPanel.hidden;
+  els.lueckenPanel.hidden = nowHidden;
+  els.lueckenToggle.textContent = nowHidden ? "📊 Wo stehe ich?" : "🧩 Ausblenden";
 });
 
 // ---------- Start ----------
