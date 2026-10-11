@@ -483,13 +483,19 @@ function renderTasks() {
     }
     card.className = "task-card" + initialState;
 
+    // Nur bei rein numerischen Lösungen das Ziffernfeld erzwingen (z.B. "27"
+    // oder "-3,5") – bei Text-Antworten (Leseverständnis, aber auch
+    // Knobelaufgaben wie "spitz"/"stumpf") sonst blockiert das iPad die
+    // Buchstabentastatur komplett.
+    const isNumericAnswer = /^-?\d+([.,]\d+)?$/.test(String(task.loesung).trim());
+
     card.innerHTML = `
       <span class="task-number">Aufgabe ${index + 1} von ${currentTasks.length}</span>
       <p class="task-question">${escapeHtml(task.frage)}</p>
       <div class="task-input-row">
         <input
           type="text"
-          inputmode="decimal"
+          inputmode="${isNumericAnswer ? "decimal" : "text"}"
           autocomplete="off"
           placeholder="Deine Antwort"
           value="${escapeHtml(String(savedAnswer))}"
