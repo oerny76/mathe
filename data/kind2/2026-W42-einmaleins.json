@@ -1,0 +1,16 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-11",
+  "woche": "2026-W42",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis: Runde 3 ✖️",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "17 × 17 = ?", "loesung": "289" },
+    { "id": 2, "typ": "rechnen", "frage": "24 × 3 = ?", "loesung": "72" },
+    { "id": 3, "typ": "rechnen", "frage": "240 : 16 = ?", "loesung": "15" },
+    { "id": 4, "typ": "rechnen", "frage": "13 × 19 = ?", "loesung": "247" },
+    { "id": 5, "typ": "rechnen", "frage": "18 × 18 = ?", "loesung": "324" },
+    { "id": 6, "typ": "rechnen", "frage": "375 : 25 = ?", "loesung": "15" }
+  ]
+}

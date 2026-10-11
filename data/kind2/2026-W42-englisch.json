@@ -1,0 +1,18 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-11",
+  "woche": "2026-W42",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "The Mystery of the Blue Cap",
+  "text": "Mia and Leo's new detective club got its first case. A boy named Sam came to them at school. His digital watch was missing from the locker room after PE class.\n\nMia and Leo asked Sam some questions. Who was near his locker? Sam said only his friend Ben was there, and Ben left early because he felt sick.\n\nThe detectives went to the locker room. Under a bench, they found a small blue cap. It was not Sam's cap. They remembered that Ben always wore a blue cap.\n\nThey visited Ben at home. Ben looked surprised and then worried. He said he picked up the watch by accident with his own things. He wanted to give it back but felt too embarrassed to say anything.\n\nBen gave the watch back to Sam and said sorry. Sam forgave him right away. Mia and Leo were happy: case number two, solved!",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "What is missing in this story?", "loesung": "a watch" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Who came to Mia and Leo for help?", "loesung": "Sam" },
+    { "id": 3, "typ": "leseverstehen", "frage": "What did the detectives find under a bench?", "loesung": "a blue cap" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Whose cap was it?", "loesung": "Ben's" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Why did Ben take the watch?", "loesung": "by accident" },
+    { "id": 6, "typ": "leseverstehen", "frage": "What did Ben say to Sam?", "loesung": "sorry" }
+  ]
+}
