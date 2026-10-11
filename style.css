@@ -631,6 +631,14 @@ body {
   margin-bottom: 6px;
 }
 
+/* .luecken-panel kommt aus der Kind-App (gleiche Klasse, gleicher Look),
+   hier aber ohne eigene Seitenränder/Hintergrund, da die Karte das schon
+   mitbringt – sonst doppelte Einrückung und kein Kontrast zum Kartenhintergrund. */
+.eltern-kid-card .luecken-panel {
+  margin: 10px 0 14px;
+  background: rgba(245, 245, 240, 0.05);
+}
+
 .eltern-kid-name {
   font-family: var(--font-display);
   color: var(--kid-color, var(--chalk-white));
