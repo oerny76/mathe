@@ -12,8 +12,9 @@
 // bekommen alle rechenBereiche + einen rotierend verdoppelten Bereich, ganz ohne
 // Lesetext (älteres Verhalten, aktuell von keinem Kind mehr genutzt). Dazu ein
 // wöchentliches Puzzle-Belohnungsbild (siehe README, Abschnitt
-// "Wochenbild-Puzzle"), dessen Stil über "bildStil" gewählt wird ("abenteuer" =
-// Standard, buntes Wallpaper; "ausmalbild" = druckbare A4-Ausmalseite). Kinder
+// "Wochenbild-Puzzle"), dessen Stil über "bildStil" gewählt wird ("ausmalbild"
+// = druckbare A4-Ausmalseite, aktuell von beiden Kindern genutzt;
+// "abenteuer" = Fallback-Default, buntes Wallpaper, aktuell unbenutzt). Kinder
 // ohne "rechenBereiche" bekommen wie bisher ein einzelnes Wochenblatt.
 //
 // Wird manuell aufgerufen (kein automatischer GitHub-Workflow):
@@ -37,6 +38,7 @@ const KIDS = [
     // mit den 2 Rechen-Arbeitsblättern). Das Wochenbild-Thema rotiert ebenfalls
     // durch diese Liste.
     interessen: ["FC Bayern München", "Drachen"],
+    bildStil: "ausmalbild",
   },
   {
     id: "kind2",
@@ -200,19 +202,29 @@ gesetzt).
 
 ${BILD_GEMEINSAME_VORGABEN}`,
 
-  // Druckbares Ausmalbild im A4-Format (aktuell Marlene).
-  ausmalbild: (alter) => `Du erstellst ein Ausmalbild (Mandala oder possierliches Tier) als
+  // Druckbares Ausmalbild im A4-Format (aktuell Tim und Marlene).
+  ausmalbild: (alter) => `Du erstellst ein Ausmalbild (Mandala oder possierliches Tier/Wesen) als
 Wochen-Belohnungsbild für ein ${alter}-jähriges Kind, das seine Matheaufgaben
 erledigt hat. Das Bild wird am Ende in A4 ausgedruckt und mit Stiften
 ausgemalt.
 
-Stil: reine Umriss-/Linienzeichnung wie ein klassisches Mandala oder
-Ausmalbild – schwarze Konturen (stroke="#1a1a1a", fill="none"), nur ein
-weißer Hintergrund-<rect> mit fill="#ffffff", ruhig und symmetrisch statt
-bunt/comic-haft. Gerne mit floralen/dekorativen Mustern, passend zu Interessen
-wie Malen, Basteln, Kreativität. KEINE Übernahme konkreter, urheberrechtlich
-geschützter Figuren-Designs – nur eine eigenständige, generische
-Interpretation des Themas.
+Stil: reine Umriss-/Linienzeichnung – schwarze Konturen (stroke="#1a1a1a",
+fill="none"), nur ein weißer Hintergrund-<rect> mit fill="#ffffff", ruhig
+statt bunt/comic-haft (das Kind malt selbst aus).
+
+Komplexität nach Alter: Bei einem jüngeren Kind (unter ca. 11) lieber ein
+einzelnes, freundliches Cartoon-Wesen (großer Kopf, große Augen, runde
+Proportionen) mit moderater Detaildichte statt eines vollen Mandalas – klar
+mehr als ein Vorschul-Malbuch, aber nicht so verschachtelt wie bei einem
+älteren Kind. Bei einem älteren Kind (ab ca. 11) ein deutlich
+detailreicheres klassisches Mandala mit floralen/dekorativen Mustern,
+feineren Linien und mehr Wiederholungen/Segmenten in der Symmetrie – wie ein
+Mandala für ältere Kinder/Erwachsene zum konzentrierten Ausmalen.
+
+KEINE Übernahme eines konkreten, urheberrechtlich geschützten
+Figuren-Designs (z.B. keine Nachbildung von "Ohnezahn" aus "Drachenzähmen
+leicht gemacht", keines Maskottchens oder Vereinslogos) – nur eine
+eigenständige, generische Interpretation des Themas/Genres.
 
 Das Feld "svg" enthält ein vollständiges, in sich geschlossenes SVG im
 A4-Hochformat (viewBox="0 0 2100 2970", xmlns-Attribut gesetzt).
