@@ -20,6 +20,20 @@
 
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
+      <section id="kopf-daily" class="kopf-daily">
+        <div class="kopf-daily-header">
+          <h2>🧠 Kopf-Minute</h2>
+          <span id="kopf-daily-date" class="kopf-daily-date"></span>
+        </div>
+        <p class="subtitle">6 kurze Kopfrechen-Aufgaben – ca. 10 Minuten, jeden Tag neu.</p>
+        <div id="kopf-daily-tasks" class="task-list"></div>
+        <div class="actions">
+          <button id="kopf-daily-check" class="chalk-button" hidden>Fertig – prüfen!</button>
+          <button id="kopf-daily-retry" class="chalk-button ghost" hidden>Nochmal versuchen</button>
+        </div>
+        <div id="kopf-daily-result" class="result-banner" hidden></div>
+      </section>
+
       <div id="puzzle-picker" class="puzzle-picker" hidden>
         <div class="puzzle-frame" id="puzzle-frame">
           <div class="puzzle-image" id="puzzle-image"></div>
@@ -62,6 +76,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="../shared.js" defer></script>
+  <script src="../kopf.js" defer></script>
   <script src="../app.js" defer></script>
   <script>
     if ('serviceWorker' in navigator) {

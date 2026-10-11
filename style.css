@@ -196,6 +196,52 @@ body {
   margin-top: 14px;
 }
 
+/* ---------- Tägliches Kopfrechnen (Kopf-Minute) ---------- */
+.kopf-daily {
+  margin: 4px 16px 20px;
+  padding: 16px 18px 18px;
+  border: 2px dashed var(--chalk-yellow);
+  border-radius: var(--radius);
+  background: var(--board-bg-2);
+}
+
+.kopf-daily-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kopf-daily-header h2 {
+  font-family: var(--font-display);
+  color: var(--chalk-yellow);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.kopf-daily-date {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  text-transform: capitalize;
+}
+
+.kopf-daily .subtitle {
+  margin-top: 4px;
+}
+
+.kopf-daily .task-list {
+  padding: 10px 0 0;
+}
+
+.kopf-daily .actions {
+  padding: 14px 0 0;
+}
+
+.kopf-daily .result-banner {
+  margin: 14px 0 0;
+}
+
 /* ---------- Arbeitsblatt-Auswahl ---------- */
 .worksheet-picker {
   padding: 4px 16px 20px;

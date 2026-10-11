@@ -333,6 +333,36 @@ zwischen Skill und App: immer wenn sich an den Datenformaten hier im Repo
 etwas ändert (neue Felder, neue Bereiche, anderes Verhältnis Lesen/Rechnen),
 muss diese Datei mit aktualisiert und auf claude.ai neu hochgeladen werden.
 
+## Kopf-Minute (tägliches Kopfrechnen)
+
+Zusätzlich zu den wöchentlichen Arbeitsblättern zeigt jede Kinderseite ganz
+oben (auf der Einstiegsseite, über dem Wochenbild bzw. der Arbeitsblatt-Liste)
+einen eigenen Bereich **„🧠 Kopf-Minute“**: 6 kurze Kopfrechen-Aufgaben
+(Addition/Subtraktion + Multiplikation/Division gemischt), ausgelegt auf ca.
+10 Minuten. Anders als die Arbeitsblätter unter `data/` werden diese Aufgaben
+**direkt im Browser erzeugt** (`kopf.js`) – es muss also nichts manuell
+angelegt werden, und jeden Kalendertag erscheint automatisch ein neuer Satz.
+
+Damit dieselben Aufgaben bei einem Reload am selben Tag nicht wechseln
+(wichtig, falls das Kind zwischendurch die Seite neu lädt), wird ein
+seedbarer Zufallsgenerator genutzt, dessen Seed sich aus Kind-ID + Datum +
+Stufe zusammensetzt – am nächsten Tag ergibt das automatisch einen neuen,
+aber wieder für den ganzen Tag stabilen Aufgabensatz. Fortschritt (Antworten,
+Punktestand) liegt pro Kind und Kalendertag in `localStorage` (Schlüssel
+`mathe-pwa:kopf:<kindId>:<datum>`) – kein Supabase-Sync, bewusst nur lokal auf
+dem Gerät, auf dem gerechnet wird.
+
+Die Schwierigkeit ist **pro Kind in Stufen** definiert (`KOPF_LEVELS` in
+`shared.js`): jede Stufe legt den Zahlenraum für Addition/Subtraktion
+(`addSub.max`) sowie die Einmaleins-Reihen für Multiplikation/Division
+(`tables`) fest. Welche Stufe aktuell gilt, steht in `KOPF_STUFE` (ein Index
+pro Kind, Standard `0` = leichteste Stufe). Beide Kinder starten bewusst auf
+Stufe 0 (einfaches Niveau für ihre Klasse, zum Wiedereinstieg ins
+Kopfrechnen) – die Stufe lässt sich jederzeit erhöhen, indem die Zahl in
+`KOPF_STUFE` hochgesetzt wird, sobald ein Kind bereit für mehr ist. Für ein
+drittes Kind (oder eine fünfte Stufe) einfach einen weiteren Eintrag in
+`KOPF_LEVELS`/`KOPF_STUFE` ergänzen.
+
 ## Eltern-Übersicht & geräteübergreifender Fortschritt
 
 Der Fortschritt eines Kindes liegt weiterhin primär in `localStorage` (offline,
