@@ -213,23 +213,22 @@ Wichtig für das `svg`-Feld, egal ob von Hand, per Skill oder per
   einer festen Bereichs-Zuordnung, da eine Woche z.B. 2 Lese- + 2
   Rechen-Arbeitsblätter statt 4 verschiedener Bereiche enthalten kann
 
-Zwei Bild-Varianten sind im Einsatz, je nach Interesse des Kindes:
+Beide Kinder bekommen inzwischen den Stil „Ausmalbild“: Hochformat-`viewBox`
+im A4-Verhältnis (z.B. `viewBox="0 0 2100 2970"`), zum Ausdrucken und Ausmalen
+mit Stiften. Stil: reine Umriss-/Linienzeichnung – schwarze Konturen
+(`stroke`, `fill="none"`), nur ein weißer Hintergrund-`rect` mit `fill`, ruhig
+statt bunt/comic-haft (das Kind malt selbst aus). Für exakte Symmetrie eignen
+sich `<use>`-Referenzen mit `transform="rotate(...)"` bzw.
+`transform="translate(...) scale(-1,1)"` zum Spiegeln/Fächern.
 
-**„Abenteuer"-Wallpaper (aktuell Tim):** Hochformat-`viewBox` im Verhältnis 3:4
-(z.B. `viewBox="0 0 1200 1600"`), zum Speichern als iPad-Hintergrund. Stil:
-dynamisch/abenteuerlich statt niedlich-kindlich – Silhouetten vor einem
-Dämmerungs-/Sonnenuntergangs-Verlauf wirken deutlich "cooler" als flache
-Cartoon-Farben (siehe `data/kind1/2026-W39-bild.json` als Beispiel).
-
-**Ausmalbild (aktuell Marlene):** Hochformat-`viewBox` im A4-Verhältnis (z.B.
-`viewBox="0 0 2100 2970"`), zum Ausdrucken und Ausmalen mit Stiften. Stil:
-reine Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild
-eines Tieres – schwarze Konturen (`stroke`, `fill="none"`), nur ein weißer
-Hintergrund-`rect` mit `fill`, ruhig und symmetrisch statt bunt (siehe
-`data/kind2/2026-W39-bild.json` als Beispiel: eine Schmetterlings-Mandala).
-Passend zu Interessen wie Kreativität/Malen/Basteln; für exakte Symmetrie
-eignen sich `<use>`-Referenzen mit `transform="translate(...) scale(-1,1)"`
-zum Spiegeln einer Körperhälfte.
+Die Komplexität unterscheidet sich nach Alter: Bei Tim (9) ein einzelnes,
+niedliches Cartoon-Wesen passend zum Wochenthema (siehe
+`data/kind1/2026-W42-bild.json`: ein freundlicher Drache). Bei Marlene (12,
+siehe `data/kind2/2026-W42-bild.json`: eine Eulen-Mandala) ein deutlich
+detailreicheres klassisches Mandala, passend zu Kreativität/Malen/Basteln.
+In beiden Fällen gilt: keine Nachbildung einer konkreten, urheberrechtlich
+geschützten Figur (z.B. keine Comic-/Film-Figuren) – nur eine eigenständige,
+generische Interpretation des Themas.
 
 Ohne `"aktuellesBild"` in `index.json` bleibt das Puzzle einfach ausgeblendet
 (z.B. bei einem neu angelegten Kind ohne Wochenbild).
@@ -285,13 +284,14 @@ Lesetexte kommen und in welcher Sprache, steuern die Felder `lesen` (Standard:
 - **`lesen` nicht gesetzt/`true`, kein `englischLesen` (aktuell Tim):** 2 der 3
   `rechenBereiche` rotierend pro Woche + 1 Lese-Arbeitsblatt pro Eintrag in
   `interessen` (~50:50, siehe „Wochenpensum“ oben). Bildthema rotiert durch
-  `interessen`, Bildstil `bildStil: "abenteuer"` (Standard).
+  `interessen`, Bildstil `bildStil: "ausmalbild"` (niedliches Cartoon-Wesen
+  statt Mandala, siehe „Wochenbild-Puzzle“ oben).
 - **`englischLesen: true` (aktuell Marlene):** alle `rechenBereiche` jede Woche
   (keine Rotation) + 1 englischer Detektiv-/Rätsel-Lesetext (`bereich:
   "lesen"`, `sprache: "englisch"`) – macht 4 Arbeitsblätter/Woche. `interessen`
   dient hier nur als Bildthema (z.B. `["Kreativität, Malen und Basteln"]`),
-  Bildstil `bildStil: "ausmalbild"` erzeugt ein druckbares Ausmalbild im
-  A4-Format statt des Abenteuer-Wallpapers.
+  Bildstil `bildStil: "ausmalbild"` erzeugt ein deutlich detailreicheres
+  Mandala als bei Tim.
 - **`lesen: false`, kein `englischLesen` (aktuell von keinem Kind genutzt):**
   alle `rechenBereiche` jede Woche + ein vierter, rotierend verdoppelter
   Bereich, ganz ohne Lesetext.

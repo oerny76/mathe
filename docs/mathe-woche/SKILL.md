@@ -25,7 +25,7 @@ Kontext, aktuelle ISO-Kalenderwoche).
 
 | Name | Ordner-ID | Alter | Rechen-Bereiche | Lesen? | Interessen | Bildstil |
 |------|-----------|-------|-----------------|--------|------------|----------|
-| Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja (Deutsch, pro Interesse) | FC Bayern München, Drachen | abenteuer (buntes Wallpaper, 3:4) |
+| Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja (Deutsch, pro Interesse) | FC Bayern München, Drachen | ausmalbild (niedliches Tier/Wesen, A4) |
 | Marlene | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | ja (Englisch, 1×/Woche) | Bild-Thema: Kreativität, Malen und Basteln · Lese-Thema: Detektivgeschichten (Stil „Die drei Fragezeichen“ o.ä.) | ausmalbild (komplexes Mandala, A4) |
 
 Diese Tabelle muss mit dem `KIDS`-Array in `scripts/generate.js` synchron
@@ -207,36 +207,48 @@ gelöster Aufgaben angezeigt (z.B. 3 von 6 richtig → 50% sichtbar) – erst be
 100% ist das Teil voll sichtbar. Nach Fertigstellung aller 4 Teile kann das
 Kind das Bild als hochauflösendes PNG herunterladen.
 
-Der Bildstil hängt vom Kind ab (Spalte „Bildstil“ in der Tabelle oben):
+Beide Kinder bekommen inzwischen den Stil „ausmalbild“ (druckbare
+Ausmalseite in A4): reine Umriss-/Linienzeichnung – schwarze Konturen
+(`stroke="#1a1a1a"`, `fill="none"`), nur ein weißer Hintergrund-`<rect>` mit
+`fill="#ffffff"`, **keine** Farbflächen (das Kind malt selbst aus). Dekorative
+Rahmen-/Eckmotive (z.B. kleine Blüten in den vier Ecken, siehe
+Referenzbeispiele) sind als wiederkehrendes, verbindendes Gestaltungselement
+über beide Kinder hinweg erwünscht, müssen aber nicht exakt übernommen
+werden. **Hochformat im A4-Verhältnis**, z.B. `viewBox="0 0 2100 2970"`.
 
-**Tim – Stil „abenteuer“ (buntes Wallpaper zum Speichern als iPad-Hintergrund):**
-dynamisch/abenteuerlich, NICHT niedlich-kindlich. Denk an eine
-Fantasy-Abenteuer-Szene: dramatische Silhouetten, Dämmerungs-/
-Sonnenuntergangsfarben (Lila/Orange/Gold-Verläufe), Gegenlicht, Bewegung/
-Dynamik in der Pose. Referenzbeispiel: `data/kind1/2026-W40-bild.json`
-(Fußball-Silhouette im Sonnenuntergang) – lies es dir über den
-GitHub-Connector durch, bevor du ein neues Bild baust, und orientiere dich
-stilistisch daran (aber nicht 1:1 kopieren, jede Woche ein neues Motiv).
-**Hochformat, Seitenverhältnis 3:4**, z.B. `viewBox="0 0 1200 1600"`.
+Komplexität und Motiv unterscheiden sich nach Kind (Spalte „Bildstil“ in der
+Tabelle oben):
 
-**Marlene – Stil „ausmalbild“ (druckbare Ausmalseite in A4):** reine
-Umriss-/Linienzeichnung wie ein klassisches Mandala oder Ausmalbild eines
-Tieres – schwarze Konturen (`stroke="#1a1a1a"`, `fill="none"`), nur ein
-weißer Hintergrund-`<rect>` mit `fill="#ffffff"`, ruhig und symmetrisch statt
-bunt/comic-haft, gerne mit floralen/dekorativen Mustern (passend zu
-Kreativität/Malen/Basteln). Marlene ist inzwischen 12 und die Motive sollen
-entsprechend anspruchsvoll sein – **nicht mehr Vorschulniveau** (wenige große,
-einfache Flächen), sondern deutlich mehr Details: feinere Linien, mehr
-Wiederholungen/Segmente in der Symmetrie, verschachtelte Muster im Inneren
-größerer Formen – wie ein Mandala für ältere Kinder/Erwachsene zum
-konzentrierten Ausmalen, nicht wie ein Kindergarten-Ausmalbild.
-Referenzbeispiel: `data/kind2/2026-W40-bild.json` (Pfauen-Mandala) – für
-exakte Symmetrie eignen sich `<use>`-Referenzen mit `transform="rotate(...)"`
-bzw. `transform="translate(...) scale(-1,1)"` zum Spiegeln/Fächern statt
-Koordinaten von Hand zu spiegeln. **Hochformat im A4-Verhältnis**, z.B.
-`viewBox="0 0 2100 2970"`.
+**Tim (9 Jahre) – niedliches Tier/Wesen statt Mandala:** ein einzelnes,
+freundliches Cartoon-Wesen passend zum wöchentlich rotierenden Interesse
+(z.B. ein niedlicher Drache bei Thema „Drachen“, ein Maskottchen-artiger
+Fußball-Charakter bei Thema „FC Bayern München“) – große Augen, runde,
+sympathische Proportionen, freundlicher Ausdruck. Deutlich weniger
+Detaildichte als bei Marlenes Mandalas (Tim ist 9, nicht 12), aber klar mehr
+als ein reines Vorschul-Malbuch: erkennbare Körperteile, ein paar
+Musterdetails (Schuppen, Bauchlinien, Flügelstruktur je nach Motiv). **KEINE
+Nachbildung einer bestimmten, urheberrechtlich geschützten Figur** (z.B.
+keine Nachbildung von „Ohnezahn“ aus „Drachenzähmen leicht gemacht“ oder
+eines FC-Bayern-Maskottchens/-Logos) – nur ein eigenständiges, generisches
+Wesen im Geiste des Themas. Referenzbeispiel: `data/kind1/2026-W42-bild.json`
+(niedlicher Drache) – lies es dir über den GitHub-Connector durch, bevor du
+ein neues Bild baust, und orientiere dich stilistisch daran (aber nicht 1:1
+kopieren, jede Woche ein neues Motiv).
 
-**WICHTIG – niemals verletzen (beide Stile):**
+**Marlene (12 Jahre) – komplexes Mandala:** klassisches Mandala oder
+Ausmalbild eines Tieres, ruhig und symmetrisch, gerne mit
+floralen/dekorativen Mustern (passend zu Kreativität/Malen/Basteln). Marlene
+ist inzwischen 12 und die Motive sollen entsprechend anspruchsvoll sein –
+**nicht mehr Vorschulniveau** (wenige große, einfache Flächen), sondern
+deutlich mehr Details: feinere Linien, mehr Wiederholungen/Segmente in der
+Symmetrie, verschachtelte Muster im Inneren größerer Formen – wie ein
+Mandala für ältere Kinder/Erwachsene zum konzentrierten Ausmalen, nicht wie
+ein Kindergarten-Ausmalbild. Referenzbeispiel: `data/kind2/2026-W42-bild.json`
+(Eulen-Mandala) – für exakte Symmetrie eignen sich `<use>`-Referenzen mit
+`transform="rotate(...)"` bzw. `transform="translate(...) scale(-1,1)"` zum
+Spiegeln/Fächern statt Koordinaten von Hand zu spiegeln.
+
+**WICHTIG – niemals verletzen (beide Kinder):**
 - Keine Übernahme eines konkreten, urheberrechtlich geschützten
   Figuren-Designs (z.B. keine Nachbildung einer bestimmten Film-/Buchfigur
   wie „Ohnezahn“) – nur eine eigene, generische Interpretation des
