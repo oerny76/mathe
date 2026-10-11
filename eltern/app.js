@@ -92,7 +92,7 @@ async function loadAttempts(kid) {
   if (!supabaseClient) return [];
   const { data, error } = await supabaseClient
     .from("attempts")
-    .select("worksheet_file, correct_count, total, completed_at")
+    .select("worksheet_file, bereich, correct_count, total, completed_at")
     .eq("kid_id", kid.id)
     .order("completed_at", { ascending: true });
 
@@ -110,6 +110,77 @@ function groupByFile(attempts) {
     byFile.get(a.worksheet_file).push(a);
   });
   return byFile;
+}
+
+// ---------- "Wo steht mein Kind?": Erfolgsquote pro Bereich ----------
+// Gleiche Logik wie die "Wo stehe ich?"-Übersicht in der Kind-App (app.js),
+// hier aber über ALLE Versuche aus Supabase statt nur die aktuell im
+// data/<kindId>/index.json gelisteten Arbeitsblätter – zeigt also auch
+// Bereiche, deren Arbeitsblätter längst wieder aus der Auswahl verschwunden
+// sind.
+function computeBereichStats(attemptsByFile) {
+  const sums = new Map();
+  attemptsByFile.forEach((history) => {
+    const latest = history[history.length - 1];
+    if (!latest || !latest.bereich || !latest.total) return;
+    const s = sums.get(latest.bereich) || { correct: 0, total: 0 };
+    s.correct += latest.correct_count;
+    s.total += latest.total;
+    sums.set(latest.bereich, s);
+  });
+
+  const orderedKeys = [
+    ...BEREICH_ORDER.filter((key) => sums.has(key)),
+    ...[...sums.keys()].filter((key) => !BEREICH_ORDER.includes(key)).sort(),
+  ];
+
+  return orderedKeys.map((key) => {
+    const { correct, total } = sums.get(key);
+    return { bereich: key, correct, total, pct: Math.round((correct / total) * 100) };
+  });
+}
+
+function lueckenLevel(pct) {
+  if (pct >= 85) return { level: "strong", emoji: "💪", text: "Stark!" };
+  if (pct >= 60) return { level: "mid", emoji: "🙂", text: "Auf gutem Weg" };
+  return { level: "weak", emoji: "🌱", text: "Übt noch" };
+}
+
+function renderLueckenPanel(stats, kidName) {
+  const panel = document.createElement("div");
+  panel.className = "luecken-panel";
+
+  if (stats.length === 0) {
+    panel.innerHTML = `
+      <p class="luecken-panel-title">📊 Wo steht ${escapeHtml(kidName)}?</p>
+      <p class="subtitle">Noch keine ausgewerteten Versuche vorhanden.</p>
+    `;
+    return panel;
+  }
+
+  const rows = [...stats]
+    .sort((a, b) => a.pct - b.pct)
+    .map((s) => {
+      const tag = lueckenLevel(s.pct);
+      return `
+        <div class="luecken-row">
+          <div class="luecken-row-head">
+            <span class="luecken-row-label">${BEREICH_ICONS[s.bereich] || "❓"} ${escapeHtml(
+              bereichLabel(s.bereich).replace(/^\S+\s/, "")
+            )}</span>
+            <span class="luecken-row-tag">${tag.emoji} ${tag.text} · ${s.pct}%</span>
+          </div>
+          <div class="luecken-bar"><div class="luecken-bar-fill ${tag.level}" style="width: ${s.pct}%"></div></div>
+        </div>
+      `;
+    })
+    .join("");
+
+  panel.innerHTML = `
+    <p class="luecken-panel-title">📊 Wo steht ${escapeHtml(kidName)}?</p>
+    <div class="luecken-list">${rows}</div>
+  `;
+  return panel;
 }
 
 function renderWorksheetRow(ws, history) {
@@ -221,6 +292,7 @@ function renderKidCard(kid, worksheets, attemptsByFile, mode) {
     }${avgQuote !== null ? ` · Ø ${avgQuote}%` : ""}</p>
   `;
   card.appendChild(header);
+  card.appendChild(renderLueckenPanel(computeBereichStats(attemptsByFile), kid.name));
 
   if (worksheets.length === 0) {
     const empty = document.createElement("p");
