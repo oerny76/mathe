@@ -1,0 +1,17 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-11",
+  "woche": "2026-W42",
+  "bereich": "lesen",
+  "titel": "Lesetext: Training an der Säbener Straße",
+  "text": "Paul durfte mit seinem Vater zu einem offenen Training des FC Bayern München an der Säbener Straße. Dort trainiert die Mannschaft normalerweise, wenn kein Spiel ansteht. Schon am Eingang war Paul aufgeregt, überall liefen Fans mit roten Schals herum.\n\nEin Nachwuchstrainer erklärte den Kindern, dass im Training nicht nur das Schießen von Toren wichtig ist, sondern vor allem das Zusammenspiel der Mannschaft. „Ein einzelner Spieler kann nicht gewinnen, nur das Team gemeinsam\", sagte er. Paul durfte sogar an einer kleinen Passübung mit anderen Kindern teilnehmen.\n\nNach dem Training erzählte der Trainer noch eine Regel des Fairplays: Wenn ein Spieler verletzt am Boden liegt, schießt der Gegner den Ball absichtlich ins Aus, damit sich die Mannschaft um ihn kümmern kann. Danach bekommt die andere Mannschaft den Ball meist zurückgespielt. Paul fand das total fair.\n\nAuf dem Heimweg übte er mit seinem Vater im Park noch ein paar Pässe. Er wusste jetzt: Fußball ist nicht nur Tore schießen, sondern vor allem ein Mannschaftssport. Am liebsten wäre er gleich am nächsten Tag wieder zum Training gegangen.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Wo fand das Training statt?", "loesung": "Säbener Straße" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Mit wem ging Paul zum Training?", "loesung": "seinem Vater" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Was ist laut dem Trainer im Training am wichtigsten?", "loesung": "das Zusammenspiel" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Was durfte Paul selbst machen?", "loesung": "eine Passübung" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Was macht ein Spieler laut der Fairplay-Regel, wenn ein Gegner verletzt am Boden liegt?", "loesung": "er schießt den Ball ins Aus" },
+    { "id": 6, "typ": "leseverstehen", "frage": "Was übte Paul auf dem Heimweg?", "loesung": "Pässe" }
+  ]
+}

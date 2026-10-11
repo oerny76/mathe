@@ -11,7 +11,11 @@
     "2026-W40-einmaleins.json",
     "2026-W40-kopfrechnen.json",
     "2026-W40-lesen-fc-bayern-muenchen.json",
-    "2026-W40-lesen-drachen-glut.json"
+    "2026-W40-lesen-drachen-glut.json",
+    "2026-W42-grundrechenarten.json",
+    "2026-W42-kopfrechnen.json",
+    "2026-W42-lesen-fc-bayern-muenchen.json",
+    "2026-W42-lesen-drachen-zunder.json"
   ],
-  "aktuellesBild": "2026-W40-bild.json"
+  "aktuellesBild": "2026-W42-bild.json"
 }

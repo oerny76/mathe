@@ -1,0 +1,17 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-11",
+  "woche": "2026-W42",
+  "bereich": "lesen",
+  "titel": "Lesetext: Zunder lernt fliegen",
+  "text": "Der junge Drache Zunder lebte in einer Höhle hoch oben in den Bergen. Alle anderen Drachen seines Alters konnten schon fliegen, nur Zunder traute sich nicht. Immer wenn er an den Rand der Höhle trat und nach unten schaute, wurde ihm schwindelig, und er zog sich schnell wieder zurück.\n\nSeine große Schwester Rauchfeder versuchte, ihm Mut zu machen. „Du musst nicht gleich weit fliegen\", sagte sie. „Fang einfach mit einem kleinen Sprung an.\" Doch Zunder hatte zu viel Angst und blieb lieber am Boden.\n\nEines Tages geriet ein kleiner Fuchs am Berghang in Gefahr: Er war auf einem schmalen Felsvorsprung stehen geblieben und kam nicht mehr herunter. Zunder hörte das ängstliche Jaulen des Fuchses. Ohne lange nachzudenken, breitete er seine Flügel aus und sprang los, um zu helfen. Vor lauter Aufregung vergaß er völlig seine Höhenangst.\n\nEr flog tatsächlich und trug den Fuchs sicher zurück zum Boden. Als er merkte, was er gerade geschafft hatte, konnte er es selbst kaum glauben. Von diesem Tag an flog Zunder jeden Tag ein kleines Stück weiter. Seine Schwester war mächtig stolz auf ihn.",
+  "aufgaben": [
+    { "id": 1, "typ": "leseverstehen", "frage": "Wie heißt der junge Drache?", "loesung": "Zunder" },
+    { "id": 2, "typ": "leseverstehen", "frage": "Wie heißt seine große Schwester?", "loesung": "Rauchfeder" },
+    { "id": 3, "typ": "leseverstehen", "frage": "Wovor hatte Zunder Angst?", "loesung": "Höhenangst" },
+    { "id": 4, "typ": "leseverstehen", "frage": "Welches Tier geriet in Gefahr?", "loesung": "ein Fuchs" },
+    { "id": 5, "typ": "leseverstehen", "frage": "Wo saß der Fuchs fest?", "loesung": "auf einem Felsvorsprung" },
+    { "id": 6, "typ": "leseverstehen", "frage": "Wem half Zunder, indem er flog?", "loesung": "dem Fuchs" }
+  ]
+}

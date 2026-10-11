@@ -1,0 +1,16 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-11",
+  "woche": "2026-W42",
+  "bereich": "grundrechenarten",
+  "titel": "Grundrechenarten: Dreistellig gemischt ➕➖",
+  "aufgaben": [
+    { "id": 1, "typ": "rechnen", "frage": "276 + 148 = ?", "loesung": "424" },
+    { "id": 2, "typ": "rechnen", "frage": "503 − 267 = ?", "loesung": "236" },
+    { "id": 3, "typ": "rechnen", "frage": "9 × 7 = ?", "loesung": "63" },
+    { "id": 4, "typ": "rechnen", "frage": "91 : 7 = ?", "loesung": "13" },
+    { "id": 5, "typ": "sachaufgabe", "frage": "Mia hat 125 Sticker. Sie bekommt von ihrer Tante 48 Sticker dazu und verschenkt danach 60 Sticker an ihre Klasse. Wie viele Sticker hat sie jetzt?", "loesung": "113" },
+    { "id": 6, "typ": "knobelaufgabe", "frage": "Ich bin eine Zahl zwischen 60 und 70. Addiere ich meine beiden Ziffern, erhalte ich 9. Welche Zahl bin ich?", "loesung": "63" }
+  ]
+}
