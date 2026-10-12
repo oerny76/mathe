@@ -41,6 +41,12 @@ const els = {
   sprintSummary: document.getElementById("sprint-summary"),
   sprintSummaryBanner: document.getElementById("sprint-summary-banner"),
   sprintSummaryClose: document.getElementById("sprint-summary-close"),
+  sprintTrendRow: document.getElementById("sprint-trend-row"),
+  sprintTrendCompare: document.getElementById("sprint-trend-compare"),
+  sprintWeakNote: document.getElementById("sprint-weak-note"),
+  sprintDetailsToggle: document.getElementById("sprint-details-toggle"),
+  sprintDetailsPanel: document.getElementById("sprint-details-panel"),
+  sprintDetailsList: document.getElementById("sprint-details-list"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -222,22 +228,28 @@ async function initLueckenPanel(kid) {
 
 // ---------- Tägliches Kopfrechnen (10-Minuten-Sprint) ----------
 // Lose, ständig neue Kopfrechenaufgaben statt eines festen Arbeitsblatts: Das
-// Kind übt 10 Minuten am Stück, die Anzahl richtig gelöster Aufgaben (nicht
-// "X von Y") ist das einzige Ergebnis, damit nichts demotiviert. Rein
-// clientseitig mit localStorage (kein Supabase-Tabellen-Update nötig) und
-// bewusst NICHT Teil der "Wo stehe ich?"-Auswertung, da offenes Dauerüben
-// sonst die Bereichs-Erfolgsquote verzerren würde.
+// Kind übt 10 Minuten am Stück. Die Hauptmeldung am Ende zeigt bewusst nur
+// die Anzahl richtig gelöster Aufgaben (nicht "X von Y"), damit nichts
+// demotiviert – Details, Verlauf und Schwachstellen gibt's nur auf Wunsch
+// über den "Details ansehen"-Button darunter. Rein clientseitig mit
+// localStorage (kein Supabase-Tabellen-Update nötig) und bewusst NICHT Teil
+// der "Wo stehe ich?"-Auswertung, da offenes Dauerüben sonst die
+// Bereichs-Erfolgsquote verzerren würde.
 const SPRINT_DURATION_MS = 10 * 60 * 1000;
 const SPRINT_MAX_LEVEL = 12;
 const SPRINT_LEVEL_UP_MIN_ATTEMPTS = 12;
 const SPRINT_LEVEL_UP_ACCURACY = 0.85;
+const SPRINT_HISTORY_DAYS = 7; // für Trend-Anzeige und Schwachstellen-Erkennung
+const SPRINT_WEAK_MIN_ATTEMPTS = 4; // Mindestanzahl Versuche eines Typs, bevor er als "schwach" gilt
+const SPRINT_WEAK_THRESHOLD = 0.7; // Trefferquote darunter = Übungsbedarf
+const SPRINT_WEAK_WEIGHT = 3; // wie viel häufiger der schwache Typ im nächsten Sprint vorkommt
 
 let sprintTimerHandle = null;
 let sprintEndAt = null;
 let sprintLevel = 1;
-let sprintCorrect = 0;
-let sprintAttempted = 0;
 let sprintTask = null;
+let sprintTaskLog = []; // {typ, frage, loesung, gegeben, richtig} je Aufgabe dieser Runde
+let sprintWeakType = null; // zu Rundenbeginn ermittelt, bleibt für die ganze Runde gleich
 
 function sprintLevelKey(kidId) {
   return `mathe-pwa:${kidId}:sprint-level`;
@@ -265,13 +277,17 @@ function saveSprintLevel(kidId, level) {
   }
 }
 
-function loadTodaySprintResult(kidId) {
+function loadSprintResult(kidId, dateStr) {
   try {
-    const raw = localStorage.getItem(sprintResultKey(kidId, todayDateStr()));
+    const raw = localStorage.getItem(sprintResultKey(kidId, dateStr));
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
   }
+}
+
+function loadTodaySprintResult(kidId) {
+  return loadSprintResult(kidId, todayDateStr());
 }
 
 function saveTodaySprintResult(kidId, result) {
@@ -282,50 +298,132 @@ function saveTodaySprintResult(kidId, result) {
   }
 }
 
+// Letzte N Tage mit Ergebnis (nicht zwingend lückenlos, nur Tage an denen
+// tatsächlich geübt wurde), älteste zuerst – für Trend & Schwachstellen.
+function loadRecentSprintResults(kidId, days) {
+  const results = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const result = loadSprintResult(kidId, d.toISOString().slice(0, 10));
+    if (result) results.push(result);
+  }
+  return results.reverse();
+}
+
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Jede Funktion liefert {frage, loesung} für ein gegebenes Level (1 = Einstieg,
-// bewusst eine Stufe unter dem normalen Wochen-Kopfrechnen-Arbeitsblatt, damit
-// das Kind "wieder reinkommt" – steigt mit dem Level langsam an).
+// Jeder Eintrag erzeugt für ein gegebenes Level {frage, loesung}. Level 1 =
+// Einstieg, bewusst eine Stufe unter dem normalen Wochen-Kopfrechnen-
+// Arbeitsblatt, damit das Kind "wieder reinkommt" – steigt langsam an. "typ"
+// + "label" werden für Verlauf/Schwachstellen-Auswertung mitgeloggt.
 const SPRINT_GENERATORS = [
-  (level) => {
-    const n = randInt(5, 15 + level * 10);
-    return { frage: `Verdopple ${n}. Wie viel ist das?`, loesung: String(n * 2) };
+  {
+    typ: "verdoppeln",
+    label: "Verdoppeln",
+    generate: (level) => {
+      const n = randInt(5, 15 + level * 10);
+      return { frage: `Verdopple ${n}. Wie viel ist das?`, loesung: String(n * 2) };
+    },
   },
-  (level) => {
-    const n = randInt(2, 8 + level * 6) * 2;
-    return { frage: `Halbiere ${n}. Wie viel ist das?`, loesung: String(n / 2) };
+  {
+    typ: "halbieren",
+    label: "Halbieren",
+    generate: (level) => {
+      const n = randInt(2, 8 + level * 6) * 2;
+      return { frage: `Halbiere ${n}. Wie viel ist das?`, loesung: String(n / 2) };
+    },
   },
-  (level) => {
-    const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
-    const a = randInt(Math.round(max / 4), max);
-    const b = randInt(Math.round(max / 4), max);
-    return { frage: `${a} + ${b} = ?`, loesung: String(a + b) };
+  {
+    typ: "addition",
+    label: "Plus-Aufgaben",
+    generate: (level) => {
+      const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
+      const a = randInt(Math.round(max / 4), max);
+      const b = randInt(Math.round(max / 4), max);
+      return { frage: `${a} + ${b} = ?`, loesung: String(a + b) };
+    },
   },
-  (level) => {
-    const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
-    const a = randInt(Math.round(max / 2), max);
-    const b = randInt(1, a - 1);
-    return { frage: `${a} − ${b} = ?`, loesung: String(a - b) };
+  {
+    typ: "subtraktion",
+    label: "Minus-Aufgaben",
+    generate: (level) => {
+      const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
+      const a = randInt(Math.round(max / 2), max);
+      const b = randInt(1, a - 1);
+      return { frage: `${a} − ${b} = ?`, loesung: String(a - b) };
+    },
   },
-  (level) => {
-    const maxFactor = Math.min(4 + level, 20);
-    const a = randInt(2, maxFactor);
-    const b = randInt(2, maxFactor);
-    return { frage: `${a} × ${b} = ?`, loesung: String(a * b) };
+  {
+    typ: "einmaleins",
+    label: "Einmaleins",
+    generate: (level) => {
+      const maxFactor = Math.min(4 + level, 20);
+      const a = randInt(2, maxFactor);
+      const b = randInt(2, maxFactor);
+      return { frage: `${a} × ${b} = ?`, loesung: String(a * b) };
+    },
   },
-  (level) => {
-    const ziel = level <= 2 ? 100 : level <= 5 ? 500 : level <= 8 ? 1000 : 10000;
-    const n = randInt(1, ziel - 1);
-    return { frage: `Ergänze ${n} auf ${ziel}. Wie viel fehlt?`, loesung: String(ziel - n) };
+  {
+    typ: "ergaenzen",
+    label: "Ergänzen",
+    generate: (level) => {
+      const ziel = level <= 2 ? 100 : level <= 5 ? 500 : level <= 8 ? 1000 : 10000;
+      const n = randInt(1, ziel - 1);
+      return { frage: `Ergänze ${n} auf ${ziel}. Wie viel fehlt?`, loesung: String(ziel - n) };
+    },
   },
 ];
 
+function sprintGeneratorLabel(typ) {
+  const entry = SPRINT_GENERATORS.find((g) => g.typ === typ);
+  return entry ? entry.label : typ;
+}
+
+// Ermittelt den Aufgaben-Typ mit der niedrigsten Trefferquote über die
+// letzten SPRINT_HISTORY_DAYS Tage (erst ab SPRINT_WEAK_MIN_ATTEMPTS
+// Versuchen aussagekräftig), oder null wenn nichts auffällig schwach ist.
+function computeWeakSprintType(kidId) {
+  const sessions = loadRecentSprintResults(kidId, SPRINT_HISTORY_DAYS);
+  const statsByTyp = {};
+  sessions.forEach((session) => {
+    (session.tasks || []).forEach((t) => {
+      if (!statsByTyp[t.typ]) statsByTyp[t.typ] = { correct: 0, attempted: 0 };
+      statsByTyp[t.typ].attempted++;
+      if (t.richtig) statsByTyp[t.typ].correct++;
+    });
+  });
+
+  let weakest = null;
+  let weakestRate = SPRINT_WEAK_THRESHOLD;
+  Object.entries(statsByTyp).forEach(([typ, s]) => {
+    if (s.attempted < SPRINT_WEAK_MIN_ATTEMPTS) return;
+    const rate = s.correct / s.attempted;
+    if (rate < weakestRate) {
+      weakestRate = rate;
+      weakest = typ;
+    }
+  });
+  return weakest;
+}
+
+// Wählt den nächsten Aufgaben-Typ zufällig, gewichtet aber den erkannten
+// Schwachpunkt höher, damit darin gezielt mehr geübt wird.
+function pickSprintGenerator() {
+  const weighted = [];
+  SPRINT_GENERATORS.forEach((gen) => {
+    const weight = gen.typ === sprintWeakType ? SPRINT_WEAK_WEIGHT : 1;
+    for (let i = 0; i < weight; i++) weighted.push(gen);
+  });
+  return weighted[randInt(0, weighted.length - 1)];
+}
+
 function nextSprintTask() {
-  const gen = SPRINT_GENERATORS[randInt(0, SPRINT_GENERATORS.length - 1)];
-  sprintTask = gen(sprintLevel);
+  const gen = pickSprintGenerator();
+  const { frage, loesung } = gen.generate(sprintLevel);
+  sprintTask = { typ: gen.typ, frage, loesung };
   els.sprintQuestion.textContent = sprintTask.frage;
   els.sprintInput.value = "";
   els.sprintInput.disabled = false;
@@ -347,12 +445,11 @@ function updateSprintTimerDisplay() {
 
 function submitSprintAnswer() {
   if (!sprintTask || els.sprintInput.disabled) return;
-  const given = normalizeAnswer(els.sprintInput.value);
+  const given = els.sprintInput.value;
   const expected = normalizeAnswer(sprintTask.loesung);
-  const isCorrect = given !== "" && given === expected;
+  const isCorrect = normalizeAnswer(given) !== "" && normalizeAnswer(given) === expected;
 
-  sprintAttempted++;
-  if (isCorrect) sprintCorrect++;
+  sprintTaskLog.push({ typ: sprintTask.typ, frage: sprintTask.frage, loesung: sprintTask.loesung, gegeben: given, richtig: isCorrect });
 
   els.sprintTaskCard.classList.add(isCorrect ? "correct" : "wrong");
   els.sprintInput.disabled = true;
@@ -365,8 +462,8 @@ function submitSprintAnswer() {
 function startSprint() {
   if (!currentKid) return;
   sprintLevel = loadSprintLevel(currentKid.id);
-  sprintCorrect = 0;
-  sprintAttempted = 0;
+  sprintWeakType = computeWeakSprintType(currentKid.id);
+  sprintTaskLog = [];
   sprintEndAt = Date.now() + SPRINT_DURATION_MS;
 
   els.picker.hidden = true;
@@ -384,14 +481,18 @@ function endSprint() {
   sprintTimerHandle = null;
   sprintEndAt = null;
 
+  const correct = sprintTaskLog.filter((t) => t.richtig).length;
+  const attempted = sprintTaskLog.length;
+
   saveTodaySprintResult(currentKid.id, {
     date: todayDateStr(),
-    correct: sprintCorrect,
-    attempted: sprintAttempted,
+    correct,
+    attempted,
     level: sprintLevel,
+    tasks: sprintTaskLog,
   });
 
-  if (sprintAttempted >= SPRINT_LEVEL_UP_MIN_ATTEMPTS && sprintCorrect / sprintAttempted >= SPRINT_LEVEL_UP_ACCURACY) {
+  if (attempted >= SPRINT_LEVEL_UP_MIN_ATTEMPTS && correct / attempted >= SPRINT_LEVEL_UP_ACCURACY) {
     saveSprintLevel(currentKid.id, Math.min(sprintLevel + 1, SPRINT_MAX_LEVEL));
   }
 
@@ -399,9 +500,15 @@ function endSprint() {
   els.sprintSummary.hidden = false;
   els.sprintSummaryBanner.classList.remove("needs-practice");
   els.sprintSummaryBanner.textContent =
-    sprintCorrect > 0
-      ? `🎉 Super gemacht! Du hast heute ${sprintCorrect} Aufgabe${sprintCorrect === 1 ? "" : "n"} geschafft.`
+    correct > 0
+      ? `🎉 Super gemacht! Du hast heute ${correct} Aufgabe${correct === 1 ? "" : "n"} geschafft.`
       : `Das war ein guter Versuch! Morgen klappt's bestimmt noch besser. 💪`;
+
+  renderSprintTrend(currentKid.id);
+  renderSprintDetails({ date: todayDateStr(), correct, attempted, level: sprintLevel, tasks: sprintTaskLog });
+  els.sprintDetailsPanel.hidden = true;
+  els.sprintDetailsToggle.hidden = attempted === 0;
+  els.sprintDetailsToggle.textContent = "📋 Details ansehen";
 
   updateSprintTodayHint();
 }
@@ -423,6 +530,84 @@ function updateSprintTodayHint() {
   } else {
     els.sprintTodayHint.hidden = true;
   }
+}
+
+// ---------- Sprint-Zusammenfassung: Trend + Details (nur auf Wunsch sichtbar) ----------
+function renderSprintTrend(kidId) {
+  const sessions = loadRecentSprintResults(kidId, SPRINT_HISTORY_DAYS); // älteste zuerst, inkl. heute
+  els.sprintTrendRow.innerHTML = "";
+
+  if (sessions.length < 2) {
+    els.sprintTrendCompare.hidden = true;
+  } else {
+    const today = sessions[sessions.length - 1];
+    const yesterday = sessions[sessions.length - 2];
+    let arrow = "➡️";
+    let text = "gleich geblieben";
+    if (today.correct > yesterday.correct) {
+      arrow = "📈";
+      text = "stärker geworden";
+    } else if (today.correct < yesterday.correct) {
+      arrow = "📉";
+      text = "etwas weniger als letztes Mal";
+    }
+    els.sprintTrendCompare.hidden = false;
+    els.sprintTrendCompare.textContent = `${arrow} Letztes Mal ${yesterday.correct}, heute ${today.correct} – ${text}.`;
+  }
+
+  const maxCorrect = Math.max(1, ...sessions.map((s) => s.correct));
+  sessions.forEach((s) => {
+    const bar = document.createElement("div");
+    bar.className = "sprint-trend-bar";
+    const heightPct = Math.round((s.correct / maxCorrect) * 100);
+    const day = new Date(s.date).toLocaleDateString("de-DE", { weekday: "short" });
+    bar.innerHTML = `
+      <span class="sprint-trend-bar-value">${s.correct}</span>
+      <span class="sprint-trend-bar-fill" style="height: ${Math.max(heightPct, 6)}%"></span>
+      <span class="sprint-trend-bar-day">${day}</span>
+    `;
+    els.sprintTrendRow.appendChild(bar);
+  });
+
+  if (sprintWeakType) {
+    els.sprintWeakNote.hidden = false;
+    els.sprintWeakNote.textContent = `💡 Beim Thema "${sprintGeneratorLabel(sprintWeakType)}" hakt's gerade öfter – davon kommt morgen etwas mehr dran.`;
+  } else {
+    els.sprintWeakNote.hidden = true;
+  }
+}
+
+function renderSprintDetails(session) {
+  els.sprintDetailsList.innerHTML = "";
+
+  const summary = document.createElement("p");
+  summary.className = "sprint-details-summary";
+  summary.textContent = `${session.correct} von ${session.attempted} Aufgaben richtig.`;
+  els.sprintDetailsList.appendChild(summary);
+
+  const wrongTasks = (session.tasks || []).filter((t) => !t.richtig);
+  if (wrongTasks.length === 0) {
+    const allRight = document.createElement("p");
+    allRight.className = "subtitle";
+    allRight.textContent = session.attempted > 0 ? "Alles richtig gelöst! 🎉" : "Keine Aufgabe bearbeitet.";
+    els.sprintDetailsList.appendChild(allRight);
+    return;
+  }
+
+  const heading = document.createElement("p");
+  heading.className = "sprint-details-heading";
+  heading.textContent = "Diese Aufgaben waren noch knifflig:";
+  els.sprintDetailsList.appendChild(heading);
+
+  wrongTasks.forEach((t) => {
+    const row = document.createElement("div");
+    row.className = "sprint-detail-row";
+    row.innerHTML = `
+      <span class="sprint-detail-frage">${escapeHtml(t.frage)}</span>
+      <span class="sprint-detail-answers">deine Antwort: ${escapeHtml(t.gegeben || "–")} · richtig: ${escapeHtml(t.loesung)}</span>
+    `;
+    els.sprintDetailsList.appendChild(row);
+  });
 }
 
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
@@ -930,6 +1115,11 @@ els.sprintStopBtn.addEventListener("click", stopSprint);
 els.sprintSummaryClose.addEventListener("click", () => {
   els.sprintSummary.hidden = true;
   showPicker();
+});
+els.sprintDetailsToggle.addEventListener("click", () => {
+  const nowHidden = !els.sprintDetailsPanel.hidden;
+  els.sprintDetailsPanel.hidden = nowHidden;
+  els.sprintDetailsToggle.textContent = nowHidden ? "📋 Details ansehen" : "🧩 Details ausblenden";
 });
 els.sprintInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitSprintAnswer();
