@@ -30,6 +30,17 @@ const els = {
   lueckenToggle: document.getElementById("luecken-toggle"),
   lueckenPanel: document.getElementById("luecken-panel"),
   lueckenList: document.getElementById("luecken-list"),
+  sprintStartBtn: document.getElementById("sprint-start-btn"),
+  sprintTodayHint: document.getElementById("sprint-today-hint"),
+  sprintView: document.getElementById("sprint-view"),
+  sprintTimer: document.getElementById("sprint-timer"),
+  sprintTaskCard: document.getElementById("sprint-task-card"),
+  sprintQuestion: document.getElementById("sprint-question"),
+  sprintInput: document.getElementById("sprint-input"),
+  sprintStopBtn: document.getElementById("sprint-stop-btn"),
+  sprintSummary: document.getElementById("sprint-summary"),
+  sprintSummaryBanner: document.getElementById("sprint-summary-banner"),
+  sprintSummaryClose: document.getElementById("sprint-summary-close"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -209,10 +220,216 @@ async function initLueckenPanel(kid) {
   updateLueckenPanel();
 }
 
+// ---------- Tägliches Kopfrechnen (10-Minuten-Sprint) ----------
+// Lose, ständig neue Kopfrechenaufgaben statt eines festen Arbeitsblatts: Das
+// Kind übt 10 Minuten am Stück, die Anzahl richtig gelöster Aufgaben (nicht
+// "X von Y") ist das einzige Ergebnis, damit nichts demotiviert. Rein
+// clientseitig mit localStorage (kein Supabase-Tabellen-Update nötig) und
+// bewusst NICHT Teil der "Wo stehe ich?"-Auswertung, da offenes Dauerüben
+// sonst die Bereichs-Erfolgsquote verzerren würde.
+const SPRINT_DURATION_MS = 10 * 60 * 1000;
+const SPRINT_MAX_LEVEL = 12;
+const SPRINT_LEVEL_UP_MIN_ATTEMPTS = 12;
+const SPRINT_LEVEL_UP_ACCURACY = 0.85;
+
+let sprintTimerHandle = null;
+let sprintEndAt = null;
+let sprintLevel = 1;
+let sprintCorrect = 0;
+let sprintAttempted = 0;
+let sprintTask = null;
+
+function sprintLevelKey(kidId) {
+  return `mathe-pwa:${kidId}:sprint-level`;
+}
+
+function sprintResultKey(kidId, dateStr) {
+  return `mathe-pwa:${kidId}:sprint:${dateStr}`;
+}
+
+function todayDateStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function loadSprintLevel(kidId) {
+  const raw = localStorage.getItem(sprintLevelKey(kidId));
+  const n = raw ? parseInt(raw, 10) : 1;
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+function saveSprintLevel(kidId, level) {
+  try {
+    localStorage.setItem(sprintLevelKey(kidId), String(level));
+  } catch (e) {
+    console.warn("Konnte Kopfrechnen-Level nicht speichern:", e);
+  }
+}
+
+function loadTodaySprintResult(kidId) {
+  try {
+    const raw = localStorage.getItem(sprintResultKey(kidId, todayDateStr()));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveTodaySprintResult(kidId, result) {
+  try {
+    localStorage.setItem(sprintResultKey(kidId, todayDateStr()), JSON.stringify(result));
+  } catch (e) {
+    console.warn("Konnte Kopfrechnen-Ergebnis nicht speichern:", e);
+  }
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Jede Funktion liefert {frage, loesung} für ein gegebenes Level (1 = Einstieg,
+// bewusst eine Stufe unter dem normalen Wochen-Kopfrechnen-Arbeitsblatt, damit
+// das Kind "wieder reinkommt" – steigt mit dem Level langsam an).
+const SPRINT_GENERATORS = [
+  (level) => {
+    const n = randInt(5, 15 + level * 10);
+    return { frage: `Verdopple ${n}. Wie viel ist das?`, loesung: String(n * 2) };
+  },
+  (level) => {
+    const n = randInt(2, 8 + level * 6) * 2;
+    return { frage: `Halbiere ${n}. Wie viel ist das?`, loesung: String(n / 2) };
+  },
+  (level) => {
+    const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
+    const a = randInt(Math.round(max / 4), max);
+    const b = randInt(Math.round(max / 4), max);
+    return { frage: `${a} + ${b} = ?`, loesung: String(a + b) };
+  },
+  (level) => {
+    const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
+    const a = randInt(Math.round(max / 2), max);
+    const b = randInt(1, a - 1);
+    return { frage: `${a} − ${b} = ?`, loesung: String(a - b) };
+  },
+  (level) => {
+    const maxFactor = Math.min(4 + level, 20);
+    const a = randInt(2, maxFactor);
+    const b = randInt(2, maxFactor);
+    return { frage: `${a} × ${b} = ?`, loesung: String(a * b) };
+  },
+  (level) => {
+    const ziel = level <= 2 ? 100 : level <= 5 ? 500 : level <= 8 ? 1000 : 10000;
+    const n = randInt(1, ziel - 1);
+    return { frage: `Ergänze ${n} auf ${ziel}. Wie viel fehlt?`, loesung: String(ziel - n) };
+  },
+];
+
+function nextSprintTask() {
+  const gen = SPRINT_GENERATORS[randInt(0, SPRINT_GENERATORS.length - 1)];
+  sprintTask = gen(sprintLevel);
+  els.sprintQuestion.textContent = sprintTask.frage;
+  els.sprintInput.value = "";
+  els.sprintInput.disabled = false;
+  els.sprintTaskCard.classList.remove("correct", "wrong");
+  els.sprintInput.focus();
+}
+
+function updateSprintTimerDisplay() {
+  const remaining = sprintEndAt - Date.now();
+  if (remaining <= 0) {
+    endSprint();
+    return;
+  }
+  const totalSeconds = Math.ceil(remaining / 1000);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  els.sprintTimer.textContent = `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function submitSprintAnswer() {
+  if (!sprintTask || els.sprintInput.disabled) return;
+  const given = normalizeAnswer(els.sprintInput.value);
+  const expected = normalizeAnswer(sprintTask.loesung);
+  const isCorrect = given !== "" && given === expected;
+
+  sprintAttempted++;
+  if (isCorrect) sprintCorrect++;
+
+  els.sprintTaskCard.classList.add(isCorrect ? "correct" : "wrong");
+  els.sprintInput.disabled = true;
+
+  setTimeout(() => {
+    if (sprintEndAt && Date.now() < sprintEndAt) nextSprintTask();
+  }, 500);
+}
+
+function startSprint() {
+  if (!currentKid) return;
+  sprintLevel = loadSprintLevel(currentKid.id);
+  sprintCorrect = 0;
+  sprintAttempted = 0;
+  sprintEndAt = Date.now() + SPRINT_DURATION_MS;
+
+  els.picker.hidden = true;
+  els.view.hidden = true;
+  els.sprintSummary.hidden = true;
+  els.sprintView.hidden = false;
+
+  nextSprintTask();
+  updateSprintTimerDisplay();
+  sprintTimerHandle = setInterval(updateSprintTimerDisplay, 250);
+}
+
+function endSprint() {
+  if (sprintTimerHandle) clearInterval(sprintTimerHandle);
+  sprintTimerHandle = null;
+  sprintEndAt = null;
+
+  saveTodaySprintResult(currentKid.id, {
+    date: todayDateStr(),
+    correct: sprintCorrect,
+    attempted: sprintAttempted,
+    level: sprintLevel,
+  });
+
+  if (sprintAttempted >= SPRINT_LEVEL_UP_MIN_ATTEMPTS && sprintCorrect / sprintAttempted >= SPRINT_LEVEL_UP_ACCURACY) {
+    saveSprintLevel(currentKid.id, Math.min(sprintLevel + 1, SPRINT_MAX_LEVEL));
+  }
+
+  els.sprintView.hidden = true;
+  els.sprintSummary.hidden = false;
+  els.sprintSummaryBanner.classList.remove("needs-practice");
+  els.sprintSummaryBanner.textContent =
+    sprintCorrect > 0
+      ? `🎉 Super gemacht! Du hast heute ${sprintCorrect} Aufgabe${sprintCorrect === 1 ? "" : "n"} geschafft.`
+      : `Das war ein guter Versuch! Morgen klappt's bestimmt noch besser. 💪`;
+
+  updateSprintTodayHint();
+}
+
+function stopSprint() {
+  if (sprintTimerHandle) clearInterval(sprintTimerHandle);
+  sprintTimerHandle = null;
+  sprintEndAt = null;
+  els.sprintView.hidden = true;
+  showPicker();
+}
+
+function updateSprintTodayHint() {
+  if (!currentKid) return;
+  const result = loadTodaySprintResult(currentKid.id);
+  if (result) {
+    els.sprintTodayHint.hidden = false;
+    els.sprintTodayHint.textContent = `Heute schon geschafft: ${result.correct} Aufgabe${result.correct === 1 ? "" : "n"} ✅`;
+  } else {
+    els.sprintTodayHint.hidden = true;
+  }
+}
+
 // ---------- Schritt 1: Kind wählen -> Bild-Einstiegsseite oder Liste ----------
 async function selectKid(kid) {
   currentKid = kid;
   initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
+  updateSprintTodayHint();
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -707,6 +924,15 @@ els.lueckenToggle.addEventListener("click", () => {
   const nowHidden = !els.lueckenPanel.hidden;
   els.lueckenPanel.hidden = nowHidden;
   els.lueckenToggle.textContent = nowHidden ? "📊 Wo stehe ich?" : "🧩 Ausblenden";
+});
+els.sprintStartBtn.addEventListener("click", startSprint);
+els.sprintStopBtn.addEventListener("click", stopSprint);
+els.sprintSummaryClose.addEventListener("click", () => {
+  els.sprintSummary.hidden = true;
+  showPicker();
+});
+els.sprintInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitSprintAnswer();
 });
 
 // ---------- Start ----------

@@ -20,6 +20,10 @@
 
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
+      <div class="sprint-toggle-row">
+        <button id="sprint-start-btn" class="chalk-button ghost small">🧠 Tägliches Kopfrechnen (10 Min)</button>
+        <p id="sprint-today-hint" class="sprint-today-hint" hidden></p>
+      </div>
       <div class="luecken-toggle-row">
         <button id="luecken-toggle" class="chalk-button ghost small" hidden>📊 Wo stehe ich?</button>
       </div>
@@ -61,6 +65,27 @@
       </div>
 
       <div id="result-banner" class="result-banner" hidden></div>
+    </section>
+
+    <section id="sprint-view" hidden>
+      <p class="sprint-timer" id="sprint-timer">10:00</p>
+      <div id="sprint-task-card" class="task-card">
+        <p class="task-question" id="sprint-question"></p>
+        <div class="task-input-row">
+          <input type="text" inputmode="decimal" autocomplete="off" id="sprint-input" placeholder="Deine Antwort" />
+          <span class="task-mark" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="sprint-stop-btn" class="chalk-button ghost small">Abbrechen</button>
+      </div>
+    </section>
+
+    <section id="sprint-summary" hidden>
+      <div id="sprint-summary-banner" class="result-banner"></div>
+      <div class="actions">
+        <button id="sprint-summary-close" class="chalk-button">Zurück zur Übersicht</button>
+      </div>
     </section>
   </main>
 
