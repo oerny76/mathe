@@ -47,6 +47,7 @@ const els = {
   sprintDetailsToggle: document.getElementById("sprint-details-toggle"),
   sprintDetailsPanel: document.getElementById("sprint-details-panel"),
   sprintDetailsList: document.getElementById("sprint-details-list"),
+  weeklyUsageHint: document.getElementById("weekly-usage-hint"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -224,6 +225,70 @@ async function initLueckenPanel(kid) {
     lueckenByFile.set(a.worksheet_file, { bereich: a.bereich, correct_count: a.correct_count, total: a.total });
   });
   updateLueckenPanel();
+}
+
+// ---------- Wochen-Übeziel (z.B. "4 Tage reichen") ----------
+// Keine Sperre, nur ein freundlicher Hinweis: Übt das Kind an so vielen
+// Kalendertagen einer Woche, wie WEEKLY_USAGE_TARGET vorgibt, zeigt die App
+// das lobend an. Alles danach ist freiwillige Extra-Übung, die App bleibt
+// an jedem Tag voll nutzbar. Zählt sowohl abgeschlossene Arbeitsblätter
+// (checkAnswers) als auch Kopfrechnen-Sprints mit mindestens einer Aufgabe.
+const WEEKLY_USAGE_TARGET = 4;
+
+// Gleiche ISO-Kalenderwochen-Berechnung wie in eltern/app.js, damit die
+// Wochengrenze (Montag bis Sonntag) überall gleich gezogen wird.
+function isoWeekString(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+}
+
+function usageWeekKey(kidId) {
+  return `mathe-pwa:${kidId}:usage-week:${isoWeekString(new Date())}`;
+}
+
+function loadUsageDays(kidId) {
+  try {
+    const raw = localStorage.getItem(usageWeekKey(kidId));
+    const days = raw ? JSON.parse(raw) : [];
+    return Array.isArray(days) ? days : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function markUsageDay(kidId) {
+  const days = loadUsageDays(kidId);
+  const today = todayDateStr();
+  if (!days.includes(today)) {
+    days.push(today);
+    try {
+      localStorage.setItem(usageWeekKey(kidId), JSON.stringify(days));
+    } catch (e) {
+      console.warn("Konnte Übungstag nicht speichern:", e);
+    }
+  }
+  updateWeeklyUsageHint();
+}
+
+function updateWeeklyUsageHint() {
+  if (!currentKid) return;
+  const count = loadUsageDays(currentKid.id).length;
+
+  if (count === 0) {
+    els.weeklyUsageHint.hidden = true;
+    return;
+  }
+
+  els.weeklyUsageHint.hidden = false;
+  if (count >= WEEKLY_USAGE_TARGET) {
+    els.weeklyUsageHint.textContent = `🎉 Super, diese Woche hast du schon an ${count} Tagen geübt. Alles weitere ist freiwillige Extra-Übung!`;
+  } else {
+    els.weeklyUsageHint.textContent = `Diese Woche schon an ${count} von ${WEEKLY_USAGE_TARGET} Tagen geübt. Weiter so!`;
+  }
 }
 
 // ---------- Tägliches Kopfrechnen (10-Minuten-Sprint) ----------
@@ -484,6 +549,8 @@ function endSprint() {
   const correct = sprintTaskLog.filter((t) => t.richtig).length;
   const attempted = sprintTaskLog.length;
 
+  if (attempted > 0) markUsageDay(currentKid.id);
+
   saveTodaySprintResult(currentKid.id, {
     date: todayDateStr(),
     correct,
@@ -615,6 +682,7 @@ async function selectKid(kid) {
   currentKid = kid;
   initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
   updateSprintTodayHint();
+  updateWeeklyUsageHint();
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -1008,6 +1076,7 @@ function checkAnswers() {
   };
   saveProgress(currentKid.id, currentFile, progress);
   syncAttempt(currentKid.id, currentFile, currentWorksheet, progress);
+  markUsageDay(currentKid.id);
   lueckenByFile.set(currentFile, {
     bereich: currentWorksheet?.bereich || null,
     correct_count: correctCount,
