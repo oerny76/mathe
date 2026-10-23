@@ -205,6 +205,10 @@ body {
   margin: 0 16px 10px;
 }
 
+.shared-goal-hint {
+  color: var(--chalk-yellow);
+}
+
 /* ---------- Tägliches Kopfrechnen (Sprint) ---------- */
 .sprint-toggle-row {
   display: flex;
