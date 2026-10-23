@@ -48,6 +48,7 @@ const els = {
   sprintDetailsPanel: document.getElementById("sprint-details-panel"),
   sprintDetailsList: document.getElementById("sprint-details-list"),
   weeklyUsageHint: document.getElementById("weekly-usage-hint"),
+  sharedGoalHint: document.getElementById("shared-goal-hint"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -274,8 +275,57 @@ function markUsageDay(kidId) {
   updateWeeklyUsageHint();
 }
 
+// ---------- Gemeinsames Wochenziel (alle Kinder zusammen) ----------
+// Teamziel statt Wettbewerb: Die Übungstage aller Kinder werden addiert. Pro
+// Kind zählen höchstens WEEKLY_USAGE_TARGET Tage, damit ein Kind das Ziel nicht
+// allein erreichen kann. Quellen je Kind: Tage auf diesem Gerät (localStorage,
+// auch Sprints) plus abgeschlossene Arbeitsblätter aus Supabase (zählt auch
+// geräteübergreifend).
+const remoteUsageDays = {}; // kidId -> Set("YYYY-MM-DD") der aktuellen Woche
+
+async function initSharedGoal() {
+  const thisWeek = isoWeekString(new Date());
+  await Promise.all(
+    KIDS.map(async (kid) => {
+      const attempts = await loadAttempts(kid);
+      const days = new Set();
+      attempts.forEach((a) => {
+        const d = new Date(a.completed_at);
+        if (isoWeekString(d) === thisWeek) days.add(d.toISOString().slice(0, 10));
+      });
+      remoteUsageDays[kid.id] = days;
+    })
+  );
+  updateSharedGoalHint();
+}
+
+function updateSharedGoalHint() {
+  if (!currentKid || KIDS.length < 2) {
+    els.sharedGoalHint.hidden = true;
+    return;
+  }
+  let total = 0;
+  KIDS.forEach((kid) => {
+    const days = new Set([...loadUsageDays(kid.id), ...(remoteUsageDays[kid.id] || [])]);
+    total += Math.min(days.size, WEEKLY_USAGE_TARGET);
+  });
+  const goal = WEEKLY_USAGE_TARGET * KIDS.length;
+
+  if (total === 0) {
+    els.sharedGoalHint.hidden = true;
+    return;
+  }
+  const others = KIDS.filter((k) => k.id !== currentKid.id).map((k) => k.name).join(" und ");
+  els.sharedGoalHint.hidden = false;
+  els.sharedGoalHint.textContent =
+    total >= goal
+      ? `🏆 Teamziel geschafft! Zusammen mit ${others} habt ihr diese Woche alle ${goal} Übungstage erreicht.`
+      : `Teamziel: Zusammen mit ${others} schon ${total} von ${goal} Übungstagen diese Woche.`;
+}
+
 function updateWeeklyUsageHint() {
   if (!currentKid) return;
+  updateSharedGoalHint();
   const count = loadUsageDays(currentKid.id).length;
 
   if (count === 0) {
@@ -683,6 +733,7 @@ async function selectKid(kid) {
   initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
   updateSprintTodayHint();
   updateWeeklyUsageHint();
+  initSharedGoal();
 
   showPicker();
   els.puzzlePicker.hidden = true;
