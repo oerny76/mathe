@@ -12,37 +12,67 @@
       "id": 1,
       "typ": "leseverstehen",
       "frage": "Who asks the detectives for help?",
-      "loesung": "Mrs Green"
+      "loesung": "Mrs Green",
+      "optionen": [
+        "Max",
+        "Mrs Green",
+        "Sam"
+      ]
     },
     {
       "id": 2,
       "typ": "leseverstehen",
       "frage": "What does someone take from the bakery every morning?",
-      "loesung": "bread"
+      "loesung": "bread",
+      "optionen": [
+        "milk",
+        "bread",
+        "cake"
+      ]
     },
     {
       "id": 3,
       "typ": "leseverstehen",
-      "frage": "Where is the little bell? (one word)",
-      "loesung": "window"
+      "frage": "Where is the little bell?",
+      "loesung": "window",
+      "optionen": [
+        "door",
+        "roof",
+        "window"
+      ]
     },
     {
       "id": 4,
       "typ": "leseverstehen",
       "frage": "What is the boy's name?",
-      "loesung": "Max"
+      "loesung": "Max",
+      "optionen": [
+        "Tom",
+        "Max",
+        "Leo"
+      ]
     },
     {
       "id": 5,
       "typ": "leseverstehen",
-      "frage": "How old is Max? (write the number with digits)",
-      "loesung": "8"
+      "frage": "How old is Max?",
+      "loesung": "8",
+      "optionen": [
+        "7",
+        "8",
+        "9"
+      ]
     },
     {
       "id": 6,
       "typ": "leseverstehen",
-      "frage": "Mrs Green says: \"Next time, just ___ on the door.\" (one word)",
-      "loesung": "knock"
+      "frage": "Mrs Green says: \"Next time, just ___ on the door.\"",
+      "loesung": "knock",
+      "optionen": [
+        "ring",
+        "knock",
+        "wait"
+      ]
     }
   ]
 }
