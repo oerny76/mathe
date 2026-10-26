@@ -57,6 +57,9 @@ const els = {
   settingsContent: document.getElementById("settings-content"),
   settingsGradeInfo: document.getElementById("settings-grade-info"),
   settingsLowerGrade: document.getElementById("settings-lower-grade"),
+  streakMain: document.getElementById("streak-main"),
+  streakWeeks: document.getElementById("streak-weeks"),
+  streakSub: document.getElementById("streak-sub"),
   starCounter: document.getElementById("star-counter"),
   starNext: document.getElementById("star-next"),
   toast: document.getElementById("toast"),
@@ -316,6 +319,105 @@ function unlockSettings() {
   renderSettings();
 }
 
+// ---------- Wochen-Streak ----------
+// Eine Woche zählt für den Streak, wenn an mindestens STREAK_MIN_DAYS Tagen
+// geübt wurde. Der Streak ist die Zahl aufeinanderfolgender Wochen, die zählen
+// (die laufende Woche zählt mit, sobald sie geschafft ist, sie bricht den
+// Streak aber nie vorzeitig). Streak-Schutz: Pro Kalendermonat darf eine
+// verpasste Woche überbrückt werden, ohne dass der Streak reißt. Alles wird
+// aus den gespeicherten Übungstagen berechnet, es gibt keinen eigenen Zähler.
+const STREAK_MIN_DAYS = 3;
+const STREAK_BONUS_STARS = 10;
+const STREAK_LOOKBACK_WEEKS = 52;
+const STREAK_CHIPS = 6;
+
+function weekInfo(weeksAgo) {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() || 7) - 1) - 7 * weeksAgo); // Montag dieser Woche, dann zurück
+  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return { week: isoWeekString(d), month, kw: isoWeekString(d).split("-W")[1] };
+}
+
+function firstUsageWeek(kidId) {
+  const prefix = `mathe-pwa:${kidId}:usage-week:`;
+  let first = null;
+  try {
+    Object.keys(localStorage).forEach((k) => {
+      if (!k.startsWith(prefix)) return;
+      const week = k.slice(prefix.length);
+      if (!first || week < first) first = week;
+    });
+  } catch (e) {
+    return null;
+  }
+  return first;
+}
+
+function computeStreak(kidId) {
+  const first = firstUsageWeek(kidId);
+  const now = weekInfo(0);
+  const currentDays = loadUsageDaysFor(kidId, now.week).length;
+  const currentDone = currentDays >= STREAK_MIN_DAYS;
+
+  const weeks = [{ kw: now.kw, status: currentDone ? "done" : "open" }];
+  let streak = currentDone ? 1 : 0;
+  const jokerMonths = new Set();
+  let broken = false;
+
+  for (let i = 1; i <= STREAK_LOOKBACK_WEEKS && !broken; i++) {
+    const info = weekInfo(i);
+    if (!first || info.week < first) break;
+    if (loadUsageDaysFor(kidId, info.week).length >= STREAK_MIN_DAYS) {
+      streak++;
+      weeks.push({ kw: info.kw, status: "done" });
+    } else if (!jokerMonths.has(info.month)) {
+      jokerMonths.add(info.month);
+      weeks.push({ kw: info.kw, status: "bridged" });
+    } else {
+      broken = true;
+      weeks.push({ kw: info.kw, status: "missed" });
+    }
+  }
+
+  return {
+    streak,
+    currentDays,
+    currentDone,
+    jokerUsedThisMonth: jokerMonths.has(now.month),
+    weeks: weeks.slice(0, STREAK_CHIPS).reverse(), // älteste zuerst, aktuelle Woche zuletzt
+  };
+}
+
+const STREAK_CHIP_ICONS = { done: "🔥", open: "⏳", bridged: "🛡️", missed: "▫️" };
+
+function updateStreakDisplay() {
+  if (!currentKid) return;
+  const info = computeStreak(currentKid.id);
+
+  els.streakMain.textContent =
+    info.streak > 0
+      ? `🔥 ${info.streak} Woche${info.streak === 1 ? "" : "n"} in Folge`
+      : `🔥 Starte deinen Wochen-Streak: Übe an ${STREAK_MIN_DAYS} Tagen in einer Woche.`;
+
+  els.streakWeeks.innerHTML = "";
+  info.weeks.forEach((w) => {
+    const chip = document.createElement("span");
+    chip.className = `streak-chip ${w.status}`;
+    chip.innerHTML = `<span class="streak-chip-icon">${STREAK_CHIP_ICONS[w.status]}</span><span class="streak-chip-kw">KW ${w.kw}</span>`;
+    els.streakWeeks.appendChild(chip);
+  });
+
+  const missing = STREAK_MIN_DAYS - info.currentDays;
+  const weekText = info.currentDone
+    ? "Diese Woche zählt schon für deinen Streak. ✅"
+    : `Noch ${missing} Tag${missing === 1 ? "" : "e"} üben, dann zählt diese Woche für deinen Streak.`;
+  const jokerText = info.jokerUsedThisMonth
+    ? "🛡️ Dein Streak-Schutz ist diesen Monat schon im Einsatz."
+    : "🛡️ Streak-Schutz: Eine verpasste Woche pro Monat ist okay.";
+  els.streakSub.textContent = `${weekText} ${jokerText}`;
+}
+
 // ---------- Wochen-Übeziel (z.B. "4 Tage reichen") ----------
 // Keine Sperre, nur ein freundlicher Hinweis: Übt das Kind an so vielen
 // Kalendertagen einer Woche, wie WEEKLY_USAGE_TARGET vorgibt, zeigt die App
@@ -339,14 +441,18 @@ function usageWeekKey(kidId) {
   return `mathe-pwa:${kidId}:usage-week:${isoWeekString(new Date())}`;
 }
 
-function loadUsageDays(kidId) {
+function loadUsageDaysFor(kidId, weekStr) {
   try {
-    const raw = localStorage.getItem(usageWeekKey(kidId));
+    const raw = localStorage.getItem(`mathe-pwa:${kidId}:usage-week:${weekStr}`);
     const days = raw ? JSON.parse(raw) : [];
     return Array.isArray(days) ? days : [];
   } catch (e) {
     return [];
   }
+}
+
+function loadUsageDays(kidId) {
+  return loadUsageDaysFor(kidId, isoWeekString(new Date()));
 }
 
 function markUsageDay(kidId) {
@@ -361,10 +467,16 @@ function markUsageDay(kidId) {
     }
   }
   updateWeeklyUsageHint();
+
+  const kid = KIDS.find((k) => k.id === kidId);
+  if (kid && days.length >= STREAK_MIN_DAYS) {
+    awardKeyed(kid, [{ key: `week:${isoWeekString(new Date())}`, value: STREAK_BONUS_STARS }], "🔥 Streak-Woche geschafft!");
+  }
 }
 
 function updateWeeklyUsageHint() {
   if (!currentKid) return;
+  updateStreakDisplay();
   const count = loadUsageDays(currentKid.id).length;
 
   if (count === 0) {
@@ -1436,14 +1548,29 @@ function saveStars(kidId, stars) {
   }
 }
 
+const toastQueue = [];
+let toastActive = false;
 let toastTimer = null;
+
+// Hinweise nacheinander zeigen, damit z.B. "Streak-Woche" und "Neuer Fund"
+// nicht gegenseitig überschrieben werden.
 function showToast(text, ms = 3500) {
-  els.toast.textContent = text;
+  toastQueue.push({ text, ms });
+  if (!toastActive) nextToast();
+}
+
+function nextToast() {
+  const item = toastQueue.shift();
+  if (!item) {
+    toastActive = false;
+    els.toast.hidden = true;
+    return;
+  }
+  toastActive = true;
+  els.toast.textContent = item.text;
   els.toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    els.toast.hidden = true;
-  }, ms);
+  toastTimer = setTimeout(nextToast, item.ms);
 }
 
 function updateStarDisplay() {
@@ -1458,7 +1585,7 @@ function updateStarDisplay() {
 
 // Schreibt Sterne gut und meldet neue Funde. "stars" ist der bereits
 // geladene Stand (wird hier gespeichert), "gained" die neu verdienten Sterne.
-function applyStarGain(kid, stars, gained) {
+function applyStarGain(kid, stars, gained, label = "") {
   if (gained <= 0) return 0;
   const before = stars.total;
   stars.total += gained;
@@ -1466,12 +1593,12 @@ function applyStarGain(kid, stars, gained) {
   updateStarDisplay();
   const newItems = kid.welt.items.filter((item) => before < item.ab && stars.total >= item.ab);
   const found = newItems.length ? ` · 🎉 Neu in deiner Sammelwelt: ${newItems.map((i) => `${i.emoji} ${i.name}`).join(", ")}` : "";
-  showToast(`⭐ +${gained} Sterne${found}`, newItems.length ? 7000 : 3500);
+  showToast(`⭐ +${gained} Sterne${label ? ` · ${label}` : ""}${found}`, newItems.length ? 7000 : 3500);
   return gained;
 }
 
 // entries: [{ key, value }], jeder Schlüssel zählt nur einmal.
-function awardKeyed(kid, entries) {
+function awardKeyed(kid, entries, label = "") {
   const stars = loadStars(kid.id);
   let gained = 0;
   entries.forEach(({ key, value }) => {
@@ -1479,7 +1606,7 @@ function awardKeyed(kid, entries) {
     stars.awarded[key] = 1;
     gained += value;
   });
-  return applyStarGain(kid, stars, gained);
+  return applyStarGain(kid, stars, gained, label);
 }
 
 function awardSprintStars(kid, correct) {
