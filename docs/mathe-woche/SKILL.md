@@ -139,8 +139,14 @@ jeweiligen Interessengebiet:
 - Bei realen Themen (z.B. ein Sportverein) nur allgemein bekannte Fakten in
   eigenen Worten.
 
-Danach genau 6 kurze Verständnisfragen mit eindeutigen, knappen Antworten
-(ein Wort/eine Zahl/ein kurzer Fakt) – die Auswertung vergleicht exakt.
+Danach genau 6 kurze Verständnisfragen. **Jede Frage bekommt `optionen`:
+genau 3 Antwortmöglichkeiten, von denen das Kind eine auswählt (kein Tippen,
+das hat zu Frust durch Tippfehler geführt).** Genau eine Option ist richtig,
+`loesung` ist exakt gleich geschrieben wie diese Option. Die beiden anderen
+sind plausibel, aber nach dem Text eindeutig falsch. Die richtige Option steht
+nicht immer an derselben Stelle. Gilt auch für alle anderen Aufgaben mit
+Wort-Antwort statt Zahl (z.B. Geometrie „stumpf“). Reine Zahlen-Antworten
+bleiben freie Eingabe.
 
 Datei: `data/kind1/<woche>-lesen-<interesse-als-slug>.json` (Slug: klein
 geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
@@ -156,7 +162,7 @@ geschrieben, Leerzeichen/Sonderzeichen durch `-` ersetzt, z.B.
   "titel": "Lesetext: <Titel>",
   "text": "<Lesetext, 180-260 Wörter>",
   "aufgaben": [
-    { "id": 1, "typ": "leseverstehen", "frage": "...", "loesung": "..." }
+    { "id": 1, "typ": "leseverstehen", "frage": "...", "optionen": ["...", "...", "..."], "loesung": "..." }
   ]
 }
 ```
@@ -178,9 +184,9 @@ Englisch trainiert werden (Sprache lernen, nicht nur Leseverständnis).
 - Länge **120-180 Wörter** (kürzer als Tims deutsche Texte, weil Englisch für
   Marlene eine Fremdsprache ist).
 
-Danach genau 6 kurze Verständnisfragen **auf Englisch**, mit knappen,
-eindeutigen englischen Antworten (ein Wort/eine Zahl/eine kurze Phrase) – die
-Auswertung vergleicht exakt, nur Groß-/Kleinschreibung wird ignoriert.
+Danach genau 6 kurze Verständnisfragen **auf Englisch**, jeweils mit `optionen`:
+genau 3 englische Antwortmöglichkeiten zur Auswahl (kein Tippen), eine davon
+richtig, `loesung` exakt wie diese Option geschrieben.
 
 Datei: `data/kind2/<woche>-englisch.json`.
 
@@ -195,7 +201,7 @@ Datei: `data/kind2/<woche>-englisch.json`.
   "titel": "<kurzer, englischer Titel>",
   "text": "<Detektivgeschichte auf Englisch, 120-180 Wörter>",
   "aufgaben": [
-    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "loesung": "<Antwort auf Englisch>" }
+    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "optionen": ["<answer A>", "<answer B>", "<answer C>"], "loesung": "<correct answer>" }
   ]
 }
 ```

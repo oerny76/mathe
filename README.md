@@ -107,10 +107,16 @@ wird ignoriert):
   "titel": "Lesetext: ...",
   "text": "Ein kurzer, altersgerechter Text, gerne zu einem Interessengebiet des Kindes (z.B. Lieblingsverein, Lieblingsbuch/-serie) – das macht Lesen leichter.",
   "aufgaben": [
-    { "id": 1, "typ": "leseverstehen", "frage": "Worum ging es im Text?", "loesung": "kurze, eindeutige Antwort" }
+    { "id": 1, "typ": "leseverstehen", "frage": "Worum ging es im Text?", "optionen": ["Antwort A", "Antwort B", "Antwort C"], "loesung": "Antwort B" }
   ]
 }
 ```
+
+Aufgaben mit **`optionen`** (genau 3 Antwortmöglichkeiten) beantwortet das Kind
+per Auswahl statt per Tippen, das vermeidet Frust durch Tippfehler.
+`loesung` muss exakt gleich geschrieben sein wie eine der Optionen. Das gilt für
+alle Lesetexte und für jede Aufgabe mit Wort-Antwort. Zahlen-Antworten bleiben
+freie Eingabe.
 
 ### Wochenpensum
 

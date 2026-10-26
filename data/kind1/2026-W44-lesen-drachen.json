@@ -11,37 +11,67 @@
       "id": 1,
       "typ": "leseverstehen",
       "frage": "Wie heißt der kleine Drache?",
-      "loesung": "Nebel"
+      "loesung": "Nebel",
+      "optionen": [
+        "Rauch",
+        "Funke",
+        "Nebel"
+      ]
     },
     {
       "id": 2,
       "typ": "leseverstehen",
       "frage": "Welche Krankheit bekommt er jeden Herbst?",
-      "loesung": "Schnupfen"
+      "loesung": "Schnupfen",
+      "optionen": [
+        "Bauchweh",
+        "Schnupfen",
+        "Fieber"
+      ]
     },
     {
       "id": 3,
       "typ": "leseverstehen",
-      "frage": "Wie viele Seen hat das Tal? (Schreibe die Zahl.)",
-      "loesung": "3"
+      "frage": "Wie viele Seen hat das Tal?",
+      "loesung": "3",
+      "optionen": [
+        "2",
+        "3",
+        "4"
+      ]
     },
     {
       "id": 4,
       "typ": "leseverstehen",
       "frage": "Welches Fest feiert das Dorf?",
-      "loesung": "Laternenfest"
+      "loesung": "Laternenfest",
+      "optionen": [
+        "Sommerfest",
+        "Laternenfest",
+        "Drachenfest"
+      ]
     },
     {
       "id": 5,
       "typ": "leseverstehen",
       "frage": "Wie heißt das Mädchen, das dem Drachen hilft?",
-      "loesung": "Lotta"
+      "loesung": "Lotta",
+      "optionen": [
+        "Mira",
+        "Anna",
+        "Lotta"
+      ]
     },
     {
       "id": 6,
       "typ": "leseverstehen",
-      "frage": "Welches Getränk bringt Lotta mit? (ein Wort)",
-      "loesung": "Holundertee"
+      "frage": "Welches Getränk bringt Lotta mit?",
+      "loesung": "Holundertee",
+      "optionen": [
+        "Apfelsaft",
+        "Pfefferminztee",
+        "Holundertee"
+      ]
     }
   ]
 }

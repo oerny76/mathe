@@ -10,38 +10,68 @@
     {
       "id": 1,
       "typ": "leseverstehen",
-      "frage": "Wie alt ist Jonas? (Schreibe die Zahl.)",
-      "loesung": "9"
+      "frage": "Wie alt ist Jonas?",
+      "loesung": "9",
+      "optionen": [
+        "8",
+        "9",
+        "10"
+      ]
     },
     {
       "id": 2,
       "typ": "leseverstehen",
       "frage": "Wer schenkt Jonas die Überraschung zum Geburtstag?",
-      "loesung": "Opa"
+      "loesung": "Opa",
+      "optionen": [
+        "Papa",
+        "Opa",
+        "Onkel"
+      ]
     },
     {
       "id": 3,
       "typ": "leseverstehen",
       "frage": "In welche Stadt fahren die beiden?",
-      "loesung": "München"
+      "loesung": "München",
+      "optionen": [
+        "Hamburg",
+        "Berlin",
+        "München"
+      ]
     },
     {
       "id": 4,
       "typ": "leseverstehen",
       "frage": "Welche Farbe hat das Stadion bei Heimspielen des FC Bayern von außen?",
-      "loesung": "rot"
+      "loesung": "rot",
+      "optionen": [
+        "blau",
+        "rot",
+        "grün"
+      ]
     },
     {
       "id": 5,
       "typ": "leseverstehen",
       "frage": "Was bekommt Jonas zu trinken?",
-      "loesung": "Kakao"
+      "loesung": "Kakao",
+      "optionen": [
+        "Limonade",
+        "Kakao",
+        "Tee"
+      ]
     },
     {
       "id": 6,
       "typ": "leseverstehen",
-      "frage": "Womit fahren Jonas und Opa nach München? (Das Wort steht im ersten Absatz.)",
-      "loesung": "Bahn"
+      "frage": "Womit fahren Jonas und Opa nach München?",
+      "loesung": "Bahn",
+      "optionen": [
+        "Auto",
+        "Bus",
+        "Bahn"
+      ]
     }
   ]
 }

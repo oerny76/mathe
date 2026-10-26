@@ -131,23 +131,29 @@ Ergänzen zu 100 etc. Keine Sachaufgaben, keine mehrschrittigen Aufgaben.`,
     anweisung: `Erzeuge genau 6 Geometrie-Aufgaben passend zum Alter (z.B. Umfang/Fläche von
 Rechteck und Quadrat, Eigenschaften von Winkeln, Eckdaten von Würfel/Quader,
 Symmetrie). Antworten sind kurze, eindeutige Strings ohne Einheit (auch wenn
-die Frage eine Einheit nennt), da die Auswertung exakt vergleicht.`,
+die Frage eine Einheit nennt), da die Auswertung exakt vergleicht. Hat eine
+Aufgabe eine Wort-Antwort statt einer Zahl (z.B. "stumpf"), bekommt sie
+zusätzlich "optionen" mit genau 3 Antwortmöglichkeiten, von denen das Kind eine
+auswählt; "loesung" muss exakt wie die richtige Option geschrieben sein.`,
   },
   lesen: {
     format: `{
   "titel": "<kurzer, ansprechender Titel, z.B. \\"Lesetext: ...\\">",
   "text": "<Lesetext, 150-220 Wörter, altersgerecht, zum angegebenen Interessengebiet>",
   "aufgaben": [
-    { "id": 1, "typ": "leseverstehen", "frage": "<Verständnisfrage>", "loesung": "<kurze, eindeutige Antwort, ein Wort oder wenige Worte>" }
+    { "id": 1, "typ": "leseverstehen", "frage": "<Verständnisfrage>", "optionen": ["<Antwort A>", "<Antwort B>", "<Antwort C>"], "loesung": "<die richtige Antwort, exakt gleich geschrieben wie eine der drei optionen>" }
   ]
 }`,
     anweisung: `Schreibe einen ORIGINELLEN, altersgerechten Lesetext (180-260 Wörter) zum
 angegebenen Interessengebiet des Kindes – KEINE Übernahme von urheberrechtlich
 geschütztem Text (keine wörtlichen Zitate aus Büchern/Filmen/Liedern, keine
 geschützten Figurennamen); bei realen Themen (z.B. ein Sportverein) nur allgemein
-bekannte Fakten in eigenen Worten. Danach genau 6 kurze Verständnisfragen mit
-eindeutigen, knappen Antworten (ein Wort/eine Zahl/ein kurzer Fakt), da die
-Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
+bekannte Fakten in eigenen Worten. Danach genau 6 kurze Verständnisfragen.
+Jede Frage bekommt genau 3 Antwortmöglichkeiten ("optionen"), von denen das Kind
+eine auswählt (kein Tippen). Genau eine ist richtig, die beiden anderen sind
+plausibel, aber nach dem Text eindeutig falsch. "loesung" muss exakt wie die
+richtige Option geschrieben sein. Die richtige Option steht nicht immer an
+derselben Stelle. Antworten kurz halten (ein Wort, eine Zahl oder ein kurzer Fakt).`,
   },
   englisch: {
     format: `{
@@ -155,7 +161,7 @@ Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
   "sprache": "englisch",
   "text": "<Detektiv-/Rätselgeschichte auf Englisch, 120-180 Wörter>",
   "aufgaben": [
-    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "loesung": "<kurze, eindeutige Antwort auf Englisch>" }
+    { "id": 1, "typ": "leseverstehen", "frage": "<Frage auf Englisch>", "optionen": ["<answer A>", "<answer B>", "<answer C>"], "loesung": "<the correct answer, spelled exactly like one of the three optionen>" }
   ]
 }`,
     anweisung: `Schreibe eine ORIGINELLE, generische Detektiv-/Rätselgeschichte auf Englisch
@@ -166,9 +172,13 @@ nur ein eigener Fall mit eigenen Namen). Sprachniveau A2 (wie im 6./7.
 Schuljahr): einfache Satzstrukturen, überwiegend Präsens/einfaches Präteritum,
 gängiger Wortschatz, keine komplexen Redewendungen oder Slang. Länge 120-180
 Wörter (kürzer als ein deutscher Lesetext, da Englisch für das Kind eine
-Fremdsprache ist). Danach genau 6 kurze Verständnisfragen AUF ENGLISCH mit
-knappen, eindeutigen englischen Antworten (ein Wort/eine Zahl/eine kurze
-Phrase), da die Auswertung exakt (ohne Groß-/Kleinschreibung) vergleicht.`,
+Fremdsprache ist). Danach genau 6 kurze Verständnisfragen AUF ENGLISCH. Jede
+Frage bekommt genau 3 englische Antwortmöglichkeiten ("optionen"), von denen das
+Kind eine auswählt (kein Tippen). Genau eine ist richtig, die beiden anderen
+sind plausibel, aber nach dem Text eindeutig falsch. "loesung" muss exakt wie
+die richtige Option geschrieben sein. Die richtige Option steht nicht immer an
+derselben Stelle. Antworten kurz halten (ein Wort, eine Zahl oder eine kurze
+Phrase).`,
   },
 };
 
@@ -309,6 +319,25 @@ async function callClaude(system, userMessage) {
   return JSON.parse(cleaned);
 }
 
+// Aufgaben mit Wort-Antwort müssen per Auswahl beantwortbar sein: 3 Optionen,
+// eine davon exakt gleich "loesung". Nur eine Warnung, die Datei wird trotzdem
+// geschrieben (das Kind könnte dann nur frei tippen).
+function warnOptionenProbleme(fileName, json) {
+  (json.aufgaben || []).forEach((a) => {
+    const istZahl = /^-?\d+([.,]\d+)?$/.test(String(a.loesung).trim());
+    if (!a.optionen) {
+      if (!istZahl) console.warn(`⚠ ${fileName}, Aufgabe ${a.id}: Wort-Antwort ohne "optionen".`);
+      return;
+    }
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) {
+      console.warn(`⚠ ${fileName}, Aufgabe ${a.id}: "optionen" braucht genau 3 verschiedene Einträge.`);
+    }
+    if (!a.optionen.includes(String(a.loesung))) {
+      console.warn(`⚠ ${fileName}, Aufgabe ${a.id}: "loesung" steht nicht in "optionen".`);
+    }
+  });
+}
+
 function writeWorksheet(kidId, fileName, json) {
   const outDir = path.join("data", kidId);
   fs.mkdirSync(outDir, { recursive: true });
@@ -377,6 +406,7 @@ ${prompt.anweisung}`;
     ...generated,
   };
 
+  warnOptionenProbleme(fileName, json);
   writeWorksheet(kid.id, fileName, json);
   return fileName;
 }

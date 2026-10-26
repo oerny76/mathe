@@ -81,6 +81,7 @@ const els = {
   redoTaskCard: document.getElementById("redo-task-card"),
   redoQuestion: document.getElementById("redo-question"),
   redoInput: document.getElementById("redo-input"),
+  redoChoices: document.getElementById("redo-choices"),
   redoSolution: document.getElementById("redo-solution"),
   redoCheckBtn: document.getElementById("redo-check-btn"),
   redoStopBtn: document.getElementById("redo-stop-btn"),
@@ -1295,6 +1296,47 @@ function renderTasks() {
     // (inputmode "decimal") nicht hat, deshalb dort normale Tastatur.
     const isNumericAnswer = /^\d+([.,]\d+)?$/.test(String(task.loesung).trim());
 
+    // Aufgaben mit "optionen" (z.B. Lesetexte) werden per Auswahl beantwortet
+    // statt per Tippen: Ein verstecktes Feld hält die gewählte Antwort, damit
+    // Auswertung und Speicherung unverändert funktionieren.
+    const hasChoices = Array.isArray(task.optionen) && task.optionen.length >= 2;
+    if (hasChoices) {
+      card.innerHTML = `
+        <span class="task-number">Aufgabe ${index + 1} von ${currentTasks.length}</span>
+        <p class="task-question">${escapeHtml(task.frage)}</p>
+        <div class="task-input-row">
+          <div class="choice-group" role="radiogroup"></div>
+          <input type="hidden" data-task-id="${task.id}" />
+          <span class="task-mark" aria-hidden="true"></span>
+        </div>
+      `;
+      const hiddenInput = card.querySelector("input");
+      hiddenInput.value = String(savedAnswer);
+      const group = card.querySelector(".choice-group");
+      task.optionen.forEach((option) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-btn";
+        btn.textContent = option;
+        btn.setAttribute("role", "radio");
+        const selected = savedAnswer !== "" && normalizeAnswer(option) === normalizeAnswer(savedAnswer);
+        btn.classList.toggle("selected", selected);
+        btn.setAttribute("aria-checked", String(selected));
+        btn.addEventListener("click", () => {
+          hiddenInput.value = option;
+          card.classList.remove("correct", "wrong");
+          group.querySelectorAll(".choice-btn").forEach((other) => {
+            const isThis = other === btn;
+            other.classList.toggle("selected", isThis);
+            other.setAttribute("aria-checked", String(isThis));
+          });
+        });
+        group.appendChild(btn);
+      });
+      els.taskList.appendChild(card);
+      return;
+    }
+
     card.innerHTML = `
       <span class="task-number">Aufgabe ${index + 1} von ${currentTasks.length}</span>
       <p class="task-question">${escapeHtml(task.frage)}</p>
@@ -1405,6 +1447,9 @@ function checkAnswers() {
       card.classList.add("wrong");
     }
     input.disabled = true;
+    card.querySelectorAll(".choice-btn").forEach((btn) => {
+      btn.disabled = true;
+    });
   });
 
   if (correctCount === currentTasks.length) {
@@ -1673,7 +1718,7 @@ function collectSheetResults() {
         const given = answers[t.id] ?? "";
         const richtig =
           !!progress.overrides?.[t.id] || (given !== "" && normalizeAnswer(given) === normalizeAnswer(t.loesung));
-        return { frage: t.frage, gegeben: String(given), loesung: String(t.loesung), richtig };
+        return { frage: t.frage, gegeben: String(given), loesung: String(t.loesung), richtig, optionen: t.optionen || null };
       });
       return {
         titel: ws.titel,
@@ -1802,9 +1847,26 @@ function showRedoTask() {
   redoChecked = false;
   els.redoProgress.textContent = `Aufgabe ${redoIndex + 1} von ${redoQueue.length}`;
   els.redoQuestion.textContent = task.frage;
+  const hasChoices = Array.isArray(task.optionen) && task.optionen.length >= 2;
   els.redoInput.inputMode = /^\d+([.,]\d+)?$/.test(task.loesung.trim()) ? "decimal" : "text";
   els.redoInput.value = "";
   els.redoInput.disabled = false;
+  els.redoInput.hidden = hasChoices;
+  els.redoChoices.hidden = !hasChoices;
+  els.redoChoices.innerHTML = "";
+  if (hasChoices) {
+    task.optionen.forEach((option) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "choice-btn";
+      btn.textContent = option;
+      btn.addEventListener("click", () => {
+        els.redoInput.value = option;
+        els.redoChoices.querySelectorAll(".choice-btn").forEach((other) => other.classList.toggle("selected", other === btn));
+      });
+      els.redoChoices.appendChild(btn);
+    });
+  }
   els.redoSolution.hidden = true;
   els.redoTaskCard.classList.remove("correct", "wrong");
   els.redoCheckBtn.textContent = "Prüfen";
@@ -1813,6 +1875,7 @@ function showRedoTask() {
 
 function handleRedoAction() {
   if (!redoChecked) {
+    if (els.redoInput.hidden && els.redoInput.value === "") return; // erst eine Antwort auswählen
     const task = redoQueue[redoIndex];
     const isCorrect =
       normalizeAnswer(els.redoInput.value) !== "" &&
@@ -1823,6 +1886,9 @@ function handleRedoAction() {
     }
     els.redoTaskCard.classList.add(isCorrect ? "correct" : "wrong");
     els.redoInput.disabled = true;
+    els.redoChoices.querySelectorAll(".choice-btn").forEach((btn) => {
+      btn.disabled = true;
+    });
     if (!isCorrect) {
       els.redoSolution.textContent = `Richtig wäre: ${task.loesung}`;
       els.redoSolution.hidden = false;

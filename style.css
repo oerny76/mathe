@@ -893,6 +893,51 @@ body {
   outline-offset: 1px;
 }
 
+.choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.choice-group[hidden] {
+  display: none;
+}
+
+.choice-btn {
+  min-height: 48px;
+  padding: 10px 14px;
+  text-align: left;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.choice-btn.selected {
+  border-color: var(--chalk-yellow);
+  background: #fff6d6;
+  font-weight: 600;
+}
+
+.choice-btn:disabled {
+  cursor: default;
+}
+
+.task-card.correct .choice-btn.selected {
+  border-color: var(--chalk-green);
+  background: #e6f6e8;
+}
+
+.task-card.wrong .choice-btn.selected {
+  border-color: var(--chalk-red);
+  background: #fdeceb;
+}
+
 .task-mark {
   font-size: 1.4rem;
   width: 28px;
