@@ -29,6 +29,8 @@ const KIDS = [
     id: "kind1",
     name: "Tim",
     alter: 9,
+    klasse: 4, // Klassenstufe (bayerischer Lehrplan); in shared.js (KIDS) gleich pflegen
+    stufeTiefer: false, // true = Aufgaben auf dem Niveau der Klassenstufe darunter
     // Pro Woche werden 2 dieser 3 Bereiche ausgewählt (rotierend), damit über die
     // Zeit alle drei drankommen. Reihenfolge ist sonst egal (Puzzle-Teile richten
     // sich nach den tatsächlichen Arbeitsblättern der Woche, nicht nach dieser Liste).
@@ -44,6 +46,8 @@ const KIDS = [
     id: "kind2",
     name: "Marlene",
     alter: 12,
+    klasse: 7,
+    stufeTiefer: false,
     // Alle 3 Bereiche kommen jede Woche vor, ohne Rotation (siehe
     // generateBereicheForKid) – das 4. Arbeitsblatt der Woche ist der
     // englische Lesetext (siehe "englischLesen").
@@ -58,6 +62,11 @@ const KIDS = [
     bildStil: "ausmalbild",
   },
 ];
+
+function klassenHinweis(kid) {
+  const ziel = kid.stufeTiefer ? kid.klasse - 1 : kid.klasse;
+  return `Klassenstufe: ${kid.klasse}. Die Aufgaben sollen dem Niveau von Klasse ${ziel} entsprechen.`;
+}
 
 const MODEL = "claude-sonnet-5";
 const API_URL = "https://api.anthropic.com/v1/messages";
@@ -339,7 +348,7 @@ async function generateWorksheet(kid, weekId, bereich, { fileName, interesse, pr
   const prompt = BEREICH_PROMPTS[promptKey || bereich];
   const previous = findPreviousWorksheet(kid.id, weekId, bereich);
 
-  const userMessage = `Alter: ${kid.alter}. Bereich: ${bereich}. Neue Kalenderwoche: ${weekId}.
+  const userMessage = `Alter: ${kid.alter}. ${klassenHinweis(kid)} Bereich: ${bereich}. Neue Kalenderwoche: ${weekId}.
 ${interesse ? `Interessengebiet für den Lesetext: ${interesse}.\n` : ""}${
     previous
       ? `Das war das letzte Arbeitsblatt in diesem Bereich (Schwierigkeit leicht daran anpassen, nicht 1:1 wiederholen):\n${JSON.stringify(previous)}`
@@ -458,7 +467,7 @@ async function generateSingleForKid(kid, weekId) {
   const previous = findPreviousWorksheet(kid.id, weekId);
 
   const userMessage = previous
-    ? `Alter: ${kid.alter}. Neue Kalenderwoche: ${weekId}.
+    ? `Alter: ${kid.alter}. ${klassenHinweis(kid)} Neue Kalenderwoche: ${weekId}.
 Das war die letzte Woche (bitte Schwierigkeit leicht daran anpassen, nicht 1:1 wiederholen):
 ${JSON.stringify(previous)}
 
@@ -475,7 +484,7 @@ Exaktes Ausgabeformat:
     { "id": 1, "typ": "rechnen|sachaufgabe|knobelaufgabe", "frage": "<Aufgabentext>", "loesung": "<Lösung als String>" }
   ]
 }`
-    : `Alter: ${kid.alter}. Neue Kalenderwoche: ${weekId}. Dies ist die erste Woche, bitte mit
+    : `Alter: ${kid.alter}. ${klassenHinweis(kid)} Neue Kalenderwoche: ${weekId}. Dies ist die erste Woche, bitte mit
 relativ einfachen Aufgaben beginnen. Erzeuge 6 bis 8 Aufgaben, gemischt aus
 Rechenaufgaben, Sachaufgaben und Knobelaufgaben.`;
 

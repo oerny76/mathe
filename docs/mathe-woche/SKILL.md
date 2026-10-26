@@ -28,6 +28,13 @@ Kontext, aktuelle ISO-Kalenderwoche).
 | Tim     | `kind1`   | 9     | einmaleins, grundrechenarten, kopfrechnen | ja (Deutsch, pro Interesse) | FC Bayern München, Drachen | ausmalbild (niedliches Tier/Wesen, A4) |
 | Marlene | `kind2`   | 12    | kopfrechnen, einmaleins, geometrie | ja (Englisch, 1×/Woche) | Bild-Thema: Kreativität, Malen und Basteln · Lese-Thema: Detektivgeschichten (Stil „Die drei Fragezeichen“ o.ä.) | ausmalbild (komplexes Mandala, A4) |
 
+**Klassenstufe:** Tim besucht Klasse 4, Marlene Klasse 7 (Bayern). Die Aufgaben
+sollen dem Niveau dieser Klassenstufe entsprechen. Wünschen die Eltern „eine
+Stufe tiefer“, orientiert sich alles an der Klasse darunter. In der App gilt
+diese Einstellung (Eltern-Code) für das tägliche Kopfrechnen. Die Wochenblätter
+musst du bei Bedarf selbst anpassen. Ist die Klassenstufe im Plan unklar,
+bitte kurz nachfragen.
+
 Diese Tabelle muss mit dem `KIDS`-Array in `scripts/generate.js` synchron
 bleiben. Wurde dort etwas geändert (neues Kind, neue Interessen, andere
 Bereiche), zuerst dort **und** in dieser Skill-Datei aktualisieren, bevor du

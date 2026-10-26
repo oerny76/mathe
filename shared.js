@@ -4,8 +4,8 @@
 
 // Hier die beiden Kinder eintragen. "id" muss zum Ordnernamen unter /data passen.
 const KIDS = [
-  { id: "kind1", name: "Tim", color: "var(--chalk-pink)" },
-  { id: "kind2", name: "Marlene", color: "var(--chalk-blue)" },
+  { id: "kind1", name: "Tim", klasse: 4, color: "var(--chalk-pink)" },
+  { id: "kind2", name: "Marlene", klasse: 7, color: "var(--chalk-blue)" },
 ];
 
 // ---------- Bereiche (Themen-Kategorien) ----------

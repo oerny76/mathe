@@ -205,6 +205,49 @@ body {
   margin: 0 16px 10px;
 }
 
+/* ---------- Eltern-Einstellungen ---------- */
+.settings-toggle-row {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 8px;
+}
+
+.settings-panel {
+  background: var(--board-bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 0 16px 16px;
+}
+
+.settings-note {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.settings-lock-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-lock-row input {
+  width: 90px;
+}
+
+.settings-error {
+  color: var(--chalk-red);
+  font-size: 0.85rem;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ---------- Meine Ergebnisse + Wiederholung ---------- */
 .results-title {
   font-family: var(--font-display);
