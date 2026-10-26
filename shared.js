@@ -38,3 +38,25 @@ const SUPABASE_KEY = "sb_publishable_1EraAljaYautx0yw-eLrsw_X25gwY2M";
 const supabaseClient = window.supabase
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
+
+// ---------- Neustart ----------
+// RESET_EPOCH: Supabase-Einträge davor werden ignoriert (bleiben als Archiv
+// in der Datenbank). RESET_VERSION: Ändert man sie, räumt jedes Gerät beim
+// nächsten Öffnen einmalig seinen lokalen Fortschritt und den Cache auf.
+const RESET_EPOCH = "2026-10-26T00:00:00Z";
+const RESET_VERSION = "2026-10-26";
+
+(function applyResetIfNeeded() {
+  try {
+    if (localStorage.getItem("mathe-pwa:reset-version") === RESET_VERSION) return;
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("mathe-pwa:"))
+      .forEach((k) => localStorage.removeItem(k));
+    localStorage.setItem("mathe-pwa:reset-version", RESET_VERSION);
+  } catch (e) {
+    return;
+  }
+  if (window.caches) {
+    caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+  }
+})();

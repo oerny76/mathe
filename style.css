@@ -205,8 +205,113 @@ body {
   margin: 0 16px 10px;
 }
 
-.shared-goal-hint {
+/* ---------- Meine Ergebnisse + Wiederholung ---------- */
+.results-title {
+  font-family: var(--font-display);
   color: var(--chalk-yellow);
+  text-align: center;
+  margin: 12px 16px;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 16px 16px;
+}
+
+.results-item {
+  background: var(--board-bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.results-item-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.results-item-title {
+  font-size: 1rem;
+}
+
+.results-item-meta {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.results-item-body {
+  padding: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.results-item-body[hidden] {
+  display: none;
+}
+
+.results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.results-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(245, 245, 240, 0.08);
+}
+
+.results-item-body.only-wrong .results-row.correct {
+  display: none;
+}
+
+.results-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.results-row-answer {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.results-row-solution {
+  font-size: 0.85rem;
+  color: var(--chalk-green);
+}
+
+.redo-progress {
+  text-align: center;
+  margin: 12px 0;
+  opacity: 0.8;
+}
+
+.redo-solution {
+  margin: 8px 0 0;
+  color: var(--chalk-green);
+}
+
+#redo-view .task-card {
+  margin: 0 16px;
 }
 
 /* ---------- Tägliches Kopfrechnen (Sprint) ---------- */
