@@ -48,7 +48,19 @@ const els = {
   sprintDetailsPanel: document.getElementById("sprint-details-panel"),
   sprintDetailsList: document.getElementById("sprint-details-list"),
   weeklyUsageHint: document.getElementById("weekly-usage-hint"),
-  sharedGoalHint: document.getElementById("shared-goal-hint"),
+  resultsOpenBtn: document.getElementById("results-open-btn"),
+  resultsView: document.getElementById("results-view"),
+  resultsBackBtn: document.getElementById("results-back-btn"),
+  resultsList: document.getElementById("results-list"),
+  redoView: document.getElementById("redo-view"),
+  redoProgress: document.getElementById("redo-progress"),
+  redoTaskCard: document.getElementById("redo-task-card"),
+  redoQuestion: document.getElementById("redo-question"),
+  redoInput: document.getElementById("redo-input"),
+  redoSolution: document.getElementById("redo-solution"),
+  redoCheckBtn: document.getElementById("redo-check-btn"),
+  redoStopBtn: document.getElementById("redo-stop-btn"),
+  redoSummary: document.getElementById("redo-summary"),
 };
 
 // Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
@@ -63,6 +75,7 @@ let currentTasks = [];
 let currentWorksheet = null;
 let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
 let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Wochenbild-Woche, ein Eintrag pro Puzzle-Teil
+let currentWorksheetList = []; // alle geladenen Arbeitsblatt-Metadaten, für "Meine Ergebnisse"
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 let lueckenByFile = new Map(); // file -> {bereich, correct_count, total}, für die "Wo stehe ich?"-Übersicht
 
@@ -155,6 +168,7 @@ async function loadAttempts(kid) {
     .from("attempts")
     .select("worksheet_file, bereich, correct_count, total, completed_at")
     .eq("kid_id", kid.id)
+    .gte("completed_at", RESET_EPOCH)
     .order("completed_at", { ascending: true });
 
   if (error) {
@@ -275,57 +289,8 @@ function markUsageDay(kidId) {
   updateWeeklyUsageHint();
 }
 
-// ---------- Gemeinsames Wochenziel (alle Kinder zusammen) ----------
-// Teamziel statt Wettbewerb: Die Übungstage aller Kinder werden addiert. Pro
-// Kind zählen höchstens WEEKLY_USAGE_TARGET Tage, damit ein Kind das Ziel nicht
-// allein erreichen kann. Quellen je Kind: Tage auf diesem Gerät (localStorage,
-// auch Sprints) plus abgeschlossene Arbeitsblätter aus Supabase (zählt auch
-// geräteübergreifend).
-const remoteUsageDays = {}; // kidId -> Set("YYYY-MM-DD") der aktuellen Woche
-
-async function initSharedGoal() {
-  const thisWeek = isoWeekString(new Date());
-  await Promise.all(
-    KIDS.map(async (kid) => {
-      const attempts = await loadAttempts(kid);
-      const days = new Set();
-      attempts.forEach((a) => {
-        const d = new Date(a.completed_at);
-        if (isoWeekString(d) === thisWeek) days.add(d.toISOString().slice(0, 10));
-      });
-      remoteUsageDays[kid.id] = days;
-    })
-  );
-  updateSharedGoalHint();
-}
-
-function updateSharedGoalHint() {
-  if (!currentKid || KIDS.length < 2) {
-    els.sharedGoalHint.hidden = true;
-    return;
-  }
-  let total = 0;
-  KIDS.forEach((kid) => {
-    const days = new Set([...loadUsageDays(kid.id), ...(remoteUsageDays[kid.id] || [])]);
-    total += Math.min(days.size, WEEKLY_USAGE_TARGET);
-  });
-  const goal = WEEKLY_USAGE_TARGET * KIDS.length;
-
-  if (total === 0) {
-    els.sharedGoalHint.hidden = true;
-    return;
-  }
-  const others = KIDS.filter((k) => k.id !== currentKid.id).map((k) => k.name).join(" und ");
-  els.sharedGoalHint.hidden = false;
-  els.sharedGoalHint.textContent =
-    total >= goal
-      ? `🏆 Teamziel geschafft! Zusammen mit ${others} habt ihr diese Woche alle ${goal} Übungstage erreicht.`
-      : `Teamziel: Zusammen mit ${others} schon ${total} von ${goal} Übungstagen diese Woche.`;
-}
-
 function updateWeeklyUsageHint() {
   if (!currentKid) return;
-  updateSharedGoalHint();
   const count = loadUsageDays(currentKid.id).length;
 
   if (count === 0) {
@@ -733,7 +698,6 @@ async function selectKid(kid) {
   initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
   updateSprintTodayHint();
   updateWeeklyUsageHint();
-  initSharedGoal();
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -778,6 +742,7 @@ async function selectKid(kid) {
     );
 
     const valid = worksheets.filter(Boolean).sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
+    currentWorksheetList = valid;
     backfillUnsyncedProgress(kid.id, valid);
     await setupPickerView(kid, index, valid);
   } catch (err) {
@@ -1215,6 +1180,209 @@ function retry() {
   renderTasks();
 }
 
+// ---------- Meine Ergebnisse: Aufgaben nachschauen + Fehler wiederholen ----------
+// Zeigt zu jeder abgeschlossenen Übung und jedem Kopfrechnen-Sprint die eigene
+// Antwort, die richtige Lösung und ob es gepasst hat. Daten kommen aus
+// localStorage (Auf diesem Gerät gespeichert), die Aufgabentexte aus den
+// bereits geladenen Arbeitsblättern.
+let redoQueue = [];
+let redoIndex = 0;
+let redoCorrect = 0;
+let redoChecked = false;
+
+function hideAllViews() {
+  [els.picker, els.view, els.sprintView, els.sprintSummary, els.resultsView, els.redoView].forEach((el) => {
+    el.hidden = true;
+  });
+}
+
+function collectSheetResults() {
+  return currentWorksheetList
+    .map((ws) => {
+      const progress = loadProgress(currentKid.id, ws.file);
+      const sheet = worksheetCache[ws.file];
+      if (!progress || !sheet || progress.total == null) return null;
+      const answers = progress.answers || {};
+      const tasks = (sheet.aufgaben || []).map((t) => {
+        const given = answers[t.id] ?? "";
+        const richtig =
+          !!progress.overrides?.[t.id] || (given !== "" && normalizeAnswer(given) === normalizeAnswer(t.loesung));
+        return { frage: t.frage, gegeben: String(given), loesung: String(t.loesung), richtig };
+      });
+      return {
+        titel: ws.titel,
+        date: progress.completedAt || "",
+        correct: tasks.filter((t) => t.richtig).length,
+        total: tasks.length,
+        tasks,
+      };
+    })
+    .filter(Boolean);
+}
+
+function collectSprintResults() {
+  return loadRecentSprintResults(currentKid.id, 30)
+    .filter((r) => (r.tasks || []).length > 0)
+    .map((r) => ({
+      titel: "🧠 Kopfrechnen-Sprint",
+      date: r.date,
+      correct: r.correct,
+      total: r.attempted,
+      tasks: r.tasks,
+    }));
+}
+
+function formatResultDate(dateStr) {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric" });
+}
+
+function renderResults() {
+  const items = [...collectSheetResults(), ...collectSprintResults()].sort((a, b) => (a.date < b.date ? 1 : -1));
+  els.resultsList.innerHTML = "";
+
+  if (items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "subtitle";
+    empty.textContent = "Hier erscheinen deine Übungen, sobald du die erste gelöst hast.";
+    els.resultsList.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const wrap = document.createElement("div");
+    wrap.className = "results-item";
+
+    const head = document.createElement("button");
+    head.type = "button";
+    head.className = "results-item-head";
+    head.innerHTML = `
+      <span class="results-item-title">${escapeHtml(item.titel)}</span>
+      <span class="results-item-meta">${escapeHtml(formatResultDate(item.date))} · ${item.correct} von ${item.total} richtig</span>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "results-item-body";
+    body.hidden = true;
+
+    const wrongTasks = item.tasks.filter((t) => !t.richtig);
+    const toolbar = document.createElement("div");
+    toolbar.className = "results-toolbar";
+    toolbar.innerHTML = `<label><input type="checkbox" class="results-only-wrong" /> Nur falsche zeigen</label>`;
+    if (wrongTasks.length > 0) {
+      const redoBtn = document.createElement("button");
+      redoBtn.type = "button";
+      redoBtn.className = "chalk-button ghost small";
+      redoBtn.textContent = `🔁 ${wrongTasks.length} falsche nochmal üben`;
+      redoBtn.addEventListener("click", () => startRedo(wrongTasks));
+      toolbar.appendChild(redoBtn);
+    }
+    body.appendChild(toolbar);
+    toolbar.querySelector(".results-only-wrong").addEventListener("change", (e) => {
+      body.classList.toggle("only-wrong", e.target.checked);
+    });
+
+    item.tasks.forEach((t) => {
+      const row = document.createElement("div");
+      row.className = "results-row " + (t.richtig ? "correct" : "wrong");
+      const given = t.gegeben === "" ? "nicht beantwortet" : escapeHtml(t.gegeben);
+      row.innerHTML = `
+        <span class="results-row-mark">${t.richtig ? "✅" : "❌"}</span>
+        <span class="results-row-text">
+          <span class="results-row-frage">${escapeHtml(t.frage)}</span>
+          <span class="results-row-answer">Deine Antwort: ${given}</span>
+          ${t.richtig ? "" : `<span class="results-row-solution">Richtig wäre: ${escapeHtml(t.loesung)}</span>`}
+        </span>
+      `;
+      body.appendChild(row);
+    });
+
+    head.addEventListener("click", () => {
+      body.hidden = !body.hidden;
+    });
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    els.resultsList.appendChild(wrap);
+  });
+}
+
+function openResults() {
+  hideAllViews();
+  renderResults();
+  els.resultsView.hidden = false;
+}
+
+function closeResults() {
+  els.resultsView.hidden = true;
+  showPicker();
+}
+
+function startRedo(tasks) {
+  redoQueue = tasks.map((t) => ({ ...t }));
+  redoIndex = 0;
+  redoCorrect = 0;
+  hideAllViews();
+  els.redoView.hidden = false;
+  els.redoSummary.hidden = true;
+  els.redoTaskCard.hidden = false;
+  els.redoCheckBtn.hidden = false;
+  showRedoTask();
+}
+
+function showRedoTask() {
+  const task = redoQueue[redoIndex];
+  redoChecked = false;
+  els.redoProgress.textContent = `Aufgabe ${redoIndex + 1} von ${redoQueue.length}`;
+  els.redoQuestion.textContent = task.frage;
+  els.redoInput.inputMode = /^-?\d+([.,]\d+)?$/.test(task.loesung.trim()) ? "decimal" : "text";
+  els.redoInput.value = "";
+  els.redoInput.disabled = false;
+  els.redoSolution.hidden = true;
+  els.redoTaskCard.classList.remove("correct", "wrong");
+  els.redoCheckBtn.textContent = "Prüfen";
+  els.redoInput.focus();
+}
+
+function handleRedoAction() {
+  if (!redoChecked) {
+    const task = redoQueue[redoIndex];
+    const isCorrect =
+      normalizeAnswer(els.redoInput.value) !== "" &&
+      normalizeAnswer(els.redoInput.value) === normalizeAnswer(task.loesung);
+    if (isCorrect) redoCorrect++;
+    els.redoTaskCard.classList.add(isCorrect ? "correct" : "wrong");
+    els.redoInput.disabled = true;
+    if (!isCorrect) {
+      els.redoSolution.textContent = `Richtig wäre: ${task.loesung}`;
+      els.redoSolution.hidden = false;
+    }
+    redoChecked = true;
+    els.redoCheckBtn.textContent = redoIndex + 1 < redoQueue.length ? "Weiter" : "Fertig";
+    return;
+  }
+
+  redoIndex++;
+  if (redoIndex < redoQueue.length) {
+    showRedoTask();
+    return;
+  }
+  markUsageDay(currentKid.id);
+  els.redoTaskCard.hidden = true;
+  els.redoCheckBtn.hidden = true;
+  els.redoProgress.textContent = "";
+  els.redoSummary.hidden = false;
+  els.redoSummary.textContent =
+    redoCorrect > 0
+      ? `🎉 Stark! Diesmal hast du ${redoCorrect} Aufgabe${redoCorrect === 1 ? "" : "n"} richtig gelöst.`
+      : "Gut drangeblieben! Schau dir die Lösungen in Ruhe an, dann klappt es beim nächsten Mal. 💪";
+}
+
+function stopRedo() {
+  els.redoView.hidden = true;
+  openResults();
+}
+
 // ---------- Events ----------
 els.checkBtn.addEventListener("click", checkAnswers);
 els.retryBtn.addEventListener("click", retry);
@@ -1232,6 +1400,13 @@ els.lueckenToggle.addEventListener("click", () => {
 });
 els.sprintStartBtn.addEventListener("click", startSprint);
 els.sprintStopBtn.addEventListener("click", stopSprint);
+els.resultsOpenBtn.addEventListener("click", openResults);
+els.resultsBackBtn.addEventListener("click", closeResults);
+els.redoCheckBtn.addEventListener("click", handleRedoAction);
+els.redoStopBtn.addEventListener("click", stopRedo);
+els.redoInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") handleRedoAction();
+});
 els.sprintSummaryClose.addEventListener("click", () => {
   els.sprintSummary.hidden = true;
   showPicker();

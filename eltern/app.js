@@ -94,6 +94,7 @@ async function loadAttempts(kid) {
     .from("attempts")
     .select("worksheet_file, bereich, correct_count, total, completed_at")
     .eq("kid_id", kid.id)
+    .gte("completed_at", RESET_EPOCH)
     .order("completed_at", { ascending: true });
 
   if (error) {

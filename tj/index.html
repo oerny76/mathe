@@ -21,12 +21,12 @@
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
       <p id="weekly-usage-hint" class="weekly-usage-hint" hidden></p>
-      <p id="shared-goal-hint" class="weekly-usage-hint shared-goal-hint" hidden></p>
       <div class="sprint-toggle-row">
         <button id="sprint-start-btn" class="chalk-button ghost small">🧠 Tägliches Kopfrechnen (10 Min)</button>
         <p id="sprint-today-hint" class="sprint-today-hint" hidden></p>
       </div>
       <div class="luecken-toggle-row">
+        <button id="results-open-btn" class="chalk-button ghost small">📋 Meine Ergebnisse</button>
         <button id="luecken-toggle" class="chalk-button ghost small" hidden>📊 Wo stehe ich?</button>
       </div>
       <div id="luecken-panel" class="luecken-panel" hidden>
@@ -67,6 +67,29 @@
       </div>
 
       <div id="result-banner" class="result-banner" hidden></div>
+    </section>
+
+    <section id="results-view" hidden>
+      <button id="results-back-btn" class="chalk-button ghost small">← Zurück</button>
+      <h2 class="results-title">📋 Meine Ergebnisse</h2>
+      <div id="results-list" class="results-list"></div>
+    </section>
+
+    <section id="redo-view" hidden>
+      <p class="redo-progress" id="redo-progress"></p>
+      <div id="redo-task-card" class="task-card">
+        <p class="task-question" id="redo-question"></p>
+        <div class="task-input-row">
+          <input type="text" inputmode="decimal" autocomplete="off" id="redo-input" placeholder="Deine Antwort" />
+          <span class="task-mark" aria-hidden="true"></span>
+        </div>
+        <p class="redo-solution" id="redo-solution" hidden></p>
+      </div>
+      <div id="redo-summary" class="result-banner" hidden></div>
+      <div class="actions">
+        <button id="redo-check-btn" class="chalk-button">Prüfen</button>
+        <button id="redo-stop-btn" class="chalk-button ghost small">Zurück zu den Ergebnissen</button>
+      </div>
     </section>
 
     <section id="sprint-view" hidden>
