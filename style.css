@@ -1,14 +1,19 @@
 /* ---------- Design-Tokens ---------- */
 :root {
-  --board-bg: #1e3a2f;
-  --board-bg-2: #234636;
-  --chalk-white: #f5f5f0;
-  --chalk-yellow: #f2c744;
-  --chalk-pink: #f27da5;
-  --chalk-blue: #5dade2;
-  --chalk-green: #7fd858;
+  --board-bg: #fff8ec;
+  --board-bg-2: #ffffff;
+  --paper: #ffffff;
+  --scrim: #dcebf8;
+  --ink: #2c3e50;
+  --accent-text: #a35a00;
+  --green-text: #2c8a3c;
+  --red-text: #c4442b;
+  --chalk-yellow: #f5c23a;
+  --chalk-pink: #e0558a;
+  --chalk-blue: #2f8fd1;
+  --chalk-green: #55b85a;
   --chalk-red: #e76f51;
-  --line: rgba(245, 245, 240, 0.18);
+  --line: rgba(44, 62, 80, 0.18);
   --font-display: "Arial Rounded MT Bold", "Baloo 2", "Segoe UI", sans-serif;
   --font-body: "Segoe UI", Verdana, Arial, sans-serif;
   --radius: 14px;
@@ -19,17 +24,14 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 38px,
-      var(--line) 39px,
-      var(--line) 40px
-    ),
-    var(--board-bg);
-  color: var(--chalk-white);
+  color: var(--ink);
   font-family: var(--font-body);
+}
+
+html {
+  background-color: var(--board-bg);
+  background-image: linear-gradient(180deg, #e6f3ff 0%, var(--board-bg) 460px);
+  background-repeat: no-repeat;
 }
 
 body {
@@ -49,12 +51,11 @@ body {
   font-size: clamp(1.6rem, 6vw, 2.2rem);
   letter-spacing: 0.5px;
   margin: 0 0 6px;
-  text-shadow: 0 0 14px rgba(245, 245, 240, 0.25);
 }
 
 .subtitle {
   margin: 0;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   font-size: 0.95rem;
 }
 
@@ -69,9 +70,9 @@ body {
 
 .kid-tab {
   display: inline-block;
-  border: 2px solid var(--kid-color, var(--chalk-white));
+  border: 2px solid var(--kid-color, var(--ink));
   background: transparent;
-  color: var(--chalk-white);
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: bold;
@@ -85,7 +86,7 @@ body {
 .kid-tab:hover, .kid-tab:focus-visible {
   transform: translateY(-2px);
   background: var(--kid-color, var(--chalk-yellow));
-  color: #1e3a2f;
+  color: var(--ink);
 }
 
 /* ---------- Wochenbild-Puzzle (Gamification / Einstiegsseite) ---------- */
@@ -102,7 +103,7 @@ body {
   margin: 0 auto;
   border-radius: var(--radius);
   overflow: hidden;
-  background: #10201a;
+  background: #ffffff;
   box-shadow: 0 0 0 3px var(--line);
   transition: box-shadow 0.4s ease;
 }
@@ -145,7 +146,7 @@ body {
 .puzzle-tile-scrim {
   position: absolute;
   inset: 0;
-  background: var(--board-bg);
+  background: var(--scrim);
   opacity: 1;
   transition: opacity 0.6s ease;
 }
@@ -159,9 +160,9 @@ body {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(16, 32, 26, 0.45);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(1px);
-  color: var(--chalk-white);
+  color: var(--ink);
   font-size: 1.6rem;
   transition: opacity 0.4s ease;
 }
@@ -169,14 +170,13 @@ body {
 .puzzle-tile-label {
   font-size: 0.62rem;
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  color: var(--accent-text);
 }
 
 .puzzle-tile-fraction {
   font-size: 0.6rem;
   font-family: var(--font-body);
-  color: var(--chalk-white);
+  color: var(--ink);
   opacity: 0.85;
 }
 
@@ -212,7 +212,7 @@ body {
 .world-total {
   text-align: center;
   margin: 0 16px 12px;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
 }
 
 .world-grid {
@@ -249,7 +249,8 @@ body {
 }
 
 .world-item.locked .world-emoji {
-  filter: grayscale(1) brightness(0.25);
+  filter: grayscale(1) brightness(0.5);
+  opacity: 0.35;
 }
 
 .world-name {
@@ -271,11 +272,11 @@ body {
   background: var(--board-bg-2);
   border: 2px solid var(--chalk-yellow);
   border-radius: var(--radius);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   font-size: 0.95rem;
   text-align: center;
   z-index: 50;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 18px rgba(44, 62, 80, 0.25);
 }
 
 .toast[hidden] {
@@ -314,7 +315,7 @@ body {
 .status-pill-value {
   font-family: var(--font-display);
   font-size: 1.3rem;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   line-height: 1.1;
 }
 
@@ -386,7 +387,7 @@ body {
 .weekly-usage-hint {
   text-align: center;
   font-size: 0.85rem;
-  color: var(--chalk-green);
+  color: var(--green-text);
   opacity: 0.9;
   margin: 0 16px 6px;
 }
@@ -424,7 +425,7 @@ body {
 }
 
 .settings-error {
-  color: var(--chalk-red);
+  color: var(--red-text);
   font-size: 0.85rem;
 }
 
@@ -437,7 +438,7 @@ body {
 /* ---------- Meine Ergebnisse + Wiederholung ---------- */
 .results-title {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   text-align: center;
   margin: 12px 16px;
 }
@@ -505,7 +506,7 @@ body {
   gap: 8px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(245, 245, 240, 0.08);
+  background: rgba(44, 62, 80, 0.08);
 }
 
 .results-item-body.only-wrong .results-row.correct {
@@ -525,7 +526,7 @@ body {
 
 .results-row-solution {
   font-size: 0.85rem;
-  color: var(--chalk-green);
+  color: var(--green-text);
 }
 
 .redo-progress {
@@ -536,7 +537,7 @@ body {
 
 .redo-solution {
   margin: 8px 0 0;
-  color: var(--chalk-green);
+  color: var(--green-text);
 }
 
 #redo-view .task-card {
@@ -555,7 +556,7 @@ body {
 .sprint-today-hint {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--chalk-green);
+  color: var(--green-text);
   opacity: 0.9;
 }
 
@@ -563,7 +564,7 @@ body {
   font-family: var(--font-display);
   font-size: 2.4rem;
   text-align: center;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   margin: 10px 0 20px;
   letter-spacing: 1px;
 }
@@ -593,7 +594,7 @@ body {
 
 .sprint-trend-bar-value {
   font-size: 0.75rem;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   opacity: 0.9;
 }
 
@@ -620,7 +621,7 @@ body {
   text-align: center;
   font-size: 0.85rem;
   margin: 0 16px 12px;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   opacity: 0.9;
 }
 
@@ -640,7 +641,7 @@ body {
 
 .sprint-details-summary {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   margin: 0;
   font-size: 1rem;
 }
@@ -657,7 +658,7 @@ body {
   gap: 2px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(245, 245, 240, 0.08);
+  background: rgba(44, 62, 80, 0.08);
 }
 
 .sprint-detail-frage {
@@ -686,7 +687,7 @@ body {
 
 .luecken-panel-title {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   margin: 0 0 10px;
   font-size: 1rem;
 }
@@ -715,7 +716,7 @@ body {
 .luecken-bar {
   height: 10px;
   border-radius: 999px;
-  background: rgba(245, 245, 240, 0.12);
+  background: rgba(44, 62, 80, 0.12);
   overflow: hidden;
 }
 
@@ -751,7 +752,7 @@ body {
   border: 2px solid var(--line);
   border-radius: var(--radius);
   padding: 14px 18px;
-  color: var(--chalk-white);
+  color: var(--ink);
   font-family: var(--font-body);
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease;
@@ -780,13 +781,13 @@ body {
 .worksheet-badge {
   align-self: flex-end;
   font-size: 0.8rem;
-  color: var(--chalk-green);
+  color: var(--green-text);
   font-family: var(--font-display);
 }
 
 .bereich-heading {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   font-size: 1rem;
   margin: 18px 0 0;
 }
@@ -814,7 +815,7 @@ body {
 
 .reading-text-title {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   margin: 0 0 8px;
 }
 
@@ -836,7 +837,7 @@ body {
   justify-content: space-between;
   padding: 0 20px 10px;
   font-size: 0.85rem;
-  color: var(--chalk-white);
+  color: var(--ink);
   opacity: 0.85;
 }
 
@@ -858,7 +859,7 @@ body {
 
 .task-number {
   font-family: var(--font-display);
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   font-size: 0.85rem;
   margin-bottom: 6px;
   display: block;
@@ -882,8 +883,8 @@ body {
   padding: 10px 12px;
   border-radius: 10px;
   border: 2px solid var(--line);
-  background: var(--chalk-white);
-  color: #1e3a2f;
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-body);
 }
 
@@ -901,15 +902,15 @@ body {
 .task-card.correct { border-color: var(--chalk-green); }
 .task-card.wrong { border-color: var(--chalk-red); }
 
-.task-card.correct .task-mark::after { content: "✔"; color: var(--chalk-green); }
-.task-card.wrong .task-mark::after { content: "✕"; color: var(--chalk-red); }
+.task-card.correct .task-mark::after { content: "✔"; color: var(--green-text); }
+.task-card.wrong .task-mark::after { content: "✕"; color: var(--red-text); }
 
 /* ---------- Notizfeld (Rechenfeld) ---------- */
 .scratch-toggle {
   margin-top: 10px;
   background: none;
   border: none;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   font-family: var(--font-body);
   font-size: 0.85rem;
   text-decoration: underline dotted;
@@ -924,8 +925,8 @@ body {
   padding: 10px 12px;
   border-radius: 10px;
   border: 2px dashed var(--line);
-  background: rgba(245, 245, 240, 0.06);
-  color: var(--chalk-white);
+  background: rgba(44, 62, 80, 0.06);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 0.95rem;
   resize: vertical;
@@ -953,7 +954,7 @@ body {
 .parent-override-toggle {
   background: none;
   border: none;
-  color: var(--chalk-red);
+  color: var(--red-text);
   font-family: var(--font-body);
   font-size: 0.8rem;
   text-decoration: underline dotted;
@@ -980,8 +981,8 @@ body {
   padding: 8px 10px;
   border-radius: 8px;
   border: 2px solid var(--line);
-  background: var(--chalk-white);
-  color: #1e3a2f;
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-body);
   letter-spacing: 2px;
 }
@@ -993,12 +994,12 @@ body {
   border-radius: 8px;
   border: none;
   background: var(--chalk-yellow);
-  color: #1e3a2f;
+  color: var(--ink);
   cursor: pointer;
 }
 
 .parent-override-error {
-  color: var(--chalk-red);
+  color: var(--red-text);
   font-size: 0.8rem;
 }
 
@@ -1017,7 +1018,7 @@ body {
   border-radius: 999px;
   border: none;
   background: var(--chalk-yellow);
-  color: #1e3a2f;
+  color: var(--ink);
   cursor: pointer;
   box-shadow: 0 4px 0 rgba(0,0,0,0.25);
 }
@@ -1026,8 +1027,8 @@ body {
 
 .chalk-button.ghost {
   background: transparent;
-  border: 2px solid var(--chalk-white);
-  color: var(--chalk-white);
+  border: 2px solid var(--ink);
+  color: var(--ink);
 }
 
 /* ---------- Ergebnis-Banner ---------- */
@@ -1052,7 +1053,7 @@ body {
   gap: 4px;
   margin-top: 10px;
   padding: 4px;
-  background: rgba(245, 245, 240, 0.06);
+  background: rgba(44, 62, 80, 0.06);
   border: 1px solid var(--line);
   border-radius: 999px;
 }
@@ -1064,14 +1065,14 @@ body {
   padding: 6px 14px;
   font-family: var(--font-body);
   font-size: 0.85rem;
-  color: var(--chalk-white);
+  color: var(--ink);
   opacity: 0.7;
   cursor: pointer;
 }
 
 .eltern-week-btn.is-active {
   background: var(--chalk-yellow);
-  color: var(--board-bg);
+  color: var(--ink);
   opacity: 1;
   font-weight: 600;
 }
@@ -1079,7 +1080,7 @@ body {
 .eltern-week-heading {
   font-family: var(--font-display);
   font-size: 0.95rem;
-  color: var(--chalk-yellow);
+  color: var(--accent-text);
   margin: 14px 0 2px;
 }
 
@@ -1110,12 +1111,12 @@ body {
    mitbringt – sonst doppelte Einrückung und kein Kontrast zum Kartenhintergrund. */
 .eltern-kid-card .luecken-panel {
   margin: 10px 0 14px;
-  background: rgba(245, 245, 240, 0.05);
+  background: rgba(44, 62, 80, 0.05);
 }
 
 .eltern-kid-name {
   font-family: var(--font-display);
-  color: var(--kid-color, var(--chalk-white));
+  color: var(--kid-color, var(--ink));
   font-size: 1.3rem;
   margin: 0;
 }
@@ -1140,11 +1141,11 @@ body {
   align-items: center;
   gap: 8px 12px;
   text-align: left;
-  background: rgba(245, 245, 240, 0.05);
+  background: rgba(44, 62, 80, 0.05);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 10px 12px;
-  color: var(--chalk-white);
+  color: var(--ink);
   font-family: var(--font-body);
   cursor: pointer;
 }
@@ -1179,7 +1180,7 @@ body {
 }
 
 .eltern-back-link {
-  color: var(--chalk-white);
+  color: var(--ink);
   opacity: 0.8;
 }
 
