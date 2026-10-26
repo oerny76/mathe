@@ -1,6 +1,6 @@
 {
-  "name": "Mathe-Stunde",
-  "short_name": "Mathe-Stunde",
+  "name": "Lernzeit",
+  "short_name": "Lernzeit",
   "description": "Wöchentliche Mathe-Übungen für zu Hause",
   "start_url": "./index.html",
   "scope": "./",
