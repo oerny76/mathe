@@ -89,6 +89,39 @@
             <input id="settings-lower-grade" type="checkbox" />
             Eine Klassenstufe tiefer üben
           </label>
+
+          <div class="extra-box">
+            <p class="settings-note"><strong>➕ Extra-Übung eintragen</strong><br />
+              Für Üben außerhalb der App, z.B. mit Anton oder mit euch. 10 Minuten bringen 5 Sterne (höchstens 20 pro Tag).
+              Ab 10 Minuten zählt der Tag für Wochenziel und Streak.</p>
+            <div class="extra-form">
+              <label>Art
+                <select id="extra-art">
+                  <option value="anton">Anton</option>
+                  <option value="eltern">Mit Eltern geübt</option>
+                  <option value="lesen">Lesen</option>
+                  <option value="sonstiges">Sonstiges</option>
+                </select>
+              </label>
+              <label>Dauer
+                <select id="extra-minutes">
+                  <option value="10">10 Minuten</option>
+                  <option value="15">15 Minuten</option>
+                  <option value="20" selected>20 Minuten</option>
+                  <option value="30">30 Minuten</option>
+                  <option value="45">45 Minuten</option>
+                  <option value="60">60 Minuten</option>
+                </select>
+              </label>
+              <label>Tag
+                <input type="date" id="extra-day" />
+              </label>
+              <button id="extra-add-btn" class="chalk-button small" type="button">Eintragen</button>
+            </div>
+            <p id="extra-feedback" class="extra-feedback" hidden></p>
+            <p id="extra-sync-state" class="settings-note"></p>
+            <div id="extra-list" class="extra-list"></div>
+          </div>
         </div>
       </div>
     </section>

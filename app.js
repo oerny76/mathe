@@ -57,6 +57,13 @@ const els = {
   settingsContent: document.getElementById("settings-content"),
   settingsGradeInfo: document.getElementById("settings-grade-info"),
   settingsLowerGrade: document.getElementById("settings-lower-grade"),
+  extraArt: document.getElementById("extra-art"),
+  extraMinutes: document.getElementById("extra-minutes"),
+  extraDay: document.getElementById("extra-day"),
+  extraAddBtn: document.getElementById("extra-add-btn"),
+  extraFeedback: document.getElementById("extra-feedback"),
+  extraSyncState: document.getElementById("extra-sync-state"),
+  extraList: document.getElementById("extra-list"),
   streakPill: document.getElementById("streak-pill"),
   streakDetails: document.getElementById("streak-details"),
   weekDays: document.getElementById("week-days"),
@@ -321,6 +328,7 @@ function unlockSettings() {
   els.settingsLock.hidden = true;
   els.settingsContent.hidden = false;
   renderSettings();
+  setupExtraForm();
 }
 
 // ---------- Wochen-Streak ----------
@@ -355,6 +363,10 @@ function firstUsageWeek(kidId) {
   } catch (e) {
     return null;
   }
+  extraDays(kidId).forEach((day) => {
+    const week = weekOfDay(day);
+    if (!first || week < first) first = week;
+  });
   return first;
 }
 
@@ -437,7 +449,7 @@ function usageWeekKey(kidId) {
   return `mathe-pwa:${kidId}:usage-week:${isoWeekString(new Date())}`;
 }
 
-function loadUsageDaysFor(kidId, weekStr) {
+function loadLocalUsageDaysFor(kidId, weekStr) {
   try {
     const raw = localStorage.getItem(`mathe-pwa:${kidId}:usage-week:${weekStr}`);
     const days = raw ? JSON.parse(raw) : [];
@@ -447,12 +459,19 @@ function loadUsageDaysFor(kidId, weekStr) {
   }
 }
 
+// Übungstage einer Woche: in der App geübt (dieses Gerät) plus Extra-Übungen
+// (geräteübergreifend synchronisiert).
+function loadUsageDaysFor(kidId, weekStr) {
+  const extra = extraDays(kidId).filter((day) => weekOfDay(day) === weekStr);
+  return [...new Set([...loadLocalUsageDaysFor(kidId, weekStr), ...extra])];
+}
+
 function loadUsageDays(kidId) {
   return loadUsageDaysFor(kidId, isoWeekString(new Date()));
 }
 
 function markUsageDay(kidId) {
-  const days = loadUsageDays(kidId);
+  const days = loadLocalUsageDaysFor(kidId, isoWeekString(new Date()));
   const today = todayDateStr();
   if (!days.includes(today)) {
     days.push(today);
@@ -465,8 +484,12 @@ function markUsageDay(kidId) {
   updateWeeklyUsageHint();
 
   const kid = KIDS.find((k) => k.id === kidId);
-  if (kid && days.length >= STREAK_MIN_DAYS) {
-    awardKeyed(kid, [{ key: `week:${isoWeekString(new Date())}`, value: STREAK_BONUS_STARS }], "🔥 Streak-Woche geschafft!");
+  if (kid) checkStreakBonus(kid, isoWeekString(new Date()));
+}
+
+function checkStreakBonus(kid, weekStr) {
+  if (loadUsageDaysFor(kid.id, weekStr).length >= STREAK_MIN_DAYS) {
+    awardKeyed(kid, [{ key: `week:${weekStr}`, value: STREAK_BONUS_STARS }], "🔥 Streak-Woche geschafft!");
   }
 }
 
@@ -1017,6 +1040,7 @@ async function selectKid(kid) {
   updateSprintTodayHint();
   updateWeeklyUsageHint();
   updateStarDisplay();
+  syncExtras(kid);
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -1575,6 +1599,263 @@ function retry() {
   renderTasks();
 }
 
+// ---------- Extra-Übungen (außerhalb der App, z.B. Anton oder mit den Eltern) ----------
+// Eltern tragen sie in den Einstellungen ein (Eltern-Code). Sterne richten sich
+// nach der Zeit (10 Minuten = 5 Sterne, höchstens 20 pro Tag), ab 10 Minuten
+// zählt der Tag für Wochenziel und Streak. Die Einträge liegen in der
+// Supabase-Tabelle "extra_practice" (siehe supabase/extra_practice.sql) und
+// werden so auf allen Geräten gleich angezeigt. Offline bleiben neue Einträge
+// lokal "ausstehend" und werden später automatisch gesendet.
+const EXTRA_TABLE = "extra_practice";
+const EXTRA_MIN_DAY_MINUTES = 10;
+const EXTRA_MINUTES_PER_STEP = 10;
+const EXTRA_STARS_PER_STEP = 5;
+const EXTRA_STARS_CAP_PER_DAY = 20;
+const EXTRA_MAX_BACKDATE_DAYS = 7;
+const EXTRA_ARTEN = { anton: "Anton", eltern: "Mit Eltern geübt", lesen: "Lesen", sonstiges: "Sonstiges" };
+const extrasSyncing = {};
+
+function extrasCacheKey(kidId) {
+  return `mathe-pwa:${kidId}:extras-cache`;
+}
+
+function extrasPendingKey(kidId) {
+  return `mathe-pwa:${kidId}:extras-pending`;
+}
+
+function readJsonList(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(value) ? value : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeJsonList(key, list) {
+  try {
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {
+    console.warn("Konnte Extra-Übungen nicht lokal speichern:", e);
+  }
+}
+
+function newExtraId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 3) | 8).toString(16);
+  });
+}
+
+function localDateStr(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function weekOfDay(day) {
+  return isoWeekString(new Date(`${day}T12:00:00`));
+}
+
+// Server-Stand (Cache) plus noch nicht gesendete Einträge, neueste zuerst.
+function loadExtras(kidId) {
+  const resetDay = RESET_EPOCH.slice(0, 10);
+  const byId = new Map();
+  readJsonList(extrasCacheKey(kidId)).forEach((row) => byId.set(row.id, row));
+  readJsonList(extrasPendingKey(kidId)).forEach((row) => byId.set(row.id, row));
+  return [...byId.values()]
+    .filter((row) => row.practiced_on >= resetDay)
+    .sort((a, b) => (a.practiced_on === b.practiced_on ? (a.created_at < b.created_at ? 1 : -1) : a.practiced_on < b.practiced_on ? 1 : -1));
+}
+
+function extraMinutesByDay(kidId) {
+  const byDay = new Map();
+  loadExtras(kidId).forEach((row) => byDay.set(row.practiced_on, (byDay.get(row.practiced_on) || 0) + row.minutes));
+  return byDay;
+}
+
+function extraDays(kidId) {
+  return [...extraMinutesByDay(kidId)].filter(([, minutes]) => minutes >= EXTRA_MIN_DAY_MINUTES).map(([day]) => day);
+}
+
+function starsForExtraMinutes(minutes) {
+  return Math.min(EXTRA_STARS_CAP_PER_DAY, Math.floor(minutes / EXTRA_MINUTES_PER_STEP) * EXTRA_STARS_PER_STEP);
+}
+
+function extraStarsTotal(kidId) {
+  let total = 0;
+  extraMinutesByDay(kidId).forEach((minutes) => {
+    total += starsForExtraMinutes(minutes);
+  });
+  return total;
+}
+
+function totalStars(kidId) {
+  return loadStars(kidId).total + extraStarsTotal(kidId);
+}
+
+// Nach Änderungen: Anzeigen auffrischen, neue Sterne/Funde melden, Streak-Bonus prüfen.
+function afterExtrasChanged(kid, starsBefore, days) {
+  updateStarDisplay();
+  updateWeeklyUsageHint();
+  const gained = totalStars(kid.id) - starsBefore;
+  if (gained > 0) {
+    const after = starsBefore + gained;
+    const newItems = kid.welt.items.filter((item) => starsBefore < item.ab && after >= item.ab);
+    const found = newItems.length ? ` · 🎉 Neu in deiner Sammelwelt: ${newItems.map((i) => `${i.emoji} ${i.name}`).join(", ")}` : "";
+    showToast(`⭐ +${gained} Sterne für die Extra-Übung${found}`, newItems.length ? 7000 : 3500);
+  }
+  new Set(days.map(weekOfDay)).forEach((week) => checkStreakBonus(kid, week));
+}
+
+async function syncExtras(kid) {
+  if (!supabaseClient || extrasSyncing[kid.id]) return false;
+  extrasSyncing[kid.id] = true;
+  try {
+    let pending = readJsonList(extrasPendingKey(kid.id));
+    for (const row of [...pending]) {
+      const { error } = await supabaseClient.from(EXTRA_TABLE).insert(row);
+      if (error && error.code !== "23505") {
+        console.warn("Konnte Extra-Übung nicht senden:", error);
+        break;
+      }
+      pending = pending.filter((p) => p.id !== row.id);
+      writeJsonList(extrasPendingKey(kid.id), pending);
+      writeJsonList(extrasCacheKey(kid.id), [...readJsonList(extrasCacheKey(kid.id)).filter((r) => r.id !== row.id), row]);
+    }
+
+    const { data, error } = await supabaseClient
+      .from(EXTRA_TABLE)
+      .select("id, kid_id, practiced_on, minutes, art, created_at")
+      .eq("kid_id", kid.id)
+      .is("deleted_at", null)
+      .gte("practiced_on", RESET_EPOCH.slice(0, 10));
+    if (error) {
+      console.warn("Konnte Extra-Übungen nicht laden:", error);
+      return false;
+    }
+    writeJsonList(extrasCacheKey(kid.id), data || []);
+    if (currentKid && currentKid.id === kid.id) {
+      updateStarDisplay();
+      updateWeeklyUsageHint();
+      renderExtrasList();
+    }
+    return true;
+  } finally {
+    extrasSyncing[kid.id] = false;
+  }
+}
+
+async function addExtra(kid, art, minutes, day) {
+  const before = totalStars(kid.id);
+  const row = { id: newExtraId(), kid_id: kid.id, practiced_on: day, minutes, art, created_at: new Date().toISOString() };
+  writeJsonList(extrasPendingKey(kid.id), [...readJsonList(extrasPendingKey(kid.id)), row]);
+  afterExtrasChanged(kid, before, [day]);
+  renderExtrasList();
+  await syncExtras(kid);
+  renderExtrasList();
+}
+
+async function deleteExtra(kid, id) {
+  const pending = readJsonList(extrasPendingKey(kid.id));
+  if (pending.some((row) => row.id === id)) {
+    writeJsonList(extrasPendingKey(kid.id), pending.filter((row) => row.id !== id));
+  } else {
+    if (!supabaseClient) return false;
+    const { error } = await supabaseClient.from(EXTRA_TABLE).update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    if (error) {
+      console.warn("Konnte Extra-Übung nicht löschen:", error);
+      return false;
+    }
+    writeJsonList(extrasCacheKey(kid.id), readJsonList(extrasCacheKey(kid.id)).filter((row) => row.id !== id));
+  }
+  updateStarDisplay();
+  updateWeeklyUsageHint();
+  renderExtrasList();
+  return true;
+}
+
+function renderExtrasList() {
+  if (!currentKid) return;
+  const kid = currentKid;
+  const pendingIds = new Set(readJsonList(extrasPendingKey(kid.id)).map((row) => row.id));
+  const cutoff = localDateStr(new Date(Date.now() - 14 * 86400000));
+  const rows = loadExtras(kid.id).filter((row) => row.practiced_on >= cutoff);
+
+  els.extraSyncState.textContent = !supabaseClient
+    ? "Kein Internet: Einträge bleiben auf diesem Gerät, bis sie gesendet werden können."
+    : pendingIds.size > 0
+      ? `⏳ ${pendingIds.size} Eintrag/Einträge warten auf das Senden.`
+      : "✅ Auf allen Geräten gleich.";
+
+  els.extraList.innerHTML = "";
+  if (rows.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "settings-note";
+    empty.textContent = "In den letzten 14 Tagen wurde nichts eingetragen.";
+    els.extraList.appendChild(empty);
+    return;
+  }
+  rows.forEach((row) => {
+    const item = document.createElement("div");
+    item.className = "extra-row";
+    const date = new Date(`${row.practiced_on}T12:00:00`).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric" });
+    const text = document.createElement("span");
+    text.textContent = `${date} · ${EXTRA_ARTEN[row.art] || row.art} · ${row.minutes} Min${pendingIds.has(row.id) ? " (wartet)" : ""}`;
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "extra-delete";
+    del.setAttribute("aria-label", "Eintrag löschen");
+    del.textContent = "🗑";
+    del.addEventListener("click", async () => {
+      if (!window.confirm("Diesen Eintrag löschen?")) return;
+      const ok = await deleteExtra(kid, row.id);
+      if (!ok) showExtraFeedback("Löschen hat nicht geklappt. Bitte mit Internet nochmal versuchen.", true);
+    });
+    item.appendChild(text);
+    item.appendChild(del);
+    els.extraList.appendChild(item);
+  });
+}
+
+function showExtraFeedback(text, isError = false) {
+  els.extraFeedback.hidden = false;
+  els.extraFeedback.textContent = text;
+  els.extraFeedback.classList.toggle("error", isError);
+}
+
+function setupExtraForm() {
+  const today = new Date();
+  els.extraDay.max = localDateStr(today);
+  els.extraDay.min = localDateStr(new Date(today.getTime() - EXTRA_MAX_BACKDATE_DAYS * 86400000));
+  els.extraDay.value = localDateStr(today);
+  els.extraFeedback.hidden = true;
+  renderExtrasList();
+  syncExtras(currentKid);
+}
+
+async function submitExtra() {
+  const day = els.extraDay.value;
+  const minutes = parseInt(els.extraMinutes.value, 10);
+  const art = els.extraArt.value;
+  if (!day || day > els.extraDay.max || day < els.extraDay.min) {
+    showExtraFeedback(`Bitte einen Tag der letzten ${EXTRA_MAX_BACKDATE_DAYS} Tage wählen.`, true);
+    return;
+  }
+  els.extraAddBtn.disabled = true;
+  const starsBefore = extraStarsTotal(currentKid.id);
+  await addExtra(currentKid, art, minutes, day);
+  const gained = extraStarsTotal(currentKid.id) - starsBefore;
+  const dayMinutes = extraMinutesByDay(currentKid.id).get(day) || 0;
+  const hint =
+    gained > 0
+      ? `+${gained} Sterne.`
+      : dayMinutes >= EXTRA_MIN_DAY_MINUTES
+        ? "Das Tageslimit für Sterne ist erreicht, der Tag zählt trotzdem."
+        : "Für Sterne und Übungstag braucht es mindestens 10 Minuten am Tag.";
+  showExtraFeedback(`✅ ${minutes} Minuten (${EXTRA_ARTEN[art]}) eingetragen. ${hint}`);
+  els.extraAddBtn.disabled = false;
+}
+
 // ---------- Sterne und Sammelwelt ----------
 // Sterne gibt es für Mühe, nicht für Tempo: 1 Stern pro richtig gelöster
 // Aufgabe (je Aufgabe nur einmal), ein Bonus für ein komplett richtiges
@@ -1636,7 +1917,7 @@ function nextToast() {
 
 function updateStarDisplay() {
   if (!currentKid) return;
-  const { total } = loadStars(currentKid.id);
+  const total = totalStars(currentKid.id);
   els.starCounter.textContent = `⭐ ${total}`;
   const next = currentKid.welt.items.find((item) => item.ab > total);
   els.starNext.textContent = next
@@ -1648,11 +1929,12 @@ function updateStarDisplay() {
 // geladene Stand (wird hier gespeichert), "gained" die neu verdienten Sterne.
 function applyStarGain(kid, stars, gained, label = "") {
   if (gained <= 0) return 0;
-  const before = stars.total;
+  const before = stars.total + extraStarsTotal(kid.id);
   stars.total += gained;
   saveStars(kid.id, stars);
   updateStarDisplay();
-  const newItems = kid.welt.items.filter((item) => before < item.ab && stars.total >= item.ab);
+  const after = before + gained;
+  const newItems = kid.welt.items.filter((item) => before < item.ab && after >= item.ab);
   const found = newItems.length ? ` · 🎉 Neu in deiner Sammelwelt: ${newItems.map((i) => `${i.emoji} ${i.name}`).join(", ")}` : "";
   showToast(`⭐ +${gained} Sterne${label ? ` · ${label}` : ""}${found}`, newItems.length ? 7000 : 3500);
   return gained;
@@ -1681,7 +1963,7 @@ function awardSprintStars(kid, correct) {
 
 function renderWorld() {
   const welt = currentKid.welt;
-  const { total } = loadStars(currentKid.id);
+  const total = totalStars(currentKid.id);
   els.worldTitle.textContent = `🧺 Mein ${welt.titel}`;
   els.worldTotal.textContent = `⭐ ${total} Sterne gesammelt`;
   els.worldGrid.innerHTML = "";
@@ -1965,6 +2247,10 @@ els.settingsCode.addEventListener("keydown", (e) => {
 els.settingsLowerGrade.addEventListener("change", () => {
   saveGradeOffset(currentKid.id, els.settingsLowerGrade.checked ? 1 : 0);
   renderSettings();
+});
+els.extraAddBtn.addEventListener("click", submitExtra);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && currentKid) syncExtras(currentKid);
 });
 els.streakPill.addEventListener("click", () => {
   const open = els.streakDetails.hidden;
