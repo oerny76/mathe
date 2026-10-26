@@ -3,7 +3,14 @@
     "2026-W44-grundrechenarten.json",
     "2026-W44-einmaleins.json",
     "2026-W44-lesen-fc-bayern-muenchen.json",
-    "2026-W44-lesen-drachen.json"
+    "2026-W44-lesen-drachen.json",
+    "2026-W45-einmaleins.json",
+    "2026-W45-kopfrechnen.json",
+    "2026-W45-lesen-fc-bayern-muenchen.json",
+    "2026-W45-lesen-drachen.json"
   ],
-  "aktuellesBild": "2026-W44-bild.json"
+  "aktuellesBild": "2026-W44-bild.json",
+  "bilder": [
+    "2026-W44-bild.json"
+  ]
 }

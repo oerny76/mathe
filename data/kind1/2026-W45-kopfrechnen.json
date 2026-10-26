@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Schnell und sicher 🧠",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "Verdopple 85. Wie viel ist das?",
+      "loesung": "170"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "Halbiere 240. Wie viel ist das?",
+      "loesung": "120"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Ergänze 640 auf 1000. Wie viel fehlt?",
+      "loesung": "360"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "450 + 380 = ?",
+      "loesung": "830"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "1000 − 350 = ?",
+      "loesung": "650"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "Verdreifache 35. Wie viel ist das?",
+      "loesung": "105"
+    }
+  ]
+}

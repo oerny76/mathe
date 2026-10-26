@@ -1060,7 +1060,13 @@ async function selectKid(kid) {
       })
     );
 
-    const valid = worksheets.filter(Boolean).sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
+    // Blätter kommender Wochen (auf Vorrat erzeugt) erscheinen erst, wenn ihre
+    // Woche beginnt, damit nichts vorab gelöst wird.
+    const thisWeek = isoWeekString(new Date());
+    const valid = worksheets
+      .filter(Boolean)
+      .filter((ws) => !ws.woche || ws.woche <= thisWeek)
+      .sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
     currentWorksheetList = valid;
     backfillUnsyncedProgress(kid.id, valid);
     await setupPickerView(kid, index, valid);
@@ -1070,13 +1076,27 @@ async function selectKid(kid) {
 }
 
 // ---------- Einstiegsseite: Wochenbild-Puzzle (bevorzugt) oder klassische Liste ----------
+// Wochenbild der laufenden Woche: "bilder" in index.json listet die Dateien
+// (Name beginnt mit der Woche, z.B. "2026-W45-bild.json"). Gewählt wird das
+// neueste, das nicht in der Zukunft liegt. Ohne passende Datei gilt weiter
+// "aktuellesBild".
+function pickBildFile(index) {
+  const thisWeek = isoWeekString(new Date());
+  const candidates = (index.bilder || [])
+    .map((file) => ({ file, woche: (file.match(/^(\d{4}-W\d{2})-/) || [])[1] }))
+    .filter((b) => b.woche && b.woche <= thisWeek)
+    .sort((a, b) => (a.woche < b.woche ? 1 : -1));
+  return candidates.length ? candidates[0].file : index.aktuellesBild || null;
+}
+
 async function setupPickerView(kid, index, worksheets) {
   currentBild = null;
   currentWeekFiles = [];
 
-  if (index.aktuellesBild) {
+  const bildFile = pickBildFile(index);
+  if (bildFile) {
     try {
-      const res = await fetch(new URL(`data/${kid.id}/${index.aktuellesBild}`, APP_BASE), { cache: "no-store" });
+      const res = await fetch(new URL(`data/${kid.id}/${bildFile}`, APP_BASE), { cache: "no-store" });
       if (!res.ok) throw new Error("Kein Wochenbild gefunden");
       currentBild = await res.json();
     } catch {

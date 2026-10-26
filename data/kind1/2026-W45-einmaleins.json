@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins: Große Päckchen, Runde 2 📦",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "7 × 16 = ?",
+      "loesung": "112"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "11 × 13 = ?",
+      "loesung": "143"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "195 : 15 = ?",
+      "loesung": "13"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "8 × 17 = ?",
+      "loesung": "136"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "238 : 14 = ?",
+      "loesung": "17"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "12 × 15 = ?",
+      "loesung": "180"
+    }
+  ]
+}

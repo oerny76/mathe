@@ -1,0 +1,78 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "The Case of the Missing Painting",
+  "text": "Lina and Jack are members of the school detective club. On Friday, the school has an art show in the big hall. Everyone brings a painting. At ten o'clock, Lina's friend Zoe shouts, \"My painting is gone!\"\n\nLina and Jack look at the wall. There is only an empty frame. On the floor, they see small spots of green paint. The spots go out of the hall and along the corridor. Jack follows them to the art room.\n\nThe door is open. Inside, Mr Ford, the art teacher, is working at a table. In front of him is Zoe's painting. He looks up and smiles. \"I'm sorry,\" he says. \"The frame was broken, so I wanted to fix it before the show starts. I forgot to tell anyone.\"\n\nTogether they carry the painting back to the hall. Zoe is happy again, and the detectives write a new line in their notebook: Case closed.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Where is the art show?",
+      "optionen": [
+        "in the garden",
+        "in the big hall",
+        "in the library"
+      ],
+      "loesung": "in the big hall"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "What is missing?",
+      "optionen": [
+        "a book",
+        "a bag",
+        "a painting"
+      ],
+      "loesung": "a painting"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "What colour are the spots on the floor?",
+      "optionen": [
+        "red",
+        "blue",
+        "green"
+      ],
+      "loesung": "green"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Where do the spots lead?",
+      "optionen": [
+        "to the art room",
+        "to the gym",
+        "to the library"
+      ],
+      "loesung": "to the art room"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Who has the painting?",
+      "optionen": [
+        "Jack",
+        "Mr Ford",
+        "Zoe's mother"
+      ],
+      "loesung": "Mr Ford"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Why does he take the painting?",
+      "optionen": [
+        "He did not like it",
+        "He wanted to sell it",
+        "The frame was broken"
+      ],
+      "loesung": "The frame was broken"
+    }
+  ]
+}
