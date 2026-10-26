@@ -394,3 +394,20 @@ Alles läuft zuerst lokal im Browser (auch ohne Internet) und wird zusätzlich
   gespeicherten Stand mit seinem eigenen zusammen, es geht nichts verloren.
 - Die geplante GitHub-Aktion `.github/workflows/supabase-keepalive.yml` ruft
   täglich Supabase auf, damit das kostenlose Projekt nicht pausiert.
+
+## Zugang mit persönlichem Code
+
+Wie bei der Stammtisch-App sind die Tabellen für den Browser gesperrt. Die App
+ruft nur geprüfte Datenbankfunktionen auf, die einen persönlichen Code mitbekommen
+(`supabase/zugangscodes.sql`). In der Datenbank liegt nur ein Hash der Codes.
+
+- **Kinder-Code** (einer pro Kind): wird beim ersten Öffnen auf einem Gerät
+  abgefragt, per Link `…/tj/?t=<Code>` oder Eingabe, und bleibt danach auf dem
+  Gerät. Er erlaubt nur den eigenen Stand.
+- **Eltern-Code:** schaltet die Einstellungen frei (Extra-Übungen, Klassenstufe),
+  erlaubt "als richtig werten" und öffnet die Eltern-Übersicht. In den
+  Einstellungen gilt er nur für die laufende Sitzung.
+- Codes erzeugen oder erneuern: `supabase/codes_erzeugen.sql` im SQL-Editor
+  ausführen. Die Codes erscheinen einmal im Ergebnis. **Nie ins Repo stellen.**
+- Reihenfolge bei der Einführung: `zugangscodes.sql`, `codes_erzeugen.sql`,
+  App-Update einspielen und anmelden, zum Schluss `zugriff_sperren.sql`.

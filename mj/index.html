@@ -19,6 +19,14 @@
   <canvas id="puzzle-canvas" hidden></canvas>
 
   <main id="app">
+    <section id="code-gate" class="code-gate" hidden>
+      <h2 class="results-title">🔑 Dein Code</h2>
+      <p class="settings-note">Gib den Code ein, den du von deinen Eltern bekommen hast, oder füge den ganzen Link ein. Du brauchst ihn nur einmal pro Gerät.</p>
+      <input id="gate-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Code oder Link einfügen" aria-label="Code oder Link" />
+      <button id="gate-btn" class="chalk-button" type="button">Weiter</button>
+      <p id="gate-error" class="gate-error" hidden></p>
+    </section>
+
     <section id="worksheet-picker" class="worksheet-picker" hidden>
       <div class="status-bar">
         <div class="status-pill">
@@ -78,7 +86,7 @@
         <div id="settings-lock">
           <p class="settings-note">Nur für Eltern. Bitte den Code eingeben.</p>
           <div class="settings-lock-row">
-            <input id="settings-code" type="text" inputmode="numeric" maxlength="4" placeholder="Code" autocomplete="off" />
+            <input id="settings-code" type="password" placeholder="Eltern-Code" autocomplete="off" />
             <button id="settings-code-ok" class="chalk-button ghost small">OK</button>
             <span id="settings-code-error" class="settings-error" hidden>Falscher Code</span>
           </div>
