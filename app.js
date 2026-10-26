@@ -57,6 +57,15 @@ const els = {
   settingsContent: document.getElementById("settings-content"),
   settingsGradeInfo: document.getElementById("settings-grade-info"),
   settingsLowerGrade: document.getElementById("settings-lower-grade"),
+  starCounter: document.getElementById("star-counter"),
+  starNext: document.getElementById("star-next"),
+  toast: document.getElementById("toast"),
+  worldOpenBtn: document.getElementById("world-open-btn"),
+  worldView: document.getElementById("world-view"),
+  worldBackBtn: document.getElementById("world-back-btn"),
+  worldTitle: document.getElementById("world-title"),
+  worldTotal: document.getElementById("world-total"),
+  worldGrid: document.getElementById("world-grid"),
   resultsOpenBtn: document.getElementById("results-open-btn"),
   resultsView: document.getElementById("results-view"),
   resultsBackBtn: document.getElementById("results-back-btn"),
@@ -763,6 +772,7 @@ function endSprint() {
   const attempted = sprintTaskLog.length;
 
   if (attempted > 0) markUsageDay(currentKid.id);
+  awardSprintStars(currentKid, correct);
 
   saveTodaySprintResult(currentKid.id, {
     date: todayDateStr(),
@@ -897,6 +907,7 @@ async function selectKid(kid) {
   initLueckenPanel(kid); // läuft unabhängig von den Arbeitsblättern im Hintergrund mit
   updateSprintTodayHint();
   updateWeeklyUsageHint();
+  updateStarDisplay();
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -1267,6 +1278,7 @@ function checkAnswers() {
 
   let correctCount = 0;
   const answers = {};
+  const starEntries = [];
 
   currentTasks.forEach((task) => {
     const input = els.taskList.querySelector(`input[data-task-id="${task.id}"]`);
@@ -1280,11 +1292,17 @@ function checkAnswers() {
     if ((given !== "" && given === expected) || overrides[task.id]) {
       card.classList.add("correct");
       correctCount++;
+      starEntries.push({ key: `${currentFile}#${task.id}`, value: 1 });
     } else {
       card.classList.add("wrong");
     }
     input.disabled = true;
   });
+
+  if (correctCount === currentTasks.length) {
+    starEntries.push({ key: `${currentFile}#perfect`, value: PERFECT_SHEET_BONUS });
+  }
+  awardKeyed(currentKid, starEntries);
 
   const progress = {
     answers,
@@ -1346,6 +1364,7 @@ function applyParentOverride(taskId) {
   if (progress.overrides[taskId]) return; // bereits als richtig gewertet
 
   progress.overrides[taskId] = true;
+  awardKeyed(currentKid, [{ key: `${currentFile}#${taskId}`, value: 1 }]);
   progress.correctCount = (progress.correctCount || 0) + 1;
   progress.total = currentTasks.length;
   progress.completedAt = new Date().toISOString();
@@ -1383,6 +1402,126 @@ function retry() {
   renderTasks();
 }
 
+// ---------- Sterne und Sammelwelt ----------
+// Sterne gibt es für Mühe, nicht für Tempo: 1 Stern pro richtig gelöster
+// Aufgabe (je Aufgabe nur einmal), ein Bonus für ein komplett richtiges
+// Arbeitsblatt und für das Üben im Kopfrechnen-Sprint (mit Tageslimit, damit
+// Raten oder Dauerklicken sich nicht lohnt). Mit der Gesamtzahl schalten sich
+// die Funde der Sammelwelt (KIDS[].welt) frei. Kein Vergleich zwischen den
+// Kindern, jedes Kind sieht nur die eigene Sammlung. Speicherung pro Gerät.
+const PERFECT_SHEET_BONUS = 3;
+const SPRINT_STAR_CAP_PER_DAY = 25;
+
+function starsKey(kidId) {
+  return `mathe-pwa:${kidId}:stars`;
+}
+
+function loadStars(kidId) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(starsKey(kidId)));
+    if (raw && typeof raw.total === "number") {
+      return { total: raw.total, awarded: raw.awarded || {}, sprintDaily: raw.sprintDaily || {} };
+    }
+  } catch (e) {
+    // fällt auf leeren Stand zurück
+  }
+  return { total: 0, awarded: {}, sprintDaily: {} };
+}
+
+function saveStars(kidId, stars) {
+  try {
+    localStorage.setItem(starsKey(kidId), JSON.stringify(stars));
+  } catch (e) {
+    console.warn("Konnte Sterne nicht speichern:", e);
+  }
+}
+
+let toastTimer = null;
+function showToast(text, ms = 3500) {
+  els.toast.textContent = text;
+  els.toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    els.toast.hidden = true;
+  }, ms);
+}
+
+function updateStarDisplay() {
+  if (!currentKid) return;
+  const { total } = loadStars(currentKid.id);
+  els.starCounter.textContent = `⭐ ${total} Sterne`;
+  const next = currentKid.welt.items.find((item) => item.ab > total);
+  els.starNext.textContent = next
+    ? `Noch ${next.ab - total} Sterne bis zum nächsten Fund in deiner Sammelwelt.`
+    : "Du hast alles in deiner Sammelwelt gefunden! 🏆";
+}
+
+// Schreibt Sterne gut und meldet neue Funde. "stars" ist der bereits
+// geladene Stand (wird hier gespeichert), "gained" die neu verdienten Sterne.
+function applyStarGain(kid, stars, gained) {
+  if (gained <= 0) return 0;
+  const before = stars.total;
+  stars.total += gained;
+  saveStars(kid.id, stars);
+  updateStarDisplay();
+  const newItems = kid.welt.items.filter((item) => before < item.ab && stars.total >= item.ab);
+  const found = newItems.length ? ` · 🎉 Neu in deiner Sammelwelt: ${newItems.map((i) => `${i.emoji} ${i.name}`).join(", ")}` : "";
+  showToast(`⭐ +${gained} Sterne${found}`, newItems.length ? 7000 : 3500);
+  return gained;
+}
+
+// entries: [{ key, value }], jeder Schlüssel zählt nur einmal.
+function awardKeyed(kid, entries) {
+  const stars = loadStars(kid.id);
+  let gained = 0;
+  entries.forEach(({ key, value }) => {
+    if (stars.awarded[key]) return;
+    stars.awarded[key] = 1;
+    gained += value;
+  });
+  return applyStarGain(kid, stars, gained);
+}
+
+function awardSprintStars(kid, correct) {
+  const stars = loadStars(kid.id);
+  const today = todayDateStr();
+  const used = stars.sprintDaily[today] || 0;
+  const gain = Math.min(correct, Math.max(0, SPRINT_STAR_CAP_PER_DAY - used));
+  stars.sprintDaily[today] = used + gain;
+  return applyStarGain(kid, stars, gain);
+}
+
+function renderWorld() {
+  const welt = currentKid.welt;
+  const { total } = loadStars(currentKid.id);
+  els.worldTitle.textContent = `🧺 Mein ${welt.titel}`;
+  els.worldTotal.textContent = `⭐ ${total} Sterne gesammelt`;
+  els.worldGrid.innerHTML = "";
+  const nextIndex = welt.items.findIndex((item) => item.ab > total);
+  welt.items.forEach((item, index) => {
+    const unlocked = total >= item.ab;
+    const card = document.createElement("div");
+    card.className = "world-item " + (unlocked ? "unlocked" : "locked") + (index === nextIndex ? " next" : "");
+    card.innerHTML = `
+      <span class="world-emoji">${item.emoji}</span>
+      <span class="world-name">${unlocked ? escapeHtml(item.name) : "???"}</span>
+      <span class="world-need">${unlocked ? "gefunden" : `ab ${item.ab} ⭐`}</span>
+    `;
+    els.worldGrid.appendChild(card);
+  });
+}
+
+function openWorld() {
+  hideAllViews();
+  renderWorld();
+  els.worldView.hidden = false;
+}
+
+function closeWorld() {
+  els.worldView.hidden = true;
+  showPicker();
+}
+
 // ---------- Meine Ergebnisse: Aufgaben nachschauen + Fehler wiederholen ----------
 // Zeigt zu jeder abgeschlossenen Übung und jedem Kopfrechnen-Sprint die eigene
 // Antwort, die richtige Lösung und ob es gepasst hat. Daten kommen aus
@@ -1392,9 +1531,10 @@ let redoQueue = [];
 let redoIndex = 0;
 let redoCorrect = 0;
 let redoChecked = false;
+let redoStarEntries = [];
 
 function hideAllViews() {
-  [els.picker, els.view, els.sprintView, els.sprintSummary, els.resultsView, els.redoView].forEach((el) => {
+  [els.picker, els.view, els.sprintView, els.sprintSummary, els.resultsView, els.redoView, els.worldView].forEach((el) => {
     el.hidden = true;
   });
 }
@@ -1525,6 +1665,7 @@ function startRedo(tasks) {
   redoQueue = tasks.map((t) => ({ ...t }));
   redoIndex = 0;
   redoCorrect = 0;
+  redoStarEntries = [];
   hideAllViews();
   els.redoView.hidden = false;
   els.redoSummary.hidden = true;
@@ -1553,7 +1694,10 @@ function handleRedoAction() {
     const isCorrect =
       normalizeAnswer(els.redoInput.value) !== "" &&
       normalizeAnswer(els.redoInput.value) === normalizeAnswer(task.loesung);
-    if (isCorrect) redoCorrect++;
+    if (isCorrect) {
+      redoCorrect++;
+      redoStarEntries.push({ key: `redo:${todayDateStr()}:${task.frage}`, value: 1 });
+    }
     els.redoTaskCard.classList.add(isCorrect ? "correct" : "wrong");
     els.redoInput.disabled = true;
     if (!isCorrect) {
@@ -1571,6 +1715,7 @@ function handleRedoAction() {
     return;
   }
   markUsageDay(currentKid.id);
+  awardKeyed(currentKid, redoStarEntries);
   els.redoTaskCard.hidden = true;
   els.redoCheckBtn.hidden = true;
   els.redoProgress.textContent = "";
@@ -1612,6 +1757,8 @@ els.settingsLowerGrade.addEventListener("change", () => {
   saveGradeOffset(currentKid.id, els.settingsLowerGrade.checked ? 1 : 0);
   renderSettings();
 });
+els.worldOpenBtn.addEventListener("click", openWorld);
+els.worldBackBtn.addEventListener("click", closeWorld);
 els.resultsOpenBtn.addEventListener("click", openResults);
 els.resultsBackBtn.addEventListener("click", closeResults);
 els.redoCheckBtn.addEventListener("click", handleRedoAction);

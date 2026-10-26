@@ -4,8 +4,54 @@
 
 // Hier die beiden Kinder eintragen. "id" muss zum Ordnernamen unter /data passen.
 const KIDS = [
-  { id: "kind1", name: "Tim", klasse: 4, color: "var(--chalk-pink)" },
-  { id: "kind2", name: "Marlene", klasse: 7, color: "var(--chalk-blue)" },
+  {
+    id: "kind1",
+    name: "Tim",
+    klasse: 4,
+    color: "var(--chalk-pink)",
+    // Sammelwelt: Wer genug Sterne gesammelt hat, schaltet der Reihe nach neue
+    // Funde frei ("ab" = benötigte Sterne insgesamt, der erste ist von Anfang an da).
+    welt: {
+      titel: "Drachenreich",
+      items: [
+        { emoji: "🥚", name: "Drachenei", ab: 0 },
+        { emoji: "🔥", name: "Erster Funke", ab: 20 },
+        { emoji: "🐲", name: "Drachenbaby", ab: 50 },
+        { emoji: "💎", name: "Glutkristall", ab: 90 },
+        { emoji: "🌋", name: "Vulkanhöhle", ab: 140 },
+        { emoji: "🛡️", name: "Drachenschild", ab: 200 },
+        { emoji: "⚔️", name: "Drachenschwert", ab: 280 },
+        { emoji: "🏰", name: "Drachenburg", ab: 380 },
+        { emoji: "🌩️", name: "Sturmdrache", ab: 500 },
+        { emoji: "👑", name: "Drachenkrone", ab: 640 },
+        { emoji: "🐉", name: "Großer Drache", ab: 800 },
+        { emoji: "🌟", name: "Drachenkönig", ab: 1000 },
+      ],
+    },
+  },
+  {
+    id: "kind2",
+    name: "Marlene",
+    klasse: 7,
+    color: "var(--chalk-blue)",
+    welt: {
+      titel: "Herbstwald",
+      items: [
+        { emoji: "🍂", name: "Erstes Herbstblatt", ab: 0 },
+        { emoji: "🌰", name: "Kastanie", ab: 20 },
+        { emoji: "🍄", name: "Waldpilz", ab: 50 },
+        { emoji: "🍁", name: "Ahornblatt", ab: 90 },
+        { emoji: "🎃", name: "Kürbis", ab: 140 },
+        { emoji: "🦔", name: "Igel", ab: 200 },
+        { emoji: "🐿️", name: "Eichhörnchen", ab: 280 },
+        { emoji: "🍎", name: "Apfelernte", ab: 380 },
+        { emoji: "🏮", name: "Laterne", ab: 500 },
+        { emoji: "🦉", name: "Eule", ab: 640 },
+        { emoji: "🌾", name: "Erntedank", ab: 800 },
+        { emoji: "🏡", name: "Waldhütte", ab: 1000 },
+      ],
+    },
+  },
 ];
 
 // ---------- Bereiche (Themen-Kategorien) ----------

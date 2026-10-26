@@ -20,12 +20,17 @@
 
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
+      <div class="star-row">
+        <p id="star-counter" class="star-counter"></p>
+        <p id="star-next" class="star-next"></p>
+      </div>
       <p id="weekly-usage-hint" class="weekly-usage-hint" hidden></p>
       <div class="sprint-toggle-row">
         <button id="sprint-start-btn" class="chalk-button ghost small">🧠 Tägliches Kopfrechnen (10 Min)</button>
         <p id="sprint-today-hint" class="sprint-today-hint" hidden></p>
       </div>
       <div class="luecken-toggle-row">
+        <button id="world-open-btn" class="chalk-button ghost small">🧺 Meine Sammelwelt</button>
         <button id="results-open-btn" class="chalk-button ghost small">📋 Meine Ergebnisse</button>
         <button id="luecken-toggle" class="chalk-button ghost small" hidden>📊 Wo stehe ich?</button>
       </div>
@@ -90,6 +95,13 @@
       <div id="result-banner" class="result-banner" hidden></div>
     </section>
 
+    <section id="world-view" hidden>
+      <button id="world-back-btn" class="chalk-button ghost small">← Zurück</button>
+      <h2 class="results-title" id="world-title"></h2>
+      <p class="world-total" id="world-total"></p>
+      <div id="world-grid" class="world-grid"></div>
+    </section>
+
     <section id="results-view" hidden>
       <button id="results-back-btn" class="chalk-button ghost small">← Zurück</button>
       <h2 class="results-title">📋 Meine Ergebnisse</h2>
@@ -141,6 +153,8 @@
       </div>
     </section>
   </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <footer class="board-footer">
     <p>Viel Erfolg &amp; viel Spaß dabei! 🧮📖</p>
