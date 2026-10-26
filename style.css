@@ -435,6 +435,79 @@ body {
   gap: 8px;
 }
 
+.extra-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px dashed var(--line);
+}
+
+.extra-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.extra-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+}
+
+.extra-form select,
+.extra-form input[type="date"] {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.extra-form .chalk-button {
+  margin: 0;
+}
+
+.extra-feedback {
+  margin: 10px 0 0;
+  color: var(--green-text);
+  font-size: 0.9rem;
+}
+
+.extra-feedback.error {
+  color: var(--red-text);
+}
+
+.extra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.extra-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(44, 62, 80, 0.06);
+  font-size: 0.85rem;
+}
+
+.extra-delete {
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
 /* ---------- Meine Ergebnisse + Wiederholung ---------- */
 .results-title {
   font-family: var(--font-display);
