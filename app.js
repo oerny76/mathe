@@ -48,6 +48,10 @@ const els = {
   sprintDetailsPanel: document.getElementById("sprint-details-panel"),
   sprintDetailsList: document.getElementById("sprint-details-list"),
   weeklyUsageHint: document.getElementById("weekly-usage-hint"),
+  codeGate: document.getElementById("code-gate"),
+  gateInput: document.getElementById("gate-input"),
+  gateBtn: document.getElementById("gate-btn"),
+  gateError: document.getElementById("gate-error"),
   settingsToggle: document.getElementById("settings-toggle"),
   settingsPanel: document.getElementById("settings-panel"),
   settingsLock: document.getElementById("settings-lock"),
@@ -95,11 +99,36 @@ const els = {
   redoSummary: document.getElementById("redo-summary"),
 };
 
-// Fester Eltern-Code, um eine einzelne Antwort manuell als richtig zu werten
-// (z.B. wenn die Auto-Prüfung eine korrekte Eingabe fälschlich ablehnt). Zum
-// Ändern hier direkt im Code (in GitHub editierbar) einen neuen vierstelligen
-// Zahlencode eintragen.
-const PARENT_OVERRIDE_CODE = "4711";
+// Eltern-Code (nur per geprüfter Datenbankfunktion, nie im Code): schaltet die
+// Einstellungen frei und erlaubt, eine einzelne Antwort als richtig zu werten
+// (z.B. wenn die Auto-Prüfung eine korrekte Eingabe fälschlich ablehnt). Er
+// bleibt nur für die laufende Sitzung im Speicher dieses Tabs.
+function parentToken() {
+  try {
+    return sessionStorage.getItem("mathe-parent-token") || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function setParentToken(code) {
+  try {
+    if (code) sessionStorage.setItem("mathe-parent-token", code);
+    else sessionStorage.removeItem("mathe-parent-token");
+  } catch (e) {
+    // egal
+  }
+}
+
+// Prüft einen Eltern-Code bei der Datenbank. true / false, bei fehlendem
+// Netz null.
+async function checkParentCode(raw) {
+  const code = normalizeCode(raw);
+  if (!code) return false;
+  const { data, error } = await callRpc("app_eltern_check", {}, code);
+  if (error) return error.offline ? null : false;
+  return data === true;
+}
 
 let currentKid = null;
 let currentFile = null;
@@ -156,26 +185,29 @@ function loadProgress(kidId, file) {
 // Nur bei Erfolg wird "synced" im localStorage-Eintrag gesetzt – das macht
 // backfillUnsyncedProgress() unten sicher wiederholbar (kein doppelter Upload).
 function syncAttempt(kidId, file, worksheetMeta, progress) {
-  if (!supabaseClient) return;
-  supabaseClient
-    .from("attempts")
-    .insert({
-      kid_id: kidId,
-      worksheet_file: file,
-      bereich: worksheetMeta?.bereich || null,
-      woche: worksheetMeta?.woche || null,
-      correct_count: progress.correctCount,
-      total: progress.total,
-      answers: progress.answers,
-      completed_at: progress.completedAt || new Date().toISOString(),
-    })
-    .then(({ error }) => {
-      if (error) {
-        console.warn("Konnte Ergebnis nicht synchronisieren:", error);
-        return;
-      }
-      saveProgress(kidId, file, { ...progress, synced: true });
-    });
+  const token = loadToken(kidId);
+  if (!token) return;
+  callRpc(
+    "app_attempt_add",
+    {
+      p_kid: kidId,
+      p_file: file,
+      p_bereich: worksheetMeta?.bereich || null,
+      p_woche: worksheetMeta?.woche || null,
+      p_correct: progress.correctCount,
+      p_total: progress.total,
+      p_answers: progress.answers,
+      p_completed_at: progress.completedAt || new Date().toISOString(),
+    },
+    token
+  ).then(({ error }) => {
+    if (error) {
+      if (isInvalidCode(error)) handleInvalidToken();
+      else console.warn("Konnte Ergebnis nicht synchronisieren:", error);
+      return;
+    }
+    saveProgress(kidId, file, { ...progress, synced: true });
+  });
 }
 
 // Fortschritt nachträglich hochladen, der lokal schon fertig ist, aber noch
@@ -197,16 +229,12 @@ function backfillUnsyncedProgress(kidId, worksheets) {
 // und wo sich Üben lohnt – unabhängig davon, ob das jeweilige Arbeitsblatt noch
 // in der aktuellen Wochenauswahl steht oder längst aus index.json verschwunden ist.
 async function loadAttempts(kid) {
-  if (!supabaseClient) return [];
-  const { data, error } = await supabaseClient
-    .from("attempts")
-    .select("worksheet_file, bereich, correct_count, total, completed_at")
-    .eq("kid_id", kid.id)
-    .gte("completed_at", RESET_EPOCH)
-    .order("completed_at", { ascending: true });
-
+  const token = loadToken(kid.id);
+  if (!token) return [];
+  const { data, error } = await callRpc("app_attempts_list", { p_kid: kid.id, p_since: RESET_EPOCH }, token);
   if (error) {
-    console.warn("Konnte Lücken-Übersicht nicht laden:", error);
+    if (isInvalidCode(error)) handleInvalidToken();
+    else console.warn("Konnte Lücken-Übersicht nicht laden:", error);
     return [];
   }
   return data || [];
@@ -315,6 +343,7 @@ function renderSettings() {
 function toggleSettings() {
   const opening = els.settingsPanel.hidden;
   els.settingsPanel.hidden = !opening;
+  if (!opening) setParentToken("");
   if (opening) {
     els.settingsLock.hidden = false;
     els.settingsContent.hidden = true;
@@ -323,12 +352,17 @@ function toggleSettings() {
   }
 }
 
-function unlockSettings() {
-  if (els.settingsCode.value.trim() !== PARENT_OVERRIDE_CODE) {
+async function unlockSettings() {
+  els.settingsCodeError.hidden = true;
+  const ok = await checkParentCode(els.settingsCode.value);
+  if (ok !== true) {
+    els.settingsCodeError.textContent = ok === null ? "Keine Verbindung. Bitte mit Internet nochmal versuchen." : "Falscher Code";
     els.settingsCodeError.hidden = false;
     els.settingsCode.value = "";
     return;
   }
+  setParentToken(normalizeCode(els.settingsCode.value));
+  els.settingsCode.value = "";
   els.settingsLock.hidden = true;
   els.settingsContent.hidden = false;
   renderSettings();
@@ -1414,7 +1448,7 @@ function renderTasks() {
       <div class="parent-override">
         <button type="button" class="parent-override-toggle" data-task-id="${task.id}">👪 Eltern: als richtig werten</button>
         <div class="parent-override-form" hidden>
-          <input type="text" inputmode="numeric" maxlength="4" placeholder="Code" class="parent-override-code" />
+          <input type="password" autocomplete="off" placeholder="Eltern-Code" class="parent-override-code" />
           <button type="button" class="parent-override-confirm">OK</button>
           <span class="parent-override-error" hidden>Falscher Code</span>
         </div>
@@ -1536,16 +1570,20 @@ function checkAnswers() {
 
 // ---------- Eltern-Korrektur einzelner Antworten ----------
 // Fällt eine eigentlich richtige Antwort z.B. durch einen Eingabe-/Vergleichsfehler
-// als "falsch" auf, können Eltern direkt an dieser Aufgabe mit dem festen Code
-// (siehe PARENT_OVERRIDE_CODE oben) manuell auf "richtig" umstellen.
-function confirmParentOverride(confirmBtn) {
+// als "falsch" auf, können Eltern direkt an dieser Aufgabe mit dem Eltern-Code
+// (wird bei der Datenbank geprüft) manuell auf "richtig" umstellen.
+async function confirmParentOverride(confirmBtn) {
   const form = confirmBtn.closest(".parent-override-form");
   const codeInput = form.querySelector(".parent-override-code");
   const errorEl = form.querySelector(".parent-override-error");
   const card = confirmBtn.closest(".task-card");
   const taskId = card.dataset.taskId;
 
-  if (codeInput.value.trim() !== PARENT_OVERRIDE_CODE) {
+  confirmBtn.disabled = true;
+  const ok = await checkParentCode(codeInput.value);
+  confirmBtn.disabled = false;
+  if (ok !== true) {
+    errorEl.textContent = ok === null ? "Keine Verbindung" : "Falscher Code";
     errorEl.hidden = false;
     codeInput.value = "";
     codeInput.focus();
@@ -1615,7 +1653,6 @@ function retry() {
 // lädt ihn, führt ihn mit dem eigenen Stand zusammen (nichts geht verloren,
 // weil fast alles nur wächst) und schreibt das Ergebnis zurück. Die App
 // arbeitet weiter zuerst lokal, auch ohne Internet.
-const STATE_TABLE = "kid_state";
 const STATE_SPRINT_DAYS = 30;
 const stateSyncing = {};
 let stateSyncTimer = null;
@@ -1767,16 +1804,18 @@ function refreshAfterStateSync() {
 }
 
 async function syncState(kid) {
-  if (!supabaseClient || stateSyncing[kid.id]) return false;
+  const token = loadToken(kid.id);
+  if (!token || stateSyncing[kid.id]) return false;
   stateSyncing[kid.id] = true;
   try {
     for (let attempt = 0; attempt < 3; attempt++) {
-      const { data, error } = await supabaseClient.from(STATE_TABLE).select("state, version").eq("kid_id", kid.id).maybeSingle();
+      const { data: row, error } = await callRpc("app_state_get", { p_kid: kid.id }, token);
       if (error) {
-        console.warn("Konnte Spielstand nicht laden:", error);
+        if (isInvalidCode(error)) handleInvalidToken();
+        else if (!error.offline) console.warn("Konnte Spielstand nicht laden:", error);
         return false;
       }
-      let remote = data && data.state && typeof data.state === "object" ? data.state : null;
+      let remote = row && row.state && typeof row.state === "object" ? row.state : null;
       if (remote && (remote.resetVersion || "") > RESET_VERSION) return false; // App ist älter als der gespeicherte Stand
       const remoteUsable = remote && (remote.resetVersion || "") === RESET_VERSION;
       if (!remoteUsable) remote = emptyState();
@@ -1785,27 +1824,18 @@ async function syncState(kid) {
       const merged = mergeStates(remote, local);
       const changedLocal = applyState(kid.id, merged, local);
 
-      if (!data || !remoteUsable || stableStringify(merged) !== stableStringify(remote)) {
-        if (!data) {
-          const { error: insertError } = await supabaseClient.from(STATE_TABLE).insert({ kid_id: kid.id, state: merged, version: 1 });
-          if (insertError) {
-            if (insertError.code === "23505") continue; // anderes Gerät war schneller
-            console.warn("Konnte Spielstand nicht speichern:", insertError);
-            return false;
-          }
-        } else {
-          const { data: updated, error: updateError } = await supabaseClient
-            .from(STATE_TABLE)
-            .update({ state: merged, version: data.version + 1, updated_at: new Date().toISOString() })
-            .eq("kid_id", kid.id)
-            .eq("version", data.version)
-            .select("version");
-          if (updateError) {
-            console.warn("Konnte Spielstand nicht speichern:", updateError);
-            return false;
-          }
-          if (!updated || updated.length === 0) continue; // inzwischen geändert, nochmal zusammenführen
+      if (!row || !remoteUsable || stableStringify(merged) !== stableStringify(remote)) {
+        const { data: newVersion, error: putError } = await callRpc(
+          "app_state_put",
+          { p_kid: kid.id, p_state: merged, p_expected: row ? row.version : 0 },
+          token
+        );
+        if (putError) {
+          if (isInvalidCode(putError)) handleInvalidToken();
+          else console.warn("Konnte Spielstand nicht speichern:", putError);
+          return false;
         }
+        if (newVersion == null) continue; // inzwischen von einem anderen Gerät geändert, nochmal zusammenführen
       }
       if (changedLocal) refreshAfterStateSync();
       return true;
@@ -1823,7 +1853,6 @@ async function syncState(kid) {
 // Supabase-Tabelle "extra_practice" (siehe supabase/extra_practice.sql) und
 // werden so auf allen Geräten gleich angezeigt. Offline bleiben neue Einträge
 // lokal "ausstehend" und werden später automatisch gesendet.
-const EXTRA_TABLE = "extra_practice";
 const EXTRA_MIN_DAY_MINUTES = 10;
 const EXTRA_MINUTES_PER_STEP = 10;
 const EXTRA_STARS_PER_STEP = 5;
@@ -1925,14 +1954,22 @@ function afterExtrasChanged(kid, starsBefore, days) {
 }
 
 async function syncExtras(kid) {
-  if (!supabaseClient || extrasSyncing[kid.id]) return false;
+  const token = loadToken(kid.id);
+  if (!token || extrasSyncing[kid.id]) return false;
   extrasSyncing[kid.id] = true;
   try {
+    // Neue Einträge senden darf nur der Eltern-Code. Ohne ihn bleiben sie
+    // "ausstehend", bis die Einstellungen das nächste Mal entsperrt werden.
+    const parent = parentToken();
     let pending = readJsonList(extrasPendingKey(kid.id));
-    for (const row of [...pending]) {
-      const { error } = await supabaseClient.from(EXTRA_TABLE).insert(row);
-      if (error && error.code !== "23505") {
-        console.warn("Konnte Extra-Übung nicht senden:", error);
+    for (const row of parent ? [...pending] : []) {
+      const { error } = await callRpc(
+        "app_extra_add",
+        { p_kid: kid.id, p_id: row.id, p_day: row.practiced_on, p_minutes: row.minutes, p_art: row.art },
+        parent
+      );
+      if (error) {
+        if (!error.offline) console.warn("Konnte Extra-Übung nicht senden:", error);
         break;
       }
       pending = pending.filter((p) => p.id !== row.id);
@@ -1940,14 +1977,10 @@ async function syncExtras(kid) {
       writeJsonList(extrasCacheKey(kid.id), [...readJsonList(extrasCacheKey(kid.id)).filter((r) => r.id !== row.id), row]);
     }
 
-    const { data, error } = await supabaseClient
-      .from(EXTRA_TABLE)
-      .select("id, kid_id, practiced_on, minutes, art, created_at")
-      .eq("kid_id", kid.id)
-      .is("deleted_at", null)
-      .gte("practiced_on", RESET_EPOCH.slice(0, 10));
+    const { data, error } = await callRpc("app_extra_list", { p_kid: kid.id, p_since: RESET_EPOCH.slice(0, 10) }, token);
     if (error) {
-      console.warn("Konnte Extra-Übungen nicht laden:", error);
+      if (isInvalidCode(error)) handleInvalidToken();
+      else if (!error.offline) console.warn("Konnte Extra-Übungen nicht laden:", error);
       return false;
     }
     writeJsonList(extrasCacheKey(kid.id), data || []);
@@ -1977,8 +2010,7 @@ async function deleteExtra(kid, id) {
   if (pending.some((row) => row.id === id)) {
     writeJsonList(extrasPendingKey(kid.id), pending.filter((row) => row.id !== id));
   } else {
-    if (!supabaseClient) return false;
-    const { error } = await supabaseClient.from(EXTRA_TABLE).update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    const { error } = await callRpc("app_extra_delete", { p_id: id }, parentToken());
     if (error) {
       console.warn("Konnte Extra-Übung nicht löschen:", error);
       return false;
@@ -2519,8 +2551,83 @@ els.sprintInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitSprintAnswer();
 });
 
+// ---------- Zugangscode (Anmeldung pro Gerät) ----------
+// Beim ersten Öffnen auf einem Gerät braucht die Seite den persönlichen Code
+// (per Link ?t=… oder Eingabe). Er bleibt danach auf dem Gerät gespeichert.
+const activeKid = KIDS.find((k) => k.id === document.body.dataset.kidId);
+
+function showGate(message = "") {
+  hideAllViews();
+  els.codeGate.hidden = false;
+  els.gateError.hidden = !message;
+  els.gateError.textContent = message;
+}
+
+function handleInvalidToken() {
+  clearToken(activeKid.id);
+  showGate("Der Code ist nicht mehr gültig. Bitte den neuen Code eingeben.");
+}
+
+async function verifyKidCode(raw) {
+  const code = normalizeCode(raw);
+  if (!code) return { ok: false, message: "Bitte den Code eingeben." };
+  const { data, error } = await callRpc("app_check", {}, code);
+  if (error) {
+    return {
+      ok: false,
+      message: error.offline
+        ? "Keine Verbindung. Bitte mit Internet nochmal versuchen."
+        : "Dieser Code passt nicht. Bitte nochmal prüfen.",
+    };
+  }
+  if (data.role !== "kind") return { ok: false, message: "Das ist ein Eltern-Code. Bitte den Code für dich nehmen." };
+  if (data.kid_id !== activeKid.id) return { ok: false, message: "Dieser Code gehört zu einer anderen Seite." };
+  saveToken(activeKid.id, code);
+  return { ok: true };
+}
+
+async function submitGate() {
+  els.gateBtn.disabled = true;
+  const result = await verifyKidCode(els.gateInput.value);
+  els.gateBtn.disabled = false;
+  if (!result.ok) {
+    els.gateError.hidden = false;
+    els.gateError.textContent = result.message;
+    return;
+  }
+  els.gateInput.value = "";
+  els.codeGate.hidden = true;
+  selectKid(activeKid);
+}
+
+els.gateBtn.addEventListener("click", submitGate);
+els.gateInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitGate();
+});
+window.addEventListener("pagehide", () => setParentToken(""));
+
 // ---------- Start ----------
 // Jede Kind-Seite trägt ihre feste Kind-ID am <body> (data-kid-id) statt einer
-// Namensschild-Auswahl – so hat jedes Kind seine eigene Seite (/tj/, /mj/).
-const activeKid = KIDS.find((k) => k.id === document.body.dataset.kidId);
-selectKid(activeKid);
+// Namensschild-Auswahl, so hat jedes Kind seine eigene Seite (/tj/, /mj/).
+async function startApp() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("t")) {
+    const fromLink = await verifyKidCode(params.get("t"));
+    history.replaceState(null, "", window.location.pathname);
+    if (!fromLink.ok) {
+      showGate(fromLink.message);
+      return;
+    }
+  }
+  if (!loadToken(activeKid.id)) {
+    showGate();
+    return;
+  }
+  selectKid(activeKid);
+  // Im Hintergrund prüfen, ob der gespeicherte Code noch gilt (z.B. erneuert).
+  callRpc("app_check", {}, loadToken(activeKid.id)).then(({ error }) => {
+    if (error && isInvalidCode(error)) handleInvalidToken();
+  });
+}
+
+startApp();

@@ -1,3 +1,6 @@
+-- Die Tabellen legt diese Datei an. Den Zugriff regeln zugangscodes.sql und
+-- zugriff_sperren.sql. Nach dem Sperren NICHT erneut ausführen, sonst öffnet
+-- die Datei den Zugriff für den öffentlichen Schlüssel wieder.
 -- Gemeinsamer Spielstand pro Kind (Sterne, Übungstage, Kopfrechnen, Ergebnisse
 -- der Arbeitsblätter, Klassenstufen-Einstellung), damit alle Geräte denselben
 -- Stand zeigen. Einmalig im Supabase SQL-Editor ausführen

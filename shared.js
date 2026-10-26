@@ -85,6 +85,56 @@ const supabaseClient = window.supabase
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
 
+// ---------- Zugangscodes ----------
+// Die Tabellen sind für den Browser gesperrt. Zugriff geht nur über geprüfte
+// Datenbankfunktionen, die den persönlichen Code mitbekommen (siehe
+// supabase/zugangscodes.sql). Codes liegen nur auf dem Gerät (localStorage,
+// außerhalb des Neustart-Bereichs "mathe-pwa:") und nie im Repo.
+function normalizeCode(input) {
+  let value = String(input || "").trim();
+  const fromLink = value.match(/[?&]t=([^&#\s]+)/);
+  if (fromLink) value = decodeURIComponent(fromLink[1]);
+  return value.replace(/[\s-]/g, "").toLowerCase();
+}
+
+function loadToken(name) {
+  try {
+    return localStorage.getItem(`mathe-token:${name}`) || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function saveToken(name, code) {
+  try {
+    localStorage.setItem(`mathe-token:${name}`, code);
+  } catch (e) {
+    console.warn("Konnte Code nicht speichern:", e);
+  }
+}
+
+function clearToken(name) {
+  try {
+    localStorage.removeItem(`mathe-token:${name}`);
+  } catch (e) {
+    // egal
+  }
+}
+
+async function callRpc(fn, args, token) {
+  if (!supabaseClient || !token) return { data: null, error: { message: "offline", offline: true } };
+  try {
+    const { data, error } = await supabaseClient.rpc(fn, { p_token: token, ...args });
+    return { data, error };
+  } catch (e) {
+    return { data: null, error: { message: String(e), offline: true } };
+  }
+}
+
+function isInvalidCode(error) {
+  return !!(error && /Code ungueltig/i.test(error.message || ""));
+}
+
 // ---------- Neustart ----------
 // RESET_EPOCH: Supabase-Einträge davor werden ignoriert (bleiben als Archiv
 // in der Datenbank). RESET_VERSION: Ändert man sie, räumt jedes Gerät beim

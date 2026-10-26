@@ -1,3 +1,6 @@
+-- ERSETZT durch zugangscodes.sql (geprüfte Funktionen mit Code) und
+-- zugriff_sperren.sql. Nach dem Sperren NICHT erneut ausführen, sonst öffnet
+-- die Datei den Zugriff für den öffentlichen Schlüssel wieder.
 -- Extra-Übungen außerhalb der App (z.B. Anton, mit den Eltern). Wird von der
 -- Kind-App geräteübergreifend synchronisiert. Einmalig im Supabase SQL-Editor
 -- ausführen (Dashboard > SQL Editor > New query > einfügen > Run).

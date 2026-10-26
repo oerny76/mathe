@@ -1,7 +1,8 @@
 # Hält das kostenlose Supabase-Projekt wach: Der Gratis-Tarif pausiert nach
-# etwa einer Woche ohne Zugriffe. Diese Aktion schickt einmal täglich eine
-# winzige Leseanfrage. Der verwendete Schlüssel ist der öffentliche
-# (publishable) Schlüssel, der ohnehin im Seitencode steht.
+# etwa einer Woche ohne Zugriffe. Diese Aktion schickt einmal täglich einen
+# winzigen Aufruf der offenen Funktion app_ping (siehe supabase/zugangscodes.sql,
+# ohne diese Funktion schlägt der Lauf fehl). Der verwendete Schlüssel ist der
+# öffentliche (publishable) Schlüssel, der ohnehin im Seitencode steht.
 name: Supabase wachhalten
 
 on:
@@ -16,11 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Leseanfrage an Supabase
+      - name: Lebenszeichen an Supabase
         run: |
           curl --fail --silent --show-error --max-time 30 --retry 3 --retry-delay 10 \
-            "https://gkqpgnwmmwvdtpdcqwye.supabase.co/rest/v1/attempts?select=id&limit=1" \
+            -X POST "https://gkqpgnwmmwvdtpdcqwye.supabase.co/rest/v1/rpc/app_ping" \
             -H "apikey: sb_publishable_1EraAljaYautx0yw-eLrsw_X25gwY2M" \
-            -H "Authorization: Bearer sb_publishable_1EraAljaYautx0yw-eLrsw_X25gwY2M" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
             -o /dev/null
           echo "Supabase hat geantwortet."

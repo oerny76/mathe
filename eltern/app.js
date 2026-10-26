@@ -6,6 +6,10 @@ const els = {
   summary: document.getElementById("summary"),
   kidsContainer: document.getElementById("kids"),
   weekButtons: document.querySelectorAll(".eltern-week-btn"),
+  gate: document.getElementById("code-gate"),
+  gateInput: document.getElementById("gate-input"),
+  gateBtn: document.getElementById("gate-btn"),
+  gateError: document.getElementById("gate-error"),
 };
 
 let viewMode = "current"; // "current" | "history"
@@ -91,15 +95,9 @@ async function loadKidWorksheets(kid) {
 }
 
 async function loadAttempts(kid) {
-  if (!supabaseClient) return [];
-  const { data, error } = await supabaseClient
-    .from("attempts")
-    .select("worksheet_file, bereich, correct_count, total, completed_at")
-    .eq("kid_id", kid.id)
-    .gte("completed_at", RESET_EPOCH)
-    .order("completed_at", { ascending: true });
-
+  const { data, error } = await callRpc("app_attempts_list", { p_kid: kid.id, p_since: RESET_EPOCH }, loadToken("eltern"));
   if (error) {
+    if (isInvalidCode(error)) throw error;
     console.warn("Konnte Ergebnisse nicht laden:", error);
     return [];
   }
@@ -360,26 +358,76 @@ function setViewMode(mode) {
   renderAll();
 }
 
+function showGate(message = "") {
+  els.gate.hidden = false;
+  els.kidsContainer.innerHTML = "";
+  els.summary.textContent = "";
+  els.gateError.hidden = !message;
+  els.gateError.textContent = message;
+}
+
+async function verifyParentCode(raw) {
+  const code = normalizeCode(raw);
+  if (!code) return "Bitte den Eltern-Code eingeben.";
+  const { data, error } = await callRpc("app_eltern_check", {}, code);
+  if (error) return "Keine Verbindung. Bitte mit Internet nochmal versuchen.";
+  if (data !== true) return "Dieser Code passt nicht.";
+  saveToken("eltern", code);
+  return "";
+}
+
+async function submitGate() {
+  els.gateBtn.disabled = true;
+  const problem = await verifyParentCode(els.gateInput.value);
+  els.gateBtn.disabled = false;
+  if (problem) {
+    els.gateError.hidden = false;
+    els.gateError.textContent = problem;
+    return;
+  }
+  els.gateInput.value = "";
+  els.gate.hidden = true;
+  init();
+}
+
 async function init() {
   if (!supabaseClient) {
     els.summary.textContent = "Supabase konnte nicht geladen werden (kein Netz?).";
     return;
   }
 
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("t")) {
+    const problem = await verifyParentCode(params.get("t"));
+    history.replaceState(null, "", window.location.pathname);
+    if (problem) return showGate(problem);
+  }
+  if (!loadToken("eltern")) return showGate();
+
   els.summary.textContent = "Lädt …";
   els.kidsContainer.innerHTML = "";
+  kidsData.length = 0;
 
-  els.weekButtons.forEach((btn) => {
-    btn.addEventListener("click", () => setViewMode(btn.dataset.mode));
-  });
-
-  for (const kid of KIDS) {
-    const [worksheets, attempts] = await Promise.all([loadKidWorksheets(kid), loadAttempts(kid)]);
-    kidsData.push({ kid, worksheets, attemptsByFile: groupByFile(attempts) });
+  try {
+    for (const kid of KIDS) {
+      const [worksheets, attempts] = await Promise.all([loadKidWorksheets(kid), loadAttempts(kid)]);
+      kidsData.push({ kid, worksheets, attemptsByFile: groupByFile(attempts) });
+    }
+  } catch (error) {
+    clearToken("eltern");
+    return showGate("Der Code ist nicht mehr gültig. Bitte neu eingeben.");
   }
 
   renderAll();
   els.summary.textContent = "";
 }
+
+els.weekButtons.forEach((btn) => {
+  btn.addEventListener("click", () => setViewMode(btn.dataset.mode));
+});
+els.gateBtn.addEventListener("click", submitGate);
+els.gateInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitGate();
+});
 
 init();
