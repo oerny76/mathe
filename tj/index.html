@@ -20,18 +20,29 @@
 
   <main id="app">
     <section id="worksheet-picker" class="worksheet-picker" hidden>
-      <div class="star-row">
-        <p id="star-counter" class="star-counter"></p>
-        <p id="star-next" class="star-next"></p>
+      <div class="status-bar">
+        <div class="status-pill">
+          <span class="status-pill-value" id="star-counter"></span>
+          <span class="status-pill-label">Sterne</span>
+        </div>
+        <button type="button" class="status-pill status-pill-button" id="streak-pill" aria-expanded="false">
+          <span class="status-pill-value" id="streak-main"></span>
+          <span class="status-pill-label">Wochen-Streak ▾</span>
+        </button>
+        <div class="status-pill">
+          <span class="status-pill-value" id="week-days"></span>
+          <span class="status-pill-label">Tage diese Woche</span>
+        </div>
       </div>
-      <div class="streak-box">
-        <p id="streak-main" class="streak-main"></p>
+      <p id="star-next" class="star-next"></p>
+      <p id="weekly-usage-hint" class="weekly-usage-hint" hidden></p>
+      <div id="streak-details" class="streak-details" hidden>
         <div id="streak-weeks" class="streak-weeks"></div>
         <p id="streak-sub" class="streak-sub"></p>
       </div>
-      <p id="weekly-usage-hint" class="weekly-usage-hint" hidden></p>
+
       <div class="sprint-toggle-row">
-        <button id="sprint-start-btn" class="chalk-button ghost small">🧠 Tägliches Kopfrechnen (10 Min)</button>
+        <button id="sprint-start-btn" class="chalk-button sprint-start">🧠 Tägliches Kopfrechnen (10 Min)</button>
         <p id="sprint-today-hint" class="sprint-today-hint" hidden></p>
       </div>
       <div class="luecken-toggle-row">

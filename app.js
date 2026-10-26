@@ -57,6 +57,9 @@ const els = {
   settingsContent: document.getElementById("settings-content"),
   settingsGradeInfo: document.getElementById("settings-grade-info"),
   settingsLowerGrade: document.getElementById("settings-lower-grade"),
+  streakPill: document.getElementById("streak-pill"),
+  streakDetails: document.getElementById("streak-details"),
+  weekDays: document.getElementById("week-days"),
   streakMain: document.getElementById("streak-main"),
   streakWeeks: document.getElementById("streak-weeks"),
   streakSub: document.getElementById("streak-sub"),
@@ -395,10 +398,7 @@ function updateStreakDisplay() {
   if (!currentKid) return;
   const info = computeStreak(currentKid.id);
 
-  els.streakMain.textContent =
-    info.streak > 0
-      ? `🔥 ${info.streak} Woche${info.streak === 1 ? "" : "n"} in Folge`
-      : `🔥 Starte deinen Wochen-Streak: Übe an ${STREAK_MIN_DAYS} Tagen in einer Woche.`;
+  els.streakMain.textContent = `🔥 ${info.streak}`;
 
   els.streakWeeks.innerHTML = "";
   info.weeks.forEach((w) => {
@@ -408,14 +408,9 @@ function updateStreakDisplay() {
     els.streakWeeks.appendChild(chip);
   });
 
-  const missing = STREAK_MIN_DAYS - info.currentDays;
-  const weekText = info.currentDone
-    ? "Diese Woche zählt schon für deinen Streak. ✅"
-    : `Noch ${missing} Tag${missing === 1 ? "" : "e"} üben, dann zählt diese Woche für deinen Streak.`;
-  const jokerText = info.jokerUsedThisMonth
+  els.streakSub.textContent = info.jokerUsedThisMonth
     ? "🛡️ Dein Streak-Schutz ist diesen Monat schon im Einsatz."
     : "🛡️ Streak-Schutz: Eine verpasste Woche pro Monat ist okay.";
-  els.streakSub.textContent = `${weekText} ${jokerText}`;
 }
 
 // ---------- Wochen-Übeziel (z.B. "4 Tage reichen") ----------
@@ -478,18 +473,19 @@ function updateWeeklyUsageHint() {
   if (!currentKid) return;
   updateStreakDisplay();
   const count = loadUsageDays(currentKid.id).length;
+  els.weekDays.textContent = `📅 ${count}/${WEEKLY_USAGE_TARGET}`;
 
-  if (count === 0) {
-    els.weeklyUsageHint.hidden = true;
-    return;
-  }
-
-  els.weeklyUsageHint.hidden = false;
+  let text;
   if (count >= WEEKLY_USAGE_TARGET) {
-    els.weeklyUsageHint.textContent = `🎉 Super, diese Woche hast du schon an ${count} Tagen geübt. Alles weitere ist freiwillige Extra-Übung!`;
+    text = "🎉 Wochenziel erreicht! Alles Weitere ist freiwillige Extra-Übung.";
+  } else if (count >= STREAK_MIN_DAYS) {
+    text = "Streak-Woche geschafft ✅ Noch ein Tag bis zum Wochenziel.";
   } else {
-    els.weeklyUsageHint.textContent = `Diese Woche schon an ${count} von ${WEEKLY_USAGE_TARGET} Tagen geübt. Weiter so!`;
+    const missing = STREAK_MIN_DAYS - count;
+    text = `Noch ${missing} Tag${missing === 1 ? "" : "e"} üben, dann zählt die Woche für deinen Streak.`;
   }
+  els.weeklyUsageHint.hidden = false;
+  els.weeklyUsageHint.textContent = text;
 }
 
 // ---------- Tägliches Kopfrechnen (10-Minuten-Sprint) ----------
@@ -1576,10 +1572,10 @@ function nextToast() {
 function updateStarDisplay() {
   if (!currentKid) return;
   const { total } = loadStars(currentKid.id);
-  els.starCounter.textContent = `⭐ ${total} Sterne`;
+  els.starCounter.textContent = `⭐ ${total}`;
   const next = currentKid.welt.items.find((item) => item.ab > total);
   els.starNext.textContent = next
-    ? `Noch ${next.ab - total} Sterne bis zum nächsten Fund in deiner Sammelwelt.`
+    ? `Noch ${next.ab - total} ⭐ bis zum nächsten Fund.`
     : "Du hast alles in deiner Sammelwelt gefunden! 🏆";
 }
 
@@ -1883,6 +1879,11 @@ els.settingsCode.addEventListener("keydown", (e) => {
 els.settingsLowerGrade.addEventListener("change", () => {
   saveGradeOffset(currentKid.id, els.settingsLowerGrade.checked ? 1 : 0);
   renderSettings();
+});
+els.streakPill.addEventListener("click", () => {
+  const open = els.streakDetails.hidden;
+  els.streakDetails.hidden = !open;
+  els.streakPill.setAttribute("aria-expanded", String(open));
 });
 els.worldOpenBtn.addEventListener("click", openWorld);
 els.worldBackBtn.addEventListener("click", closeWorld);
