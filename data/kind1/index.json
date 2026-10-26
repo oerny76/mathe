@@ -1,9 +1,8 @@
 {
   "files": [
-    "2026-W42-grundrechenarten.json",
-    "2026-W42-kopfrechnen.json",
-    "2026-W42-lesen-fc-bayern-muenchen.json",
-    "2026-W42-lesen-drachen-zunder.json"
-  ],
-  "aktuellesBild": "2026-W42-bild.json"
+    "2026-W44-grundrechenarten.json",
+    "2026-W44-einmaleins.json",
+    "2026-W44-lesen-fc-bayern-muenchen.json",
+    "2026-W44-lesen-drachen.json"
+  ]
 }

@@ -1,9 +1,8 @@
 {
   "files": [
-    "2026-W42-kopfrechnen.json",
-    "2026-W42-einmaleins.json",
-    "2026-W42-geometrie.json",
-    "2026-W42-englisch.json"
-  ],
-  "aktuellesBild": "2026-W42-bild.json"
+    "2026-W44-kopfrechnen.json",
+    "2026-W44-einmaleins.json",
+    "2026-W44-geometrie.json",
+    "2026-W44-englisch.json"
+  ]
 }

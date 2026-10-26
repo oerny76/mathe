@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "geometrie",
+  "titel": "Geometrie: Dreiecke und Winkel 📐",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "Zwei Winkel eines Dreiecks sind 52° und 68° groß. Wie groß ist der dritte Winkel in Grad?",
+      "loesung": "60"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "Ein Dreieck hat eine Grundseite von 14 cm und eine Höhe von 9 cm. Wie groß ist sein Flächeninhalt in cm²?",
+      "loesung": "63"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Ein Rechteck hat einen Flächeninhalt von 96 cm² und ist 8 cm breit. Wie lang ist es in cm?",
+      "loesung": "12"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "Wie groß ist die Winkelsumme in einem Viereck in Grad?",
+      "loesung": "360"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Ein gleichschenkliges Dreieck hat an der Spitze einen Winkel von 40°. Wie groß ist jeder der beiden Basiswinkel in Grad?",
+      "loesung": "70"
+    },
+    {
+      "id": 6,
+      "typ": "knobelaufgabe",
+      "frage": "Ein Quadrat hat einen Flächeninhalt von 81 cm². Wie lang ist sein Umfang in cm?",
+      "loesung": "36"
+    }
+  ]
+}

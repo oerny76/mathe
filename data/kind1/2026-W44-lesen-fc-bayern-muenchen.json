@@ -1,0 +1,47 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "lesen",
+  "titel": "Lesetext: Ein Abend in der Arena",
+  "text": "Jonas ist neun Jahre alt und spielt selbst in einer Fußballmannschaft. Sein Lieblingsverein ist der FC Bayern München. Zum Geburtstag schenkt ihm sein Opa eine große Überraschung: Die beiden fahren zusammen mit der Bahn nach München in die Arena.\n\nSchon von weitem sieht Jonas das riesige Stadion. Bei Heimspielen des FC Bayern leuchtet es von außen rot. Jonas bekommt Gänsehaut. Im Stadion finden mehr als siebzigtausend Menschen Platz. Überall sieht er rote Schals und rote Trikots. Seinen eigenen Schal hat er natürlich auch mitgebracht und trägt ihn stolz um den Hals. Opa kauft ihm eine Bratwurst und einen warmen Kakao, denn der Abend ist kühl.\n\nDann laufen die Spieler auf den Rasen. Die Fans singen und klatschen. Jonas ruft so laut mit, dass seine Stimme ganz heiser wird. In der zweiten Halbzeit fällt ein Tor. Alle springen von den Sitzen auf, und Opa nimmt Jonas in den Arm.\n\nAuf dem Heimweg in der Bahn ist Jonas müde, aber glücklich. „Das war der schönste Geburtstag aller Zeiten“, sagt er. Zu Hause erzählt er seiner Schwester alles ganz genau. Und er träumt davon, eines Tages selbst auf so einem großen Rasen zu spielen.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Wie alt ist Jonas? (Schreibe die Zahl.)",
+      "loesung": "9"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Wer schenkt Jonas die Überraschung zum Geburtstag?",
+      "loesung": "Opa"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "In welche Stadt fahren die beiden?",
+      "loesung": "München"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Welche Farbe hat das Stadion bei Heimspielen des FC Bayern von außen?",
+      "loesung": "rot"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Was bekommt Jonas zu trinken?",
+      "loesung": "Kakao"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Womit fahren Jonas und Opa nach München? (Das Wort steht im ersten Absatz.)",
+      "loesung": "Bahn"
+    }
+  ]
+}

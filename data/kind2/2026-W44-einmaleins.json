@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis: Runde 4 ✖️",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "23 × 12 = ?",
+      "loesung": "276"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "19 × 19 = ?",
+      "loesung": "361"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "432 : 18 = ?",
+      "loesung": "24"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "2 hoch 5 = ?",
+      "loesung": "32"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "14 × 25 = ?",
+      "loesung": "350"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "525 : 21 = ?",
+      "loesung": "25"
+    }
+  ]
+}

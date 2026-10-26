@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "grundrechenarten",
+  "titel": "Grundrechenarten: Jetzt mit Tausendern ➕➖",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "1248 + 735 = ?",
+      "loesung": "1983"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "3000 − 1467 = ?",
+      "loesung": "1533"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "34 × 6 = ?",
+      "loesung": "204"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "252 : 6 = ?",
+      "loesung": "42"
+    },
+    {
+      "id": 5,
+      "typ": "sachaufgabe",
+      "frage": "Familie Berger fährt in den Urlaub. Am ersten Tag fahren sie 286 Kilometer, am zweiten Tag 349 Kilometer. Wie viele Kilometer sind das zusammen?",
+      "loesung": "635"
+    },
+    {
+      "id": 6,
+      "typ": "knobelaufgabe",
+      "frage": "Ich denke mir eine Zahl. Verdopple ich sie und zähle 7 dazu, erhalte ich 35. Welche Zahl habe ich mir gedacht?",
+      "loesung": "14"
+    }
+  ]
+}
