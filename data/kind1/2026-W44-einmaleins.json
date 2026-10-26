@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins: Jetzt wird's groß 🎯",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "6 × 14 = ?",
+      "loesung": "84"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "12 × 12 = ?",
+      "loesung": "144"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "168 : 8 = ?",
+      "loesung": "21"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "15 × 7 = ?",
+      "loesung": "105"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "156 : 12 = ?",
+      "loesung": "13"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "9 × 13 = ?",
+      "loesung": "117"
+    }
+  ]
+}

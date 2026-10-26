@@ -1,0 +1,47 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "lesen",
+  "titel": "Lesetext: Der Drache mit dem Schnupfen",
+  "text": "Im Tal der drei Seen lebte der kleine Drache Nebel. Er war grün mit gelben Punkten und hatte ein Problem: Jeden Herbst bekam er einen dicken Schnupfen. Dann konnte er kein Feuer spucken, sondern nur niesen. „Hatschi!“, machte er, und statt einer Flamme kam nur ein bisschen Rauch heraus.\n\nIm Dorf unten feierten die Menschen jedes Jahr das Laternenfest. Die Kinder bastelten bunte Laternen, und der Drache sollte wie immer die Kerzen anzünden. Doch an diesem Abend hustete und schniefte Nebel in seiner Höhle. Er schämte sich sehr und wollte nicht ins Dorf fliegen.\n\nDa kam das Mädchen Lotta zu ihm hinauf. Sie hatte eine Thermoskanne mit warmem Holundertee und etwas Honig dabei. „Trink das, dann geht es dir besser“, sagte sie. Nebel trank den süßen Tee in kleinen Schlucken. Langsam wurde seine Nase wieder frei.\n\nGemeinsam flogen sie ins Dorf. Die Kinder warteten schon mit ihren Laternen. Nebel holte tief Luft und spuckte eine kleine, warme Flamme. Eine Kerze nach der anderen begann zu leuchten, und das ganze Dorf strahlte. Alle jubelten, und Nebel war nicht mehr traurig. Seitdem trinkt er jeden Herbst Holundertee, bevor das Fest beginnt.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt der kleine Drache?",
+      "loesung": "Nebel"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Welche Krankheit bekommt er jeden Herbst?",
+      "loesung": "Schnupfen"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Wie viele Seen hat das Tal? (Schreibe die Zahl.)",
+      "loesung": "3"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Welches Fest feiert das Dorf?",
+      "loesung": "Laternenfest"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt das Mädchen, das dem Drachen hilft?",
+      "loesung": "Lotta"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Welches Getränk bringt Lotta mit? (ein Wort)",
+      "loesung": "Holundertee"
+    }
+  ]
+}

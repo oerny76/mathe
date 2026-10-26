@@ -1,0 +1,48 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "The Case of the Silent Bell",
+  "text": "Nora and Tom have a small detective club in their town. One Monday, Mrs Green, the owner of the bakery, asks them for help. Every morning, someone takes a loaf of bread from her shop, but the door is always locked.\n\nOn Tuesday night, Nora and Tom watch the bakery. At five o'clock in the morning, they hear a small bell. It is the bell on the back window! Tom looks closer and sees a little hand. It belongs to a boy with a bag.\n\nThe boy's name is Max. He is eight years old, and he is very hungry. His family has no money this week. Max climbs through the small window every morning because he is too shy to ask for help.\n\nMrs Green is not angry. She smiles and says, \"Next time, just knock on the door.\" From that day, Max gets a free breakfast every morning, and Nora and Tom have solved another case.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Who asks the detectives for help?",
+      "loesung": "Mrs Green"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "What does someone take from the bakery every morning?",
+      "loesung": "bread"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Where is the little bell? (one word)",
+      "loesung": "window"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "What is the boy's name?",
+      "loesung": "Max"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "How old is Max? (write the number with digits)",
+      "loesung": "8"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Mrs Green says: \"Next time, just ___ on the door.\" (one word)",
+      "loesung": "knock"
+    }
+  ]
+}

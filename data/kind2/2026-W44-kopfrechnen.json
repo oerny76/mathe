@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W44",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Negative Zahlen und Prozent 🧠",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "(−6) × 9 = ?",
+      "loesung": "-54"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "35 % von 240 = ?",
+      "loesung": "84"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Wie viel ist 3/8 von 64?",
+      "loesung": "24"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "−12 − 19 = ?",
+      "loesung": "-31"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Berechne 3x + 5 für x = 6.",
+      "loesung": "23"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "√169 = ?",
+      "loesung": "13"
+    }
+  ]
+}
