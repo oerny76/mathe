@@ -107,6 +107,7 @@ let currentTasks = [];
 let currentWorksheet = null;
 let currentBild = null; // aktuelles Wochenbild (Puzzle-Gamification)
 let currentWeekFiles = []; // Arbeitsblätter (file+bereich) der aktuellen Wochenbild-Woche, ein Eintrag pro Puzzle-Teil
+let currentIndex = null; // index.json des aktuellen Kindes
 let currentWorksheetList = []; // alle geladenen Arbeitsblatt-Metadaten, für "Meine Ergebnisse"
 let worksheetCache = {}; // file -> geladenes JSON (vermeidet doppelte fetches)
 let lueckenByFile = new Map(); // file -> {bereich, correct_count, total}, für die "Wo stehe ich?"-Übersicht
@@ -136,6 +137,7 @@ function saveProgress(kidId, file, data) {
   } catch (e) {
     console.warn("Konnte Fortschritt nicht speichern:", e);
   }
+  noteLocalChange();
 }
 
 function loadProgress(kidId, file) {
@@ -293,9 +295,11 @@ function loadGradeOffset(kidId) {
 function saveGradeOffset(kidId, offset) {
   try {
     localStorage.setItem(gradeOffsetKey(kidId), String(offset));
+    localStorage.setItem(`${gradeOffsetKey(kidId)}-at`, new Date().toISOString());
   } catch (e) {
     console.warn("Konnte Einstellung nicht speichern:", e);
   }
+  noteLocalChange();
 }
 
 function effectiveGrade(kid) {
@@ -480,6 +484,7 @@ function markUsageDay(kidId) {
     } catch (e) {
       console.warn("Konnte Übungstag nicht speichern:", e);
     }
+    noteLocalChange();
   }
   updateWeeklyUsageHint();
 
@@ -562,6 +567,7 @@ function saveSprintLevel(kidId, level) {
   } catch (e) {
     console.warn("Konnte Kopfrechnen-Level nicht speichern:", e);
   }
+  noteLocalChange();
 }
 
 function loadSprintResult(kidId, dateStr) {
@@ -583,6 +589,7 @@ function saveTodaySprintResult(kidId, result) {
   } catch (e) {
     console.warn("Konnte Kopfrechnen-Ergebnis nicht speichern:", e);
   }
+  noteLocalChange();
 }
 
 // Letzte N Tage mit Ergebnis (nicht zwingend lückenlos, nur Tage an denen
@@ -1041,6 +1048,7 @@ async function selectKid(kid) {
   updateWeeklyUsageHint();
   updateStarDisplay();
   syncExtras(kid);
+  syncState(kid);
 
   showPicker();
   els.puzzlePicker.hidden = true;
@@ -1091,6 +1099,7 @@ async function selectKid(kid) {
       .filter(Boolean)
       .filter((ws) => !ws.woche || ws.woche <= thisWeek)
       .sort((a, b) => (a.erstellt < b.erstellt ? 1 : -1));
+    currentIndex = index;
     currentWorksheetList = valid;
     backfillUnsyncedProgress(kid.id, valid);
     await setupPickerView(kid, index, valid);
@@ -1599,6 +1608,214 @@ function retry() {
   renderTasks();
 }
 
+// ---------- Spielstand-Synchronisierung (alle Geräte) ----------
+// Der Stand jedes Kindes (Arbeitsblatt-Ergebnisse, Sterne, Übungstage,
+// Kopfrechnen, Klassenstufen-Einstellung) liegt zusätzlich als ein JSON in der
+// Supabase-Tabelle "kid_state" (siehe supabase/kid_state.sql). Jedes Gerät
+// lädt ihn, führt ihn mit dem eigenen Stand zusammen (nichts geht verloren,
+// weil fast alles nur wächst) und schreibt das Ergebnis zurück. Die App
+// arbeitet weiter zuerst lokal, auch ohne Internet.
+const STATE_TABLE = "kid_state";
+const STATE_SPRINT_DAYS = 30;
+const stateSyncing = {};
+let stateSyncTimer = null;
+let stateApplying = false;
+
+function noteLocalChange() {
+  if (stateApplying) return;
+  clearTimeout(stateSyncTimer);
+  stateSyncTimer = setTimeout(() => {
+    if (currentKid) syncState(currentKid);
+  }, 1500);
+}
+
+function emptyState() {
+  return { v: 1, resetVersion: RESET_VERSION, gradeOffset: { value: 0, at: "" }, sprint: { level: 1, sessions: {} }, stars: {}, usage: {}, progress: {} };
+}
+
+function stableStringify(value) {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function parseJson(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function pruneSessions(sessions) {
+  const days = Object.keys(sessions).sort().reverse().slice(0, STATE_SPRINT_DAYS);
+  const out = {};
+  days.forEach((day) => {
+    out[day] = sessions[day];
+  });
+  return out;
+}
+
+function collectLocalState(kidId) {
+  const state = emptyState();
+  const prefix = `mathe-pwa:${kidId}:`;
+  state.stars = loadStars(kidId).ledger;
+  state.gradeOffset = {
+    value: loadGradeOffset(kidId),
+    at: localStorage.getItem(`${gradeOffsetKey(kidId)}-at`) || "",
+  };
+  state.sprint.level = loadSprintLevel(kidId);
+  Object.keys(localStorage).forEach((key) => {
+    if (!key.startsWith(prefix)) return;
+    const rest = key.slice(prefix.length);
+    if (rest.startsWith("sprint:")) {
+      const session = parseJson(localStorage.getItem(key));
+      if (session) state.sprint.sessions[rest.slice("sprint:".length)] = session;
+    } else if (rest.startsWith("usage-week:")) {
+      const days = parseJson(localStorage.getItem(key));
+      if (Array.isArray(days)) state.usage[rest.slice("usage-week:".length)] = days;
+    } else if (rest.endsWith(".json")) {
+      const progress = parseJson(localStorage.getItem(key));
+      if (progress && progress.total != null) {
+        const { synced, ...clean } = progress;
+        state.progress[rest] = clean;
+      }
+    }
+  });
+  state.sprint.sessions = pruneSessions(state.sprint.sessions);
+  return state;
+}
+
+function betterSession(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  if ((a.attempted || 0) !== (b.attempted || 0)) return (a.attempted || 0) > (b.attempted || 0) ? a : b;
+  return (a.correct || 0) >= (b.correct || 0) ? a : b;
+}
+
+function mergeStates(a, b) {
+  const out = emptyState();
+  out.gradeOffset = (b.gradeOffset?.at || "") > (a.gradeOffset?.at || "") ? b.gradeOffset : a.gradeOffset || out.gradeOffset;
+  out.sprint.level = Math.max(a.sprint?.level || 1, b.sprint?.level || 1);
+
+  const sessions = {};
+  new Set([...Object.keys(a.sprint?.sessions || {}), ...Object.keys(b.sprint?.sessions || {})]).forEach((day) => {
+    sessions[day] = betterSession(a.sprint?.sessions?.[day], b.sprint?.sessions?.[day]);
+  });
+  out.sprint.sessions = pruneSessions(sessions);
+
+  new Set([...Object.keys(a.stars || {}), ...Object.keys(b.stars || {})]).forEach((key) => {
+    out.stars[key] = Math.max(a.stars?.[key] || 0, b.stars?.[key] || 0);
+  });
+
+  new Set([...Object.keys(a.usage || {}), ...Object.keys(b.usage || {})]).forEach((week) => {
+    out.usage[week] = [...new Set([...(a.usage?.[week] || []), ...(b.usage?.[week] || [])])].sort();
+  });
+
+  new Set([...Object.keys(a.progress || {}), ...Object.keys(b.progress || {})]).forEach((file) => {
+    const pa = a.progress?.[file];
+    const pb = b.progress?.[file];
+    if (!pa || !pb) out.progress[file] = pa || pb;
+    else out.progress[file] = (pb.completedAt || "") > (pa.completedAt || "") ? pb : pa;
+  });
+  return out;
+}
+
+// Schreibt den zusammengeführten Stand in den lokalen Speicher. Gibt zurück,
+// ob sich lokal etwas geändert hat.
+function applyState(kidId, merged, localBefore) {
+  const prefix = `mathe-pwa:${kidId}:`;
+  stateApplying = true;
+  try {
+    localStorage.setItem(gradeOffsetKey(kidId), String(merged.gradeOffset.value ? 1 : 0));
+    localStorage.setItem(`${gradeOffsetKey(kidId)}-at`, merged.gradeOffset.at || "");
+    localStorage.setItem(sprintLevelKey(kidId), String(merged.sprint.level));
+    localStorage.setItem(starsKey(kidId), JSON.stringify({ ledger: merged.stars }));
+    Object.entries(merged.sprint.sessions).forEach(([day, session]) => {
+      localStorage.setItem(sprintResultKey(kidId, day), JSON.stringify(session));
+    });
+    Object.entries(merged.usage).forEach(([week, days]) => {
+      localStorage.setItem(`${prefix}usage-week:${week}`, JSON.stringify(days));
+    });
+    Object.entries(merged.progress).forEach(([file, progress]) => {
+      const existing = loadProgress(kidId, file);
+      if (existing && (existing.completedAt || "") >= (progress.completedAt || "")) return;
+      localStorage.setItem(progressKey(kidId, file), JSON.stringify({ ...progress, synced: true }));
+    });
+  } catch (e) {
+    console.warn("Konnte synchronisierten Stand nicht speichern:", e);
+  } finally {
+    stateApplying = false;
+  }
+  return stableStringify(collectLocalState(kidId)) !== stableStringify(localBefore);
+}
+
+function refreshAfterStateSync() {
+  if (!currentKid) return;
+  updateStarDisplay();
+  updateWeeklyUsageHint();
+  updateSprintTodayHint();
+  if (currentIndex) {
+    currentWorksheetList.forEach((ws) => {
+      const progress = loadProgress(currentKid.id, ws.file);
+      ws.erledigt = progress ? progress.correctCount === progress.total : false;
+    });
+    if (!els.picker.hidden) setupPickerView(currentKid, currentIndex, currentWorksheetList);
+  }
+}
+
+async function syncState(kid) {
+  if (!supabaseClient || stateSyncing[kid.id]) return false;
+  stateSyncing[kid.id] = true;
+  try {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data, error } = await supabaseClient.from(STATE_TABLE).select("state, version").eq("kid_id", kid.id).maybeSingle();
+      if (error) {
+        console.warn("Konnte Spielstand nicht laden:", error);
+        return false;
+      }
+      let remote = data && data.state && typeof data.state === "object" ? data.state : null;
+      if (remote && (remote.resetVersion || "") > RESET_VERSION) return false; // App ist älter als der gespeicherte Stand
+      const remoteUsable = remote && (remote.resetVersion || "") === RESET_VERSION;
+      if (!remoteUsable) remote = emptyState();
+
+      const local = collectLocalState(kid.id);
+      const merged = mergeStates(remote, local);
+      const changedLocal = applyState(kid.id, merged, local);
+
+      if (!data || !remoteUsable || stableStringify(merged) !== stableStringify(remote)) {
+        if (!data) {
+          const { error: insertError } = await supabaseClient.from(STATE_TABLE).insert({ kid_id: kid.id, state: merged, version: 1 });
+          if (insertError) {
+            if (insertError.code === "23505") continue; // anderes Gerät war schneller
+            console.warn("Konnte Spielstand nicht speichern:", insertError);
+            return false;
+          }
+        } else {
+          const { data: updated, error: updateError } = await supabaseClient
+            .from(STATE_TABLE)
+            .update({ state: merged, version: data.version + 1, updated_at: new Date().toISOString() })
+            .eq("kid_id", kid.id)
+            .eq("version", data.version)
+            .select("version");
+          if (updateError) {
+            console.warn("Konnte Spielstand nicht speichern:", updateError);
+            return false;
+          }
+          if (!updated || updated.length === 0) continue; // inzwischen geändert, nochmal zusammenführen
+        }
+      }
+      if (changedLocal) refreshAfterStateSync();
+      return true;
+    }
+    return false;
+  } finally {
+    stateSyncing[kid.id] = false;
+  }
+}
+
 // ---------- Extra-Übungen (außerhalb der App, z.B. Anton oder mit den Eltern) ----------
 // Eltern tragen sie in den Einstellungen ein (Eltern-Code). Sterne richten sich
 // nach der Zeit (10 Minuten = 5 Sterne, höchstens 20 pro Tag), ab 10 Minuten
@@ -1870,24 +2087,45 @@ function starsKey(kidId) {
   return `mathe-pwa:${kidId}:stars`;
 }
 
+// Sterne als Liste "Schlüssel -> Sterne" (Ledger). Jeder Schlüssel zählt nur
+// einmal, die Gesamtzahl ist die Summe. So lassen sich Stände mehrerer Geräte
+// verlustfrei zusammenführen (pro Schlüssel der höhere Wert).
+function ledgerTotal(ledger) {
+  return Object.values(ledger).reduce((sum, value) => sum + (Number(value) || 0), 0);
+}
+
+function migrateLegacyStars(raw) {
+  const ledger = {};
+  Object.keys(raw.awarded || {}).forEach((key) => {
+    ledger[key] = key.endsWith("#perfect") ? PERFECT_SHEET_BONUS : key.startsWith("week:") ? STREAK_BONUS_STARS : 1;
+  });
+  Object.entries(raw.sprintDaily || {}).forEach(([day, count]) => {
+    if (count > 0) ledger[`sprint:${day}`] = count;
+  });
+  const rest = (raw.total || 0) - ledgerTotal(ledger);
+  if (rest > 0) ledger.legacy = rest;
+  return ledger;
+}
+
 function loadStars(kidId) {
+  let ledger = {};
   try {
     const raw = JSON.parse(localStorage.getItem(starsKey(kidId)));
-    if (raw && typeof raw.total === "number") {
-      return { total: raw.total, awarded: raw.awarded || {}, sprintDaily: raw.sprintDaily || {} };
-    }
+    if (raw && raw.ledger) ledger = { ...raw.ledger };
+    else if (raw && typeof raw.total === "number") ledger = migrateLegacyStars(raw);
   } catch (e) {
-    // fällt auf leeren Stand zurück
+    ledger = {};
   }
-  return { total: 0, awarded: {}, sprintDaily: {} };
+  return { ledger, total: ledgerTotal(ledger) };
 }
 
 function saveStars(kidId, stars) {
   try {
-    localStorage.setItem(starsKey(kidId), JSON.stringify(stars));
+    localStorage.setItem(starsKey(kidId), JSON.stringify({ ledger: stars.ledger }));
   } catch (e) {
     console.warn("Konnte Sterne nicht speichern:", e);
   }
+  noteLocalChange();
 }
 
 const toastQueue = [];
@@ -1929,11 +2167,10 @@ function updateStarDisplay() {
 // geladene Stand (wird hier gespeichert), "gained" die neu verdienten Sterne.
 function applyStarGain(kid, stars, gained, label = "") {
   if (gained <= 0) return 0;
-  const before = stars.total + extraStarsTotal(kid.id);
-  stars.total += gained;
+  const after = ledgerTotal(stars.ledger) + extraStarsTotal(kid.id);
+  const before = after - gained;
   saveStars(kid.id, stars);
   updateStarDisplay();
-  const after = before + gained;
   const newItems = kid.welt.items.filter((item) => before < item.ab && after >= item.ab);
   const found = newItems.length ? ` · 🎉 Neu in deiner Sammelwelt: ${newItems.map((i) => `${i.emoji} ${i.name}`).join(", ")}` : "";
   showToast(`⭐ +${gained} Sterne${label ? ` · ${label}` : ""}${found}`, newItems.length ? 7000 : 3500);
@@ -1945,8 +2182,8 @@ function awardKeyed(kid, entries, label = "") {
   const stars = loadStars(kid.id);
   let gained = 0;
   entries.forEach(({ key, value }) => {
-    if (stars.awarded[key]) return;
-    stars.awarded[key] = 1;
+    if (stars.ledger[key]) return;
+    stars.ledger[key] = value;
     gained += value;
   });
   return applyStarGain(kid, stars, gained, label);
@@ -1954,10 +2191,10 @@ function awardKeyed(kid, entries, label = "") {
 
 function awardSprintStars(kid, correct) {
   const stars = loadStars(kid.id);
-  const today = todayDateStr();
-  const used = stars.sprintDaily[today] || 0;
+  const key = `sprint:${todayDateStr()}`;
+  const used = stars.ledger[key] || 0;
   const gain = Math.min(correct, Math.max(0, SPRINT_STAR_CAP_PER_DAY - used));
-  stars.sprintDaily[today] = used + gain;
+  if (gain > 0) stars.ledger[key] = used + gain;
   return applyStarGain(kid, stars, gain);
 }
 
@@ -2250,7 +2487,10 @@ els.settingsLowerGrade.addEventListener("change", () => {
 });
 els.extraAddBtn.addEventListener("click", submitExtra);
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && currentKid) syncExtras(currentKid);
+  if (!document.hidden && currentKid) {
+    syncExtras(currentKid);
+    syncState(currentKid);
+  }
 });
 els.streakPill.addEventListener("click", () => {
   const open = els.streakDetails.hidden;

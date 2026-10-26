@@ -379,3 +379,18 @@ neue Versuche ab jetzt werden synchronisiert.
 - **Mehr Kinder:** weitere Einträge in `KIDS` (`app.js` und
   `scripts/generate.js`), einen neuen Unterordner nach Vorbild von `tj/`/`mj/`
   sowie passende Datenordner samt `index.json` ergänzen.
+
+## Synchronisierung über mehrere Geräte
+
+Alles läuft zuerst lokal im Browser (auch ohne Internet) und wird zusätzlich
+über Supabase abgeglichen:
+
+- **Arbeitsblatt-Ergebnisse** für die Eltern-Übersicht: Tabelle `attempts`.
+- **Extra-Übungen** (Anton, mit Eltern): Tabelle `extra_practice`,
+  SQL in `supabase/extra_practice.sql`.
+- **Spielstand pro Kind** (Sterne, Übungstage, Kopfrechnen, Ergebnisse der
+  Blätter, Klassenstufen-Einstellung): Tabelle `kid_state` samt Verlauf
+  `kid_state_log`, SQL in `supabase/kid_state.sql`. Jedes Gerät führt den
+  gespeicherten Stand mit seinem eigenen zusammen, es geht nichts verloren.
+- Die geplante GitHub-Aktion `.github/workflows/supabase-keepalive.yml` ruft
+  täglich Supabase auf, damit das kostenlose Projekt nicht pausiert.
