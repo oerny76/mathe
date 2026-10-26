@@ -48,6 +48,15 @@ const els = {
   sprintDetailsPanel: document.getElementById("sprint-details-panel"),
   sprintDetailsList: document.getElementById("sprint-details-list"),
   weeklyUsageHint: document.getElementById("weekly-usage-hint"),
+  settingsToggle: document.getElementById("settings-toggle"),
+  settingsPanel: document.getElementById("settings-panel"),
+  settingsLock: document.getElementById("settings-lock"),
+  settingsCode: document.getElementById("settings-code"),
+  settingsCodeOk: document.getElementById("settings-code-ok"),
+  settingsCodeError: document.getElementById("settings-code-error"),
+  settingsContent: document.getElementById("settings-content"),
+  settingsGradeInfo: document.getElementById("settings-grade-info"),
+  settingsLowerGrade: document.getElementById("settings-lower-grade"),
   resultsOpenBtn: document.getElementById("results-open-btn"),
   resultsView: document.getElementById("results-view"),
   resultsBackBtn: document.getElementById("results-back-btn"),
@@ -242,6 +251,62 @@ async function initLueckenPanel(kid) {
   updateLueckenPanel();
 }
 
+// ---------- Klassenstufe + "eine Stufe tiefer" (Eltern-Einstellung) ----------
+// Jedes Kind hat eine Klassenstufe (KIDS[].klasse aus shared.js). Eltern können
+// per Code einstellen, dass eine Stufe tiefer geübt wird (z.B. zum Auffrischen).
+// Die Einstellung gilt pro Gerät (localStorage).
+function gradeOffsetKey(kidId) {
+  return `mathe-pwa:${kidId}:grade-offset`;
+}
+
+function loadGradeOffset(kidId) {
+  try {
+    return localStorage.getItem(gradeOffsetKey(kidId)) === "1" ? 1 : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function saveGradeOffset(kidId, offset) {
+  try {
+    localStorage.setItem(gradeOffsetKey(kidId), String(offset));
+  } catch (e) {
+    console.warn("Konnte Einstellung nicht speichern:", e);
+  }
+}
+
+function effectiveGrade(kid) {
+  return Math.max(1, (kid.klasse || 4) - loadGradeOffset(kid.id));
+}
+
+function renderSettings() {
+  const offset = loadGradeOffset(currentKid.id);
+  els.settingsLowerGrade.checked = offset === 1;
+  els.settingsGradeInfo.textContent = `Klassenstufe von ${currentKid.name}: ${currentKid.klasse}. Aktuell wird auf Stufe ${effectiveGrade(currentKid)} geübt.`;
+}
+
+function toggleSettings() {
+  const opening = els.settingsPanel.hidden;
+  els.settingsPanel.hidden = !opening;
+  if (opening) {
+    els.settingsLock.hidden = false;
+    els.settingsContent.hidden = true;
+    els.settingsCodeError.hidden = true;
+    els.settingsCode.value = "";
+  }
+}
+
+function unlockSettings() {
+  if (els.settingsCode.value.trim() !== PARENT_OVERRIDE_CODE) {
+    els.settingsCodeError.hidden = false;
+    els.settingsCode.value = "";
+    return;
+  }
+  els.settingsLock.hidden = true;
+  els.settingsContent.hidden = false;
+  renderSettings();
+}
+
 // ---------- Wochen-Übeziel (z.B. "4 Tage reichen") ----------
 // Keine Sperre, nur ein freundlicher Hinweis: Übt das Kind an so vielen
 // Kalendertagen einer Woche, wie WEEKLY_USAGE_TARGET vorgibt, zeigt die App
@@ -316,7 +381,7 @@ function updateWeeklyUsageHint() {
 // der "Wo stehe ich?"-Auswertung, da offenes Dauerüben sonst die
 // Bereichs-Erfolgsquote verzerren würde.
 const SPRINT_DURATION_MS = 10 * 60 * 1000;
-const SPRINT_MAX_LEVEL = 12;
+const SPRINT_MAX_LEVEL = 6; // Stufen innerhalb einer Klassenstufe
 const SPRINT_LEVEL_UP_MIN_ATTEMPTS = 12;
 const SPRINT_LEVEL_UP_ACCURACY = 0.85;
 const SPRINT_HISTORY_DAYS = 7; // für Trend-Anzeige und Schwachstellen-Erkennung
@@ -327,6 +392,7 @@ const SPRINT_WEAK_WEIGHT = 3; // wie viel häufiger der schwache Typ im nächste
 let sprintTimerHandle = null;
 let sprintEndAt = null;
 let sprintLevel = 1;
+let sprintGrade = 4; // Klassenstufe, auf der in dieser Runde geübt wird
 let sprintTask = null;
 let sprintTaskLog = []; // {typ, frage, loesung, gegeben, richtig} je Aufgabe dieser Runde
 let sprintWeakType = null; // zu Rundenbeginn ermittelt, bleibt für die ganze Runde gleich
@@ -399,10 +465,34 @@ function randInt(min, max) {
 // Einstieg, bewusst eine Stufe unter dem normalen Wochen-Kopfrechnen-
 // Arbeitsblatt, damit das Kind "wieder reinkommt" – steigt langsam an. "typ"
 // + "label" werden für Verlauf/Schwachstellen-Auswertung mitgeloggt.
+// Klassenstufe -> Grundlevel für die Zahlenbereiche der Grundaufgaben. Das
+// Kind-Level (1 bis SPRINT_MAX_LEVEL) steigert innerhalb der Klassenstufe.
+const GRADE_LEVEL_BONUS = { 1: 0, 2: 0, 3: 2, 4: 4, 5: 5 };
+
+function gradeLevelBonus(grade) {
+  return grade >= 6 ? 6 : GRADE_LEVEL_BONUS[grade] ?? 0;
+}
+
+function pickOne(list) {
+  return list[randInt(0, list.length - 1)];
+}
+
+// Dezimalzahl mit Komma darstellen, ganze Zahlen ohne ",0".
+function formatTenths(n) {
+  const v = n / 10;
+  return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(".", ",");
+}
+
+const MINUS = "\u2212";
+
+// generate(eff, sub): eff = Zahlenbereich-Level (Klassenstufe + Kind-Level),
+// sub = Kind-Level innerhalb der Klassenstufe (1 bis SPRINT_MAX_LEVEL).
+// minGrade/maxGrade begrenzen, ab/bis welcher Klassenstufe ein Typ vorkommt.
 const SPRINT_GENERATORS = [
   {
     typ: "verdoppeln",
     label: "Verdoppeln",
+    maxGrade: 5,
     generate: (level) => {
       const n = randInt(5, 15 + level * 10);
       return { frage: `Verdopple ${n}. Wie viel ist das?`, loesung: String(n * 2) };
@@ -411,6 +501,7 @@ const SPRINT_GENERATORS = [
   {
     typ: "halbieren",
     label: "Halbieren",
+    maxGrade: 5,
     generate: (level) => {
       const n = randInt(2, 8 + level * 6) * 2;
       return { frage: `Halbiere ${n}. Wie viel ist das?`, loesung: String(n / 2) };
@@ -433,7 +524,7 @@ const SPRINT_GENERATORS = [
       const max = level <= 2 ? 50 : level <= 4 ? 200 : level <= 7 ? 1000 : 10000;
       const a = randInt(Math.round(max / 2), max);
       const b = randInt(1, a - 1);
-      return { frage: `${a} − ${b} = ?`, loesung: String(a - b) };
+      return { frage: `${a} ${MINUS} ${b} = ?`, loesung: String(a - b) };
     },
   },
   {
@@ -443,16 +534,119 @@ const SPRINT_GENERATORS = [
       const maxFactor = Math.min(4 + level, 20);
       const a = randInt(2, maxFactor);
       const b = randInt(2, maxFactor);
-      return { frage: `${a} × ${b} = ?`, loesung: String(a * b) };
+      return { frage: `${a} \u00d7 ${b} = ?`, loesung: String(a * b) };
     },
   },
   {
     typ: "ergaenzen",
     label: "Ergänzen",
+    maxGrade: 5,
     generate: (level) => {
       const ziel = level <= 2 ? 100 : level <= 5 ? 500 : level <= 8 ? 1000 : 10000;
       const n = randInt(1, ziel - 1);
       return { frage: `Ergänze ${n} auf ${ziel}. Wie viel fehlt?`, loesung: String(ziel - n) };
+    },
+  },
+  {
+    typ: "dezimal",
+    label: "Dezimalzahlen",
+    minGrade: 5,
+    generate: (eff, sub) => {
+      const max = 50 + sub * 50;
+      if (Math.random() < 0.3) {
+        const a = randInt(11, max);
+        return { frage: `${formatTenths(a)} \u00d7 10 = ?`, loesung: String(a) };
+      }
+      const a = randInt(11, max);
+      const b = randInt(11, max);
+      if (Math.random() < 0.5) {
+        return { frage: `${formatTenths(a)} + ${formatTenths(b)} = ?`, loesung: formatTenths(a + b) };
+      }
+      const big = Math.max(a, b);
+      const small = Math.min(a, b);
+      return { frage: `${formatTenths(big)} ${MINUS} ${formatTenths(small)} = ?`, loesung: formatTenths(big - small) };
+    },
+  },
+  {
+    typ: "bruch",
+    label: "Brüche",
+    minGrade: 6,
+    generate: (eff, sub) => {
+      const nenner = pickOne([2, 3, 4, 5, 8, 10]);
+      const zaehler = randInt(1, nenner - 1);
+      const basis = nenner * randInt(1, 4 + sub * 2);
+      return { frage: `Wie viel ist ${zaehler}/${nenner} von ${basis}?`, loesung: String((basis / nenner) * zaehler) };
+    },
+  },
+  {
+    typ: "prozent",
+    label: "Prozent",
+    minGrade: 6,
+    generate: (eff, sub) => {
+      const p = pickOne([5, 10, 20, 25, 50, 75]);
+      const basis = 20 * randInt(1, 5 + sub * 5);
+      return { frage: `${p} % von ${basis} = ?`, loesung: String((basis * p) / 100) };
+    },
+  },
+  {
+    typ: "quadrat",
+    label: "Quadratzahlen und Wurzeln",
+    minGrade: 6,
+    generate: (eff, sub) => {
+      const n = randInt(3, 10 + sub);
+      return Math.random() < 0.5
+        ? { frage: `${n}\u00b2 = ?`, loesung: String(n * n) }
+        : { frage: `\u221a${n * n} = ?`, loesung: String(n) };
+    },
+  },
+  {
+    typ: "negativ",
+    label: "Negative Zahlen",
+    minGrade: 6,
+    generate: (eff, sub) => {
+      const variant = randInt(0, 4);
+      if (variant === 0) {
+        const a = randInt(1, 10 + sub * 5);
+        const b = randInt(a + 1, a + 10 + sub * 5);
+        return { frage: `${MINUS}${a} + ${b} = ?`, loesung: String(b - a) };
+      }
+      if (variant === 1) {
+        const a = randInt(1, 15);
+        const b = randInt(a + 1, 20 + sub * 10);
+        return { frage: `${a} ${MINUS} ${b} = ?`, loesung: String(a - b) };
+      }
+      if (variant === 2) {
+        const a = randInt(2, 12);
+        const b = randInt(2, 12);
+        return { frage: `(${MINUS}${a}) \u00d7 ${b} = ?`, loesung: String(-a * b) };
+      }
+      if (variant === 3) {
+        const a = randInt(2, 12);
+        const b = randInt(2, 12);
+        return { frage: `(${MINUS}${a}) \u00d7 (${MINUS}${b}) = ?`, loesung: String(a * b) };
+      }
+      const a = randInt(2, 12);
+      const b = randInt(2, 12);
+      return { frage: `${a * b} : (${MINUS}${b}) = ?`, loesung: String(-a) };
+    },
+  },
+  {
+    typ: "term",
+    label: "Terme und Gleichungen",
+    minGrade: 7,
+    generate: (eff, sub) => {
+      const a = randInt(2, 9);
+      if (Math.random() < 0.5) {
+        const b = randInt(1, 9);
+        const x = randInt(-4, 4 + sub);
+        const plus = Math.random() < 0.5;
+        const wert = plus ? a * x + b : a * x - b;
+        const xText = x < 0 ? `${MINUS}${-x}` : String(x);
+        return { frage: `Berechne ${a}x ${plus ? "+" : MINUS} ${b} für x = ${xText}.`, loesung: String(wert) };
+      }
+      const b = randInt(1, 9);
+      const x = randInt(1, 6 + sub);
+      return { frage: `Löse: ${a}x + ${b} = ${a * x + b}. Wie groß ist x?`, loesung: String(x) };
     },
   },
 ];
@@ -493,18 +687,21 @@ function computeWeakSprintType(kidId) {
 // Schwachpunkt höher, damit darin gezielt mehr geübt wird.
 function pickSprintGenerator() {
   const weighted = [];
-  SPRINT_GENERATORS.forEach((gen) => {
-    const weight = gen.typ === sprintWeakType ? SPRINT_WEAK_WEIGHT : 1;
-    for (let i = 0; i < weight; i++) weighted.push(gen);
-  });
+  SPRINT_GENERATORS.filter((gen) => sprintGrade >= (gen.minGrade || 0) && sprintGrade <= (gen.maxGrade || 99)).forEach(
+    (gen) => {
+      const weight = gen.typ === sprintWeakType ? SPRINT_WEAK_WEIGHT : 1;
+      for (let i = 0; i < weight; i++) weighted.push(gen);
+    }
+  );
   return weighted[randInt(0, weighted.length - 1)];
 }
 
 function nextSprintTask() {
   const gen = pickSprintGenerator();
-  const { frage, loesung } = gen.generate(sprintLevel);
+  const { frage, loesung } = gen.generate(sprintLevel + gradeLevelBonus(sprintGrade), sprintLevel);
   sprintTask = { typ: gen.typ, frage, loesung };
   els.sprintQuestion.textContent = sprintTask.frage;
+  els.sprintInput.inputMode = /^\d+([.,]\d+)?$/.test(sprintTask.loesung) ? "decimal" : "text";
   els.sprintInput.value = "";
   els.sprintInput.disabled = false;
   els.sprintTaskCard.classList.remove("correct", "wrong");
@@ -543,6 +740,7 @@ function startSprint() {
   if (!currentKid) return;
   sprintLevel = loadSprintLevel(currentKid.id);
   sprintWeakType = computeWeakSprintType(currentKid.id);
+  sprintGrade = effectiveGrade(currentKid);
   sprintTaskLog = [];
   sprintEndAt = Date.now() + SPRINT_DURATION_MS;
 
@@ -571,6 +769,7 @@ function endSprint() {
     correct,
     attempted,
     level: sprintLevel,
+    grade: sprintGrade,
     tasks: sprintTaskLog,
   });
 
@@ -973,7 +1172,9 @@ function renderTasks() {
     // oder "-3,5") – bei Text-Antworten (Leseverständnis, aber auch
     // Knobelaufgaben wie "spitz"/"stumpf") sonst blockiert das iPad die
     // Buchstabentastatur komplett.
-    const isNumericAnswer = /^-?\d+([.,]\d+)?$/.test(String(task.loesung).trim());
+    // Negative Lösungen brauchen das Minuszeichen, das die iPad-Zifferntastatur
+    // (inputmode "decimal") nicht hat, deshalb dort normale Tastatur.
+    const isNumericAnswer = /^\d+([.,]\d+)?$/.test(String(task.loesung).trim());
 
     card.innerHTML = `
       <span class="task-number">Aufgabe ${index + 1} von ${currentTasks.length}</span>
@@ -1052,7 +1253,9 @@ function escapeHtml(str) {
 
 // ---------- Auswertung ----------
 function normalizeAnswer(value) {
-  return String(value).trim().replace(",", ".").toLowerCase();
+  const text = String(value).trim().replace(/\u2212/g, "-").replace(",", ".").toLowerCase();
+  // Zahlen vereinheitlichen, damit "12,0", "12.0" und "12" als gleich gelten.
+  return /^-?\d+(\.\d+)?$/.test(text) ? String(Number(text)) : text;
 }
 
 function checkAnswers() {
@@ -1335,7 +1538,7 @@ function showRedoTask() {
   redoChecked = false;
   els.redoProgress.textContent = `Aufgabe ${redoIndex + 1} von ${redoQueue.length}`;
   els.redoQuestion.textContent = task.frage;
-  els.redoInput.inputMode = /^-?\d+([.,]\d+)?$/.test(task.loesung.trim()) ? "decimal" : "text";
+  els.redoInput.inputMode = /^\d+([.,]\d+)?$/.test(task.loesung.trim()) ? "decimal" : "text";
   els.redoInput.value = "";
   els.redoInput.disabled = false;
   els.redoSolution.hidden = true;
@@ -1400,6 +1603,15 @@ els.lueckenToggle.addEventListener("click", () => {
 });
 els.sprintStartBtn.addEventListener("click", startSprint);
 els.sprintStopBtn.addEventListener("click", stopSprint);
+els.settingsToggle.addEventListener("click", toggleSettings);
+els.settingsCodeOk.addEventListener("click", unlockSettings);
+els.settingsCode.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") unlockSettings();
+});
+els.settingsLowerGrade.addEventListener("change", () => {
+  saveGradeOffset(currentKid.id, els.settingsLowerGrade.checked ? 1 : 0);
+  renderSettings();
+});
 els.resultsOpenBtn.addEventListener("click", openResults);
 els.resultsBackBtn.addEventListener("click", closeResults);
 els.redoCheckBtn.addEventListener("click", handleRedoAction);

@@ -49,6 +49,27 @@
         <p class="subtitle" id="picker-hint"></p>
         <div id="worksheet-list" class="worksheet-list"></div>
       </div>
+
+      <div class="settings-toggle-row">
+        <button id="settings-toggle" class="chalk-button ghost small">⚙️ Einstellungen (Eltern)</button>
+      </div>
+      <div id="settings-panel" class="settings-panel" hidden>
+        <div id="settings-lock">
+          <p class="settings-note">Nur für Eltern. Bitte den Code eingeben.</p>
+          <div class="settings-lock-row">
+            <input id="settings-code" type="text" inputmode="numeric" maxlength="4" placeholder="Code" autocomplete="off" />
+            <button id="settings-code-ok" class="chalk-button ghost small">OK</button>
+            <span id="settings-code-error" class="settings-error" hidden>Falscher Code</span>
+          </div>
+        </div>
+        <div id="settings-content" hidden>
+          <p id="settings-grade-info" class="settings-note"></p>
+          <label class="settings-option">
+            <input id="settings-lower-grade" type="checkbox" />
+            Eine Klassenstufe tiefer üben
+          </label>
+        </div>
+      </div>
     </section>
 
     <section id="worksheet-view" hidden>
