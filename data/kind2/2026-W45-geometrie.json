@@ -1,0 +1,51 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "geometrie",
+  "titel": "Geometrie: Dreiecke, Winkel und Flächen 📐",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "Zwei Winkel eines Dreiecks sind 47° und 83° groß. Wie groß ist der dritte Winkel in Grad?",
+      "loesung": "50"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "Ein Parallelogramm hat eine Grundseite von 12 cm und eine Höhe von 7 cm. Wie groß ist sein Flächeninhalt in cm²?",
+      "loesung": "84"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Ein Dreieck hat einen Flächeninhalt von 60 cm² und eine Grundseite von 15 cm. Wie hoch ist es in cm?",
+      "loesung": "8"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "Ein Dreieck hat drei gleich lange Seiten. Wie groß ist jeder Winkel in Grad?",
+      "loesung": "60"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Ein rechtwinkliges Dreieck hat einen Winkel von 35° und den rechten Winkel. Wie groß ist der dritte Winkel in Grad?",
+      "loesung": "55"
+    },
+    {
+      "id": 6,
+      "typ": "knobelaufgabe",
+      "frage": "Wie nennt man ein Dreieck mit zwei gleich langen Seiten?",
+      "optionen": [
+        "gleichseitig",
+        "rechtwinklig",
+        "gleichschenklig"
+      ],
+      "loesung": "gleichschenklig"
+    }
+  ]
+}

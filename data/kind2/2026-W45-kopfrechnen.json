@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Mehr Terme, mehr Prozent 🧠",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "(−8) × (−7) = ?",
+      "loesung": "56"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "15 % von 360 = ?",
+      "loesung": "54"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Wie viel ist 5/6 von 72?",
+      "loesung": "60"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "−25 + 18 = ?",
+      "loesung": "-7"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Berechne 4x − 7 für x = 5.",
+      "loesung": "13"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "Löse: 5x + 3 = 28. Wie groß ist x?",
+      "loesung": "5"
+    }
+  ]
+}

@@ -294,11 +294,16 @@ Datei: `data/<ordner-id>/<woche>-bild.json`
 
 Lies die aktuelle `data/<ordner-id>/index.json`, ergänze die 4 neuen
 Arbeitsblatt-Dateinamen im `"files"`-Array (nichts Bestehendes entfernen) und
-setze `"aktuellesBild"` auf den neuen `<woche>-bild.json`-Dateinamen:
+hänge den neuen `<woche>-bild.json`-Dateinamen an das `"bilder"`-Array an und
+setze `"aktuellesBild"` darauf:
 
 ```json
-{ "files": [ "...", "<woche>-einmaleins.json", "..." ], "aktuellesBild": "<woche>-bild.json" }
+{ "files": [ "...", "<woche>-einmaleins.json", "..." ], "bilder": [ "...", "<woche>-bild.json" ], "aktuellesBild": "<woche>-bild.json" }
 ```
+
+Die App zeigt Blätter und Wochenbild einer Woche erst, wenn diese Woche
+beginnt (auch bei „auf Vorrat“ erzeugten Wochen). Aus `"bilder"` wählt sie
+automatisch das Bild der laufenden Woche.
 
 ### 6. Committen
 

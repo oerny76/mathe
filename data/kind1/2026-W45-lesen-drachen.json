@@ -1,0 +1,77 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "lesen",
+  "titel": "Lesetext: Pelle, der Wolkendrache",
+  "text": "Im Dorf Trockenbach hatte es seit vielen Wochen nicht mehr geregnet. Die Wiesen waren braun, und der Brunnen gab nur noch wenige Tropfen her. Die zehnjährige Mira machte sich Sorgen um den Gemüsegarten ihrer Oma.\n\nEines Abends sah sie am Himmel eine kleine graue Wolke, die sich bewegte, als hätte sie Beine. Neugierig kletterte Mira auf den Hügel hinter dem Dorf. Dort saß ein Drache, nicht größer als ein Pony. Seine Schuppen schimmerten silbern wie Regentropfen. „Ich heiße Pelle“, sagte der Drache leise. „Ich bin ein Wolkendrache. Normalerweise ziehe ich die Regenwolken über das Land. Aber ich habe mir den Flügel verletzt.“\n\nMira holte Verbandszeug von zu Hause und wickelte den Flügel vorsichtig ein. Drei Tage lang brachte sie Pelle jeden Morgen frisches Wasser und Äpfel. Am vierten Tag konnte er wieder fliegen. Er schwang sich in die Luft, sammelte hoch oben die Wolken zusammen und blies sie über das Dorf. Dann begann es zu regnen. Mira tanzte im Garten, und ihre Oma lachte. Zum Abschied versprach Mira, das Geheimnis für sich zu behalten. Seitdem besucht Pelle das Dorf jeden Frühling.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt das Dorf?",
+      "optionen": [
+        "Regendorf",
+        "Trockenbach",
+        "Wolkental"
+      ],
+      "loesung": "Trockenbach"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt der Drache?",
+      "optionen": [
+        "Wolke",
+        "Silber",
+        "Pelle"
+      ],
+      "loesung": "Pelle"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Wie alt ist Mira?",
+      "optionen": [
+        "8",
+        "10",
+        "12"
+      ],
+      "loesung": "10"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Was war mit dem Flügel des Drachen passiert?",
+      "optionen": [
+        "Er war nass",
+        "Er war zu klein",
+        "Er war verletzt"
+      ],
+      "loesung": "Er war verletzt"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Wie viele Tage lang brachte Mira dem Drachen Wasser und Äpfel?",
+      "optionen": [
+        "zwei",
+        "drei",
+        "fünf"
+      ],
+      "loesung": "drei"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Was machte Pelle mit den Wolken?",
+      "optionen": [
+        "Er versteckte sie",
+        "Er blies sie über das Dorf",
+        "Er fraß sie"
+      ],
+      "loesung": "Er blies sie über das Dorf"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis: Runde 5 ✖️",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "27 × 11 = ?",
+      "loesung": "297"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "18 × 15 = ?",
+      "loesung": "270"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "546 : 26 = ?",
+      "loesung": "21"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "3 hoch 4 = ?",
+      "loesung": "81"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "35 × 12 = ?",
+      "loesung": "420"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "644 : 28 = ?",
+      "loesung": "23"
+    }
+  ]
+}

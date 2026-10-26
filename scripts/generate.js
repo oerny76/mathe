@@ -358,7 +358,11 @@ function updateIndex(kidId, { addFiles = [], aktuellesBild } = {}) {
   addFiles.forEach((f) => {
     if (!index.files.includes(f)) index.files.push(f);
   });
-  if (aktuellesBild) index.aktuellesBild = aktuellesBild;
+  if (aktuellesBild) {
+    index.aktuellesBild = aktuellesBild;
+    index.bilder = index.bilder || [];
+    if (!index.bilder.includes(aktuellesBild)) index.bilder.push(aktuellesBild);
+  }
 
   fs.writeFileSync(indexPath, JSON.stringify(index, null, 2) + "\n", "utf-8");
   console.log(`✓ Index aktualisiert: ${indexPath}`);

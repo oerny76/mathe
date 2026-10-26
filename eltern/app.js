@@ -82,7 +82,9 @@ async function loadKidWorksheets(kid) {
         }
       })
     );
-    return worksheets.filter(Boolean);
+    // Blätter kommender Wochen sind für die Kinder noch nicht sichtbar.
+    const thisWeek = isoWeekString(new Date());
+    return worksheets.filter(Boolean).filter((ws) => !ws.woche || ws.woche <= thisWeek);
   } catch {
     return [];
   }

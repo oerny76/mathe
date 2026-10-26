@@ -1,0 +1,77 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-10-26",
+  "woche": "2026-W45",
+  "bereich": "lesen",
+  "titel": "Lesetext: Emil im Tor",
+  "text": "Emil steht im Tor. Er ist der Torwart seiner Fußballmannschaft, und heute ist das wichtigste Training der Woche, denn am Sonntag steht ein Spiel gegen den Nachbarverein an. Emil trägt ein rotes Trikot, so wie sein großes Vorbild vom FC Bayern München.\n\nTrainerin Berger stellt fünf Hütchen auf. „Heute üben wir das Fangen von hohen Bällen“, ruft sie. Emil streckt sich, springt und greift nach dem Ball. Beim ersten Versuch rutscht ihm der Ball durch die Finger. Beim zweiten Versuch klappt es schon besser. Nach zehn Würfen hat er den Ball neunmal sicher gefangen.\n\n„Weißt du, was ein guter Torwart vor allem braucht?“, fragt die Trainerin. Emil überlegt. „Schnelle Reaktionen?“ – „Auch“, sagt sie, „aber vor allem Mut und Geduld. Fehler gehören dazu. Wichtig ist, dass du weitermachst.“\n\nAm Sonntag steht es kurz vor Schluss unentschieden. Ein Gegner schießt aus kurzer Entfernung. Emil wirft sich nach links und hält den Ball fest. Seine Mannschaft jubelt. Am Ende gewinnen sie mit einem Tor Vorsprung, und für Emil fühlt es sich an wie ein Sieg in der Meisterschaft. Abends erzählt er seiner Mutter beim Abendessen stolz alles ganz genau.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Welche Position spielt Emil?",
+      "optionen": [
+        "Stürmer",
+        "Torwart",
+        "Verteidiger"
+      ],
+      "loesung": "Torwart"
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Welche Farbe hat Emils Trikot?",
+      "optionen": [
+        "blau",
+        "gelb",
+        "rot"
+      ],
+      "loesung": "rot"
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt die Trainerin?",
+      "optionen": [
+        "Müller",
+        "Schmidt",
+        "Berger"
+      ],
+      "loesung": "Berger"
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Wie viele Hütchen stellt die Trainerin auf?",
+      "optionen": [
+        "drei",
+        "fünf",
+        "zehn"
+      ],
+      "loesung": "fünf"
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Wie oft fängt Emil den Ball nach zehn Würfen sicher?",
+      "optionen": [
+        "sechsmal",
+        "achtmal",
+        "neunmal"
+      ],
+      "loesung": "neunmal"
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Was braucht ein guter Torwart vor allem?",
+      "optionen": [
+        "Größe",
+        "Kraft",
+        "Mut und Geduld"
+      ],
+      "loesung": "Mut und Geduld"
+    }
+  ]
+}
