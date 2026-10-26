@@ -197,20 +197,9 @@ body {
 }
 
 /* ---------- Sterne, Sammelwelt, Hinweis-Toast ---------- */
-.star-row {
-  text-align: center;
-  margin: 0 16px 10px;
-}
-
-.star-counter {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: var(--chalk-yellow);
-}
-
 .star-next {
-  margin: 2px 0 0;
+  margin: 0 16px 2px;
+  text-align: center;
   font-size: 0.8rem;
   opacity: 0.8;
 }
@@ -293,19 +282,60 @@ body {
   display: none;
 }
 
-/* ---------- Wochen-Streak ---------- */
-.streak-box {
-  text-align: center;
-  margin: 0 16px 12px;
+/* ---------- Status-Leiste (Sterne, Streak, Wochentage) ---------- */
+.status-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 460px;
+  margin: 0 auto 8px;
+  padding: 0 16px;
 }
 
-.streak-main {
-  margin: 0 0 6px;
+.status-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 8px 6px;
+  background: var(--board-bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  color: inherit;
+  font: inherit;
+}
+
+.status-pill-button {
+  cursor: pointer;
+}
+
+.status-pill-value {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--chalk-yellow);
+  line-height: 1.1;
 }
 
+.status-pill-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.streak-details {
+  max-width: 460px;
+  margin: 0 auto 8px;
+  padding: 0 16px;
+}
+
+.sprint-start {
+  display: block;
+  min-height: 52px;
+  margin: 6px auto 4px;
+}
+
+/* ---------- Wochen-Streak ---------- */
 .streak-weeks {
   display: flex;
   justify-content: center;
@@ -358,7 +388,7 @@ body {
   font-size: 0.85rem;
   color: var(--chalk-green);
   opacity: 0.9;
-  margin: 0 16px 10px;
+  margin: 0 16px 6px;
 }
 
 /* ---------- Eltern-Einstellungen ---------- */
@@ -793,6 +823,7 @@ body {
 }
 
 .chalk-button.small {
+  min-height: 44px;
   padding: 8px 16px;
   font-size: 0.85rem;
   box-shadow: none;
