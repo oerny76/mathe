@@ -369,6 +369,7 @@ function showGate(message = "") {
 async function verifyParentCode(raw) {
   const code = normalizeCode(raw);
   if (!code) return "Bitte den Eltern-Code eingeben.";
+  if (/^\d{4,8}$/.test(code)) return "Hier braucht es den langen Eltern-Code, nicht den kurzen PIN.";
   const { data, error } = await callRpc("app_eltern_check", {}, code);
   if (error) return "Keine Verbindung. Bitte mit Internet nochmal versuchen.";
   if (data !== true) return "Dieser Code passt nicht.";

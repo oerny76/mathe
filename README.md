@@ -407,6 +407,11 @@ ruft nur geprüfte Datenbankfunktionen auf, die einen persönlichen Code mitbeko
 - **Eltern-Code:** schaltet die Einstellungen frei (Extra-Übungen, Klassenstufe),
   erlaubt "als richtig werten" und öffnet die Eltern-Übersicht. In den
   Einstellungen gilt er nur für die laufende Sitzung.
+- **Eltern-PIN** (6 Ziffern, `supabase/eltern_pin.sql`): öffnet nur die
+  Eltern-Einstellungen und "als richtig werten", sonst nichts. Nach 5 Fehlversuchen
+  ist der PIN 15 Minuten gesperrt (der lange Eltern-Code geht weiter). Setzen:
+  `select public.eltern_pin_setzen('123456');`, nachsehen über die Ansicht
+  `zugangscodes_anzeigen`.
 - Codes erzeugen oder erneuern: `supabase/codes_erzeugen.sql` im SQL-Editor
   ausführen. Die Codes erscheinen einmal im Ergebnis. **Nie ins Repo stellen.**
 - Reihenfolge bei der Einführung: `zugangscodes.sql`, `codes_erzeugen.sql`,
