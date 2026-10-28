@@ -74,6 +74,11 @@
         </div>
       </div>
 
+      <div id="outsourced-picker" class="outsourced-picker" hidden>
+        <p class="subtitle">🔓 Freigeschaltet. Hier kannst du trotzdem noch üben:</p>
+        <div id="outsourced-list" class="worksheet-list"></div>
+      </div>
+
       <div id="classic-picker">
         <p class="subtitle" id="picker-hint"></p>
         <div id="worksheet-list" class="worksheet-list"></div>
@@ -101,7 +106,8 @@
           <div class="extra-box">
             <p class="settings-note"><strong>➕ Extra-Übung eintragen</strong><br />
               Für Üben außerhalb der App, z.B. mit Anton oder mit euch. 10 Minuten bringen 5 Sterne (höchstens 20 pro Tag).
-              Ab 10 Minuten zählt der Tag für Wochenziel und Streak.</p>
+              Ab 10 Minuten zählt der Tag für Wochenziel und Streak.
+              Bildteile: Die nächsten offenen Teile des Wochenbilds werden freigeschaltet, ihre Blätter stehen dann unter dem Bild. Geht auch ohne Minuten.</p>
             <div class="extra-form">
               <label>Art
                 <select id="extra-art">
@@ -113,12 +119,22 @@
               </label>
               <label>Dauer
                 <select id="extra-minutes">
+                  <option value="0">0 Minuten (nur Bildteile)</option>
                   <option value="10">10 Minuten</option>
                   <option value="15">15 Minuten</option>
                   <option value="20" selected>20 Minuten</option>
                   <option value="30">30 Minuten</option>
                   <option value="45">45 Minuten</option>
                   <option value="60">60 Minuten</option>
+                </select>
+              </label>
+              <label>Bildteile freischalten
+                <select id="extra-teile">
+                  <option value="0">keine</option>
+                  <option value="1">1 Teil</option>
+                  <option value="2">2 Teile</option>
+                  <option value="3">3 Teile</option>
+                  <option value="4">4 Teile</option>
                 </select>
               </label>
               <label>Tag

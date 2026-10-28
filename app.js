@@ -64,6 +64,9 @@ const els = {
   extraArt: document.getElementById("extra-art"),
   extraMinutes: document.getElementById("extra-minutes"),
   extraDay: document.getElementById("extra-day"),
+  extraTeile: document.getElementById("extra-teile"),
+  outsourcedPicker: document.getElementById("outsourced-picker"),
+  outsourcedList: document.getElementById("outsourced-list"),
   extraAddBtn: document.getElementById("extra-add-btn"),
   extraFeedback: document.getElementById("extra-feedback"),
   extraSyncState: document.getElementById("extra-sync-state"),
@@ -1193,6 +1196,12 @@ async function setupPickerView(kid, index, worksheets) {
       .sort((a, b) => a.file.localeCompare(b.file));
   }
 
+  renderPickerSections(worksheets);
+}
+
+// Bild-Einstiegsseite oder klassische Liste neu zeichnen (ohne das Bild neu zu
+// laden), z.B. wenn Bildteile freigeschaltet wurden.
+function renderPickerSections(worksheets) {
   if (currentBild && currentWeekFiles.length > 0) {
     // Bild-Einstiegsseite: nur das Bild, Aufgaben stecken in den anklickbaren Teilen.
     els.puzzlePicker.hidden = false;
@@ -1200,6 +1209,12 @@ async function setupPickerView(kid, index, worksheets) {
     const vb = parseViewBox(currentBild.svg);
     els.puzzleFrame.style.aspectRatio = `${vb.width} / ${vb.height}`;
     renderPuzzleGrid();
+
+    // Von den Eltern freigeschaltete Teile: ihre Blätter stehen direkt unter dem Bild.
+    const unlocked = unlockedFiles(currentKid.id);
+    const outsourced = currentWeekFiles.filter((ws) => unlocked.has(ws.file));
+    els.outsourcedPicker.hidden = outsourced.length === 0;
+    renderWorksheetList(outsourced, els.outsourcedList);
 
     const backlog = worksheets.filter((ws) => !currentWeekFiles.includes(ws));
     els.classicPicker.hidden = true;
@@ -1210,11 +1225,17 @@ async function setupPickerView(kid, index, worksheets) {
   } else {
     // Fallback: kein Wochenbild vorhanden (z.B. Marlene) -> klassische Liste wie bisher.
     els.puzzlePicker.hidden = true;
+    els.outsourcedPicker.hidden = true;
     els.classicPicker.hidden = false;
     els.backlogToggle.hidden = true;
     els.pickerHint.textContent = "Wähle eine Aufgabe aus:";
     renderWorksheetList(worksheets);
   }
+}
+
+function refreshPicker() {
+  if (!currentKid || !currentIndex || els.picker.hidden) return;
+  renderPickerSections(currentWorksheetList);
 }
 
 function renderPuzzleGrid() {
@@ -1223,17 +1244,20 @@ function renderPuzzleGrid() {
   els.puzzleGrid.innerHTML = "";
   let allDone = currentWeekFiles.length > 0;
 
+  const unlocked = unlockedFiles(currentKid.id);
   currentWeekFiles.forEach((ws) => {
     const total = (worksheetCache[ws.file]?.aufgaben || []).length;
     const progress = loadProgress(currentKid.id, ws.file);
     const correct = progress ? progress.correctCount : 0;
-    const fraction = total > 0 ? Math.min(correct / total, 1) : 0;
+    const free = unlocked.has(ws.file);
+    const fraction = free ? 1 : total > 0 ? Math.min(correct / total, 1) : 0;
     if (fraction < 1) allDone = false;
 
     const tile = document.createElement("button");
     tile.type = "button";
-    tile.className = "puzzle-tile" + (fraction >= 1 ? " done" : "");
-    tile.setAttribute("aria-label", `${ws.titel} – ${correct} von ${total} richtig`);
+    tile.className = "puzzle-tile" + (fraction >= 1 ? " done" : "") + (free ? " unlocked" : "");
+    tile.disabled = free;
+    tile.setAttribute("aria-label", free ? `${ws.titel}: von den Eltern freigeschaltet` : `${ws.titel} – ${correct} von ${total} richtig`);
     tile.innerHTML = `
       <span class="puzzle-tile-scrim" style="opacity: ${1 - fraction}"></span>
       <span class="puzzle-tile-content">
@@ -1297,12 +1321,12 @@ function renderWorksheetCard(ws) {
   return card;
 }
 
-function renderWorksheetList(worksheets) {
-  els.worksheetList.innerHTML = "";
+function renderWorksheetList(worksheets, target = els.worksheetList) {
+  target.innerHTML = "";
 
   const hasBereiche = worksheets.some((ws) => ws.bereich);
   if (!hasBereiche) {
-    worksheets.forEach((ws) => els.worksheetList.appendChild(renderWorksheetCard(ws)));
+    worksheets.forEach((ws) => target.appendChild(renderWorksheetCard(ws)));
     return;
   }
 
@@ -1322,12 +1346,12 @@ function renderWorksheetList(worksheets) {
     const heading = document.createElement("h2");
     heading.className = "bereich-heading";
     heading.textContent = key === "sonstiges" ? "Weitere Aufgaben" : bereichLabel(key);
-    els.worksheetList.appendChild(heading);
+    target.appendChild(heading);
 
     const group = document.createElement("div");
     group.className = "bereich-group";
     groups.get(key).forEach((ws) => group.appendChild(renderWorksheetCard(ws)));
-    els.worksheetList.appendChild(group);
+    target.appendChild(group);
   });
 }
 
@@ -1949,6 +1973,28 @@ function extraStarsTotal(kidId) {
   return total;
 }
 
+// Von den Eltern freigeschaltete Bildteile (Dateinamen der Blätter) aus allen
+// Extra-Übungen. Löscht man den Eintrag, ist der Teil wieder gesperrt.
+function unlockedFiles(kidId) {
+  const files = new Set();
+  loadExtras(kidId).forEach((row) => (row.teile || []).forEach((file) => files.add(file)));
+  return files;
+}
+
+// Die nächsten noch offenen Teile des Wochenbilds in Puzzle-Reihenfolge.
+function nextOpenTileFiles(kidId, count) {
+  const unlocked = unlockedFiles(kidId);
+  return currentWeekFiles
+    .filter((ws) => {
+      if (unlocked.has(ws.file)) return false;
+      const total = (worksheetCache[ws.file]?.aufgaben || []).length;
+      const progress = loadProgress(kidId, ws.file);
+      return !(total > 0 && progress && progress.correctCount >= total);
+    })
+    .slice(0, count)
+    .map((ws) => ws.file);
+}
+
 function totalStars(kidId) {
   return loadStars(kidId).total + extraStarsTotal(kidId);
 }
@@ -1957,6 +2003,7 @@ function totalStars(kidId) {
 function afterExtrasChanged(kid, starsBefore, days) {
   updateStarDisplay();
   updateWeeklyUsageHint();
+  refreshPicker();
   const gained = totalStars(kid.id) - starsBefore;
   if (gained > 0) {
     const after = starsBefore + gained;
@@ -1979,7 +2026,7 @@ async function syncExtras(kid) {
     for (const row of parent ? [...pending] : []) {
       const { error } = await callRpc(
         "app_extra_add",
-        { p_kid: kid.id, p_id: row.id, p_day: row.practiced_on, p_minutes: row.minutes, p_art: row.art },
+        { p_kid: kid.id, p_id: row.id, p_day: row.practiced_on, p_minutes: row.minutes, p_art: row.art, p_teile: row.teile || [] },
         parent
       );
       if (error) {
@@ -2002,6 +2049,7 @@ async function syncExtras(kid) {
       updateStarDisplay();
       updateWeeklyUsageHint();
       renderExtrasList();
+      refreshPicker();
     }
     return true;
   } finally {
@@ -2009,9 +2057,9 @@ async function syncExtras(kid) {
   }
 }
 
-async function addExtra(kid, art, minutes, day) {
+async function addExtra(kid, art, minutes, day, teile = []) {
   const before = totalStars(kid.id);
-  const row = { id: newExtraId(), kid_id: kid.id, practiced_on: day, minutes, art, created_at: new Date().toISOString() };
+  const row = { id: newExtraId(), kid_id: kid.id, practiced_on: day, minutes, art, teile, created_at: new Date().toISOString() };
   writeJsonList(extrasPendingKey(kid.id), [...readJsonList(extrasPendingKey(kid.id)), row]);
   afterExtrasChanged(kid, before, [day]);
   renderExtrasList();
@@ -2033,6 +2081,7 @@ async function deleteExtra(kid, id) {
   }
   updateStarDisplay();
   updateWeeklyUsageHint();
+  refreshPicker();
   renderExtrasList();
   return true;
 }
@@ -2063,7 +2112,9 @@ function renderExtrasList() {
     item.className = "extra-row";
     const date = new Date(`${row.practiced_on}T12:00:00`).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric" });
     const text = document.createElement("span");
-    text.textContent = `${date} · ${EXTRA_ARTEN[row.art] || row.art} · ${row.minutes} Min${pendingIds.has(row.id) ? " (wartet)" : ""}`;
+    const teileText = (row.teile || []).length ? ` · 🧩 ${row.teile.length} Bildteil${row.teile.length === 1 ? "" : "e"}` : "";
+    const minutesText = row.minutes > 0 ? `${row.minutes} Min` : "ohne Minuten";
+    text.textContent = `${date} · ${EXTRA_ARTEN[row.art] || row.art} · ${minutesText}${teileText}${pendingIds.has(row.id) ? " (wartet)" : ""}`;
     const del = document.createElement("button");
     del.type = "button";
     del.className = "extra-delete";
@@ -2091,6 +2142,7 @@ function setupExtraForm() {
   els.extraDay.max = localDateStr(today);
   els.extraDay.min = localDateStr(new Date(today.getTime() - EXTRA_MAX_BACKDATE_DAYS * 86400000));
   els.extraDay.value = localDateStr(today);
+  els.extraTeile.value = "0";
   els.extraFeedback.hidden = true;
   renderExtrasList();
   syncExtras(currentKid);
@@ -2100,22 +2152,39 @@ async function submitExtra() {
   const day = els.extraDay.value;
   const minutes = parseInt(els.extraMinutes.value, 10);
   const art = els.extraArt.value;
+  const wanted = parseInt(els.extraTeile.value, 10) || 0;
   if (!day || day > els.extraDay.max || day < els.extraDay.min) {
     showExtraFeedback(`Bitte einen Tag der letzten ${EXTRA_MAX_BACKDATE_DAYS} Tage wählen.`, true);
     return;
   }
+  if (minutes === 0 && wanted === 0) {
+    showExtraFeedback("Bitte Minuten oder Bildteile angeben.", true);
+    return;
+  }
+
+  // Freigeschaltet werden die nächsten noch offenen Teile des Wochenbilds.
+  const teile = wanted > 0 ? nextOpenTileFiles(currentKid.id, wanted) : [];
+  if (wanted > 0 && teile.length === 0 && minutes === 0) {
+    showExtraFeedback(currentBild ? "Es sind keine offenen Bildteile mehr übrig." : "Es gibt gerade kein Wochenbild zum Freischalten.", true);
+    return;
+  }
+
   els.extraAddBtn.disabled = true;
   const starsBefore = extraStarsTotal(currentKid.id);
-  await addExtra(currentKid, art, minutes, day);
+  await addExtra(currentKid, art, minutes, day, teile);
   const gained = extraStarsTotal(currentKid.id) - starsBefore;
   const dayMinutes = extraMinutesByDay(currentKid.id).get(day) || 0;
-  const hint =
-    gained > 0
-      ? `+${gained} Sterne.`
-      : dayMinutes >= EXTRA_MIN_DAY_MINUTES
-        ? "Das Tageslimit für Sterne ist erreicht, der Tag zählt trotzdem."
-        : "Für Sterne und Übungstag braucht es mindestens 10 Minuten am Tag.";
-  showExtraFeedback(`✅ ${minutes} Minuten (${EXTRA_ARTEN[art]}) eingetragen. ${hint}`);
+  const parts = [];
+  parts.push(minutes > 0 ? `${minutes} Minuten (${EXTRA_ARTEN[art]})` : `${EXTRA_ARTEN[art]} ohne Minuten`);
+  let hint;
+  if (gained > 0) hint = `+${gained} Sterne.`;
+  else if (minutes === 0) hint = "";
+  else hint = dayMinutes >= EXTRA_MIN_DAY_MINUTES ? "Das Tageslimit für Sterne ist erreicht, der Tag zählt trotzdem." : "Für Sterne und Übungstag braucht es mindestens 10 Minuten am Tag.";
+  if (wanted > 0) {
+    const frei = teile.length === wanted ? `${teile.length} Bildteil${teile.length === 1 ? "" : "e"} freigeschaltet.` : `Nur ${teile.length} von ${wanted} Bildteilen ${teile.length === 1 ? "war" : "waren"} noch offen und ${teile.length === 1 ? "wurde" : "wurden"} freigeschaltet.`;
+    hint = `${hint} ${frei}`.trim();
+  }
+  showExtraFeedback(`✅ ${parts[0]} eingetragen. ${hint}`);
   els.extraAddBtn.disabled = false;
 }
 

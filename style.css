@@ -475,6 +475,14 @@ body {
   gap: 8px;
 }
 
+.outsourced-picker {
+  margin: 14px 0 4px;
+}
+
+.puzzle-tile.unlocked {
+  cursor: default;
+}
+
 .extra-box {
   margin-top: 16px;
   padding-top: 14px;
