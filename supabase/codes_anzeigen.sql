@@ -19,12 +19,14 @@ select
   case when t.role = 'eltern'
        then substr(k.code, 1, 4) || '-' || substr(k.code, 5, 4) || '-' || substr(k.code, 9, 4) || '-' || substr(k.code, 13, 4)
        else k.code end as code,
-  case t.kid_id when 'kind1' then 'tj/?t=' || k.code when 'kind2' then 'mj/?t=' || k.code
+  case when t.role = 'pin' then 'nur für die Eltern-Einstellungen'
+       when t.kid_id = 'kind1' then 'tj/?t=' || k.code
+       when t.kid_id = 'kind2' then 'mj/?t=' || k.code
        else 'eltern/?t=' || k.code end as link_ende,
   t.created_at as erzeugt
 from public.access_tokens t
 join public.access_codes_klartext k on k.id = t.id
 where t.revoked_at is null
-order by case t.label when 'Tim' then 1 when 'Marlene' then 2 else 3 end;
+order by case t.label when 'Tim' then 1 when 'Marlene' then 2 when 'Eltern' then 3 else 4 end;
 
 revoke all on public.zugangscodes_anzeigen from anon, authenticated;

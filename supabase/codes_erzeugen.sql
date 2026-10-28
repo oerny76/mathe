@@ -20,7 +20,8 @@ alter table public.access_codes_klartext enable row level security;
 revoke all on public.access_codes_klartext from anon, authenticated;
 
 with alt as (
-  update public.access_tokens set revoked_at = now() where revoked_at is null returning id
+  update public.access_tokens set revoked_at = now()
+  where revoked_at is null and role in ('kind', 'eltern') returning id
 ),
 alt_klartext as (
   delete from public.access_codes_klartext where id in (select id from alt) returning 1

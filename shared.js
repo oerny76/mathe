@@ -121,11 +121,28 @@ function clearToken(name) {
   }
 }
 
+// Netzwerkfehler kommen ohne Datenbank-Fehlercode zurück: als "offline" markieren.
+function markOffline(error) {
+  if (error && !error.code && !error.offline) error.offline = true;
+  return error;
+}
+
 async function callRpc(fn, args, token) {
   if (!supabaseClient || !token) return { data: null, error: { message: "offline", offline: true } };
   try {
     const { data, error } = await supabaseClient.rpc(fn, { p_token: token, ...args });
-    return { data, error };
+    return { data, error: markOffline(error) };
+  } catch (e) {
+    return { data: null, error: { message: String(e), offline: true } };
+  }
+}
+
+// Für Funktionen ohne Code (z.B. PIN-Anmeldung).
+async function callRpcOpen(fn, args) {
+  if (!supabaseClient) return { data: null, error: { message: "offline", offline: true } };
+  try {
+    const { data, error } = await supabaseClient.rpc(fn, args);
+    return { data, error: markOffline(error) };
   } catch (e) {
     return { data: null, error: { message: String(e), offline: true } };
   }

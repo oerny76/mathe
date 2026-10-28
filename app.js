@@ -120,14 +120,28 @@ function setParentToken(code) {
   }
 }
 
-// Prüft einen Eltern-Code bei der Datenbank. true / false, bei fehlendem
-// Netz null.
-async function checkParentCode(raw) {
-  const code = normalizeCode(raw);
-  if (!code) return false;
+// Prüft den Eltern-PIN (4 bis 8 Ziffern) oder den langen Eltern-Code bei der
+// Datenbank. Liefert { ok, token } oder { ok: false, offline | locked }.
+// Beim PIN ist token eine 8 Stunden gültige Sitzung, nicht der PIN selbst.
+async function unlockParent(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return { ok: false };
+  if (/^\d{4,8}$/.test(text)) {
+    const { data, error } = await callRpcOpen("app_pin_login", { p_pin: text });
+    if (error) return { ok: false, offline: !!error.offline };
+    if (data && data.ok) return { ok: true, token: data.token };
+    return { ok: false, locked: !!(data && data.gesperrt) };
+  }
+  const code = normalizeCode(text);
   const { data, error } = await callRpc("app_eltern_check", {}, code);
-  if (error) return error.offline ? null : false;
-  return data === true;
+  if (error) return { ok: false, offline: !!error.offline };
+  return data === true ? { ok: true, token: code } : { ok: false };
+}
+
+function parentProblemText(result) {
+  if (result.offline) return "Keine Verbindung. Bitte mit Internet nochmal versuchen.";
+  if (result.locked) return "Zu viele Versuche. Bitte in 15 Minuten nochmal oder den langen Eltern-Code nehmen.";
+  return "Falscher PIN oder Code";
 }
 
 let currentKid = null;
@@ -354,14 +368,14 @@ function toggleSettings() {
 
 async function unlockSettings() {
   els.settingsCodeError.hidden = true;
-  const ok = await checkParentCode(els.settingsCode.value);
-  if (ok !== true) {
-    els.settingsCodeError.textContent = ok === null ? "Keine Verbindung. Bitte mit Internet nochmal versuchen." : "Falscher Code";
+  const result = await unlockParent(els.settingsCode.value);
+  if (!result.ok) {
+    els.settingsCodeError.textContent = parentProblemText(result);
     els.settingsCodeError.hidden = false;
     els.settingsCode.value = "";
     return;
   }
-  setParentToken(normalizeCode(els.settingsCode.value));
+  setParentToken(result.token);
   els.settingsCode.value = "";
   els.settingsLock.hidden = true;
   els.settingsContent.hidden = false;
@@ -1448,7 +1462,7 @@ function renderTasks() {
       <div class="parent-override">
         <button type="button" class="parent-override-toggle" data-task-id="${task.id}">👪 Eltern: als richtig werten</button>
         <div class="parent-override-form" hidden>
-          <input type="password" autocomplete="off" placeholder="Eltern-Code" class="parent-override-code" />
+          <input type="password" autocomplete="off" placeholder="Eltern-PIN" class="parent-override-code" />
           <button type="button" class="parent-override-confirm">OK</button>
           <span class="parent-override-error" hidden>Falscher Code</span>
         </div>
@@ -1580,10 +1594,10 @@ async function confirmParentOverride(confirmBtn) {
   const taskId = card.dataset.taskId;
 
   confirmBtn.disabled = true;
-  const ok = await checkParentCode(codeInput.value);
+  const result = await unlockParent(codeInput.value);
   confirmBtn.disabled = false;
-  if (ok !== true) {
-    errorEl.textContent = ok === null ? "Keine Verbindung" : "Falscher Code";
+  if (!result.ok) {
+    errorEl.textContent = parentProblemText(result);
     errorEl.hidden = false;
     codeInput.value = "";
     codeInput.focus();
