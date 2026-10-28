@@ -416,3 +416,12 @@ ruft nur geprüfte Datenbankfunktionen auf, die einen persönlichen Code mitbeko
   ausführen. Die Codes erscheinen einmal im Ergebnis. **Nie ins Repo stellen.**
 - Reihenfolge bei der Einführung: `zugangscodes.sql`, `codes_erzeugen.sql`,
   App-Update einspielen und anmelden, zum Schluss `zugriff_sperren.sql`.
+
+## Bildteile freischalten (Eltern)
+
+In den Eltern-Einstellungen lässt sich beim Eintragen einer Extra-Übung festlegen,
+wie viele Teile des Wochenbilds freigeschaltet werden (auch ohne Minuten). Es
+werden die nächsten noch offenen Teile in Puzzle-Reihenfolge freigeschaltet.
+Ihre Blätter stehen dann unter dem Bild und lassen sich weiter lösen (mit Sternen
+wie gewohnt). Löscht man den Eintrag, ist der Teil wieder gesperrt. Datenbank:
+`supabase/bildteile.sql`.
