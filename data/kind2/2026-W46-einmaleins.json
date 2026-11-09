@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "einmaleins",
+  "titel": "Einmaleins für Profis: Runde 6 ✖️",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "23 × 12 = ?",
+      "loesung": "276"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "19 × 14 = ?",
+      "loesung": "266"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "589 : 31 = ?",
+      "loesung": "19"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "2 hoch 8 = ?",
+      "loesung": "256"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "45 × 14 = ?",
+      "loesung": "630"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "702 : 27 = ?",
+      "loesung": "26"
+    }
+  ]
+}

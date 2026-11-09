@@ -1,0 +1,78 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "lesen",
+  "sprache": "englisch",
+  "titel": "The Secret Note in the Library",
+  "text": "Nina and Sam love puzzles. On Monday, they find a strange note in an old library book. It says: \"Go to the clock. Look under the red chair at four o'clock.\"\n\nThe only clock in the school is in the front hall. At four o'clock, the two friends stand under it. There is a small red chair next to the wall. Nina bends down and finds a little box under the chair. Inside the box, there is a silver key and a second note: \"This key opens the door of the music room.\"\n\nThey run to the music room and open the door. In the middle of the room stands a big birthday cake with a card: \"Happy birthday, Nina! From all your friends.\" Nina laughs. \"So that was a secret game!\" she says. Sam smiles and cuts the first piece.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Where do Nina and Sam find the first note?",
+      "loesung": "in a library book",
+      "optionen": [
+        "in a school bag",
+        "in a library book",
+        "in the music room"
+      ]
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "What colour is the chair?",
+      "loesung": "red",
+      "optionen": [
+        "blue",
+        "red",
+        "green"
+      ]
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "At what time do they go to the clock?",
+      "loesung": "four o'clock",
+      "optionen": [
+        "three o'clock",
+        "four o'clock",
+        "five o'clock"
+      ]
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "What is in the little box?",
+      "loesung": "a silver key",
+      "optionen": [
+        "a gold coin",
+        "a silver key",
+        "a red pen"
+      ]
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "What does the key open?",
+      "loesung": "the music room",
+      "optionen": [
+        "the library",
+        "the music room",
+        "the front hall"
+      ]
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Whose birthday is it?",
+      "loesung": "Nina's",
+      "optionen": [
+        "Sam's",
+        "Nina's",
+        "Zoe's"
+      ]
+    }
+  ]
+}

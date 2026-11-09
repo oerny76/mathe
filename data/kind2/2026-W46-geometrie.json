@@ -1,0 +1,51 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "geometrie",
+  "titel": "Geometrie: Quader, Würfel und Vierecke 📦",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "Ein Quader ist 6 cm lang, 4 cm breit und 5 cm hoch. Wie groß ist sein Volumen in cm³?",
+      "loesung": "120"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "Ein Würfel hat eine Kantenlänge von 7 cm. Wie groß ist seine Oberfläche in cm²?",
+      "loesung": "294"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Wie viel Grad beträgt die Winkelsumme in einem Viereck?",
+      "loesung": "360"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "Ein Rechteck hat einen Umfang von 38 cm. Eine Seite ist 11 cm lang. Wie lang ist die andere Seite in cm?",
+      "loesung": "8"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Ein Quadrat hat einen Flächeninhalt von 81 cm². Wie lang ist eine Seite in cm?",
+      "loesung": "9"
+    },
+    {
+      "id": 6,
+      "typ": "knobelaufgabe",
+      "frage": "Wie viele Kanten hat ein Würfel?",
+      "loesung": "12",
+      "optionen": [
+        "8",
+        "12",
+        "6"
+      ]
+    }
+  ]
+}

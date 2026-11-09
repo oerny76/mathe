@@ -1,0 +1,46 @@
+{
+  "kind": "Marlene",
+  "alter": 12,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Brüche, Prozente und Terme 🧠",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "(−9) × 6 = ?",
+      "loesung": "-54"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "35 % von 240 = ?",
+      "loesung": "84"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Wie viel ist 3/8 von 64?",
+      "loesung": "24"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "−32 + 19 = ?",
+      "loesung": "-13"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "Berechne 6x − 5 für x = 4.",
+      "loesung": "19"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "Löse: 3x − 4 = 20. Wie groß ist x?",
+      "loesung": "8"
+    }
+  ]
+}
