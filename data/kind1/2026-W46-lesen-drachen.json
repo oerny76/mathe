@@ -1,0 +1,77 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "lesen",
+  "titel": "Lesetext: Moos, der Bücherdrache",
+  "text": "In der alten Stadtbibliothek von Lindental gab es ein Geheimnis. Jede Nacht fehlten ein paar Bücher im Regal. Am Morgen lagen sie wieder an ihrem Platz, aber mit einem kleinen Brandfleck am Rand. Bibliothekarin Frau Wald verstand die Welt nicht mehr.\n\nDer neunjährige Ben wollte der Sache auf den Grund gehen. Abends versteckte er sich hinter dem Sofa im Lesesaal und wartete. Um Mitternacht hörte er ein leises Kratzen am Fenster. Ein winziger grüner Drache schlüpfte herein, nicht größer als eine Katze. Er setzte sich auf einen Bücherstapel und blätterte mit seiner Kralle um.\n\n„Ich heiße Moos“, flüsterte er, als Ben hervorkam. „Ich kann nicht lesen, aber ich liebe die Bilder. Leider niese ich manchmal Funken, deshalb die Flecken. Das tut mir leid.“\n\nBen überlegte kurz. Am nächsten Tag stellte er einen Eimer Wasser neben Moos' Lieblingsplatz. „Wenn du niesen musst, tauche einfach den Kopf hinein“, sagte er. Frau Wald erlaubte dem Drachen sogar, jeden Freitagabend zu bleiben, wenn Ben ihm vorlas. Seitdem gab es nie wieder Brandflecken. Und Ben las bald so gut wie kaum jemand in seiner Klasse.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt die Stadt?",
+      "loesung": "Lindental",
+      "optionen": [
+        "Lindenburg",
+        "Lindental",
+        "Waldstadt"
+      ]
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt die Bibliothekarin?",
+      "loesung": "Frau Wald",
+      "optionen": [
+        "Frau Berg",
+        "Frau Wald",
+        "Frau Bach"
+      ]
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Wie alt ist Ben?",
+      "loesung": "9",
+      "optionen": [
+        "7",
+        "9",
+        "11"
+      ]
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Wie groß ist der Drache?",
+      "loesung": "so groß wie eine Katze",
+      "optionen": [
+        "so groß wie eine Maus",
+        "so groß wie eine Katze",
+        "so groß wie ein Pferd"
+      ]
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "Warum haben die Bücher Brandflecken?",
+      "loesung": "Der Drache niest Funken",
+      "optionen": [
+        "Der Drache niest Funken",
+        "Der Drache kocht Tee",
+        "Der Drache spielt mit Kerzen"
+      ]
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Wie hilft Ben dem Drachen?",
+      "loesung": "Er stellt einen Eimer Wasser hin",
+      "optionen": [
+        "Er schließt das Fenster",
+        "Er stellt einen Eimer Wasser hin",
+        "Er schenkt ihm ein Buch"
+      ]
+    }
+  ]
+}

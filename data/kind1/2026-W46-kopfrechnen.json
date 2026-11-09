@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "kopfrechnen",
+  "titel": "Kopfrechnen: Blitzschnell im Kopf ⚡",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "Verdopple 175. Wie viel ist das?",
+      "loesung": "350"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "Halbiere 360. Wie viel ist das?",
+      "loesung": "180"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "Ergänze 730 auf 1000. Wie viel fehlt?",
+      "loesung": "270"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "640 + 380 = ?",
+      "loesung": "1020"
+    },
+    {
+      "id": 5,
+      "typ": "rechnen",
+      "frage": "2000 − 750 = ?",
+      "loesung": "1250"
+    },
+    {
+      "id": 6,
+      "typ": "rechnen",
+      "frage": "Wie viel ist ein Viertel von 480?",
+      "loesung": "120"
+    }
+  ]
+}

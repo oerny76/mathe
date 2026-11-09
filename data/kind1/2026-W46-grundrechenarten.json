@@ -1,0 +1,46 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "grundrechenarten",
+  "titel": "Grundrechenarten: Fanclub-Rechnen 🚌",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "rechnen",
+      "frage": "2358 + 1647 = ?",
+      "loesung": "4005"
+    },
+    {
+      "id": 2,
+      "typ": "rechnen",
+      "frage": "5000 − 2386 = ?",
+      "loesung": "2614"
+    },
+    {
+      "id": 3,
+      "typ": "rechnen",
+      "frage": "48 × 7 = ?",
+      "loesung": "336"
+    },
+    {
+      "id": 4,
+      "typ": "rechnen",
+      "frage": "378 : 9 = ?",
+      "loesung": "42"
+    },
+    {
+      "id": 5,
+      "typ": "sachaufgabe",
+      "frage": "Der Fanclub fährt mit 4 Bussen zum Stadion. In jedem Bus sitzen 46 Fans. Wie viele Fans sind das zusammen?",
+      "loesung": "184"
+    },
+    {
+      "id": 6,
+      "typ": "knobelaufgabe",
+      "frage": "Ich denke mir eine Zahl. Multipliziere ich sie mit 3 und ziehe dann 4 ab, erhalte ich 23. Welche Zahl habe ich mir gedacht?",
+      "loesung": "9"
+    }
+  ]
+}

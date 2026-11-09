@@ -1,0 +1,77 @@
+{
+  "kind": "Tim",
+  "alter": 9,
+  "erstellt": "2026-11-09",
+  "woche": "2026-W46",
+  "bereich": "lesen",
+  "titel": "Lesetext: Mit dem Fanclub ins Stadion",
+  "text": "Lukas und seine Schwester Jule fahren zum ersten Mal mit dem Fanclub ins Stadion. Der Bus fährt schon um sieben Uhr morgens los, denn der Weg nach München dauert drei Stunden. Lukas trägt seinen roten Schal und hat Brote und einen Apfel im Rucksack.\n\nIm Bus sitzt neben ihnen Herr Sommer. Er ist schon seit dreißig Jahren Fan. „Früher gab es keine großen Bildschirme im Stadion“, erzählt er. „Man musste gut aufpassen, um alles zu sehen.“ Jule lacht und singt mit den anderen ein Lied. Lukas schaut aus dem Fenster und zählt die Kühe auf den Wiesen. Nach zwei Stunden hat er schon vierzig gezählt.\n\nAm Stadion bleiben Lukas die Augen offen stehen. Die Tribünen sind riesig, und überall flattern rote Fahnen. Lukas und Jule haben Plätze in der dritten Reihe hinter dem Tor. Als die Mannschaft einläuft, steht das ganze Stadion auf. Es wird so laut, dass Jule sich die Ohren zuhalten muss.\n\nKurz vor der Pause fällt das erste Tor. Lukas springt auf und umarmt Herrn Sommer. Am Ende gewinnt die Heimmannschaft mit 3 zu 1. Auf der Rückfahrt schlafen beide im Bus ein, müde und glücklich.",
+  "aufgaben": [
+    {
+      "id": 1,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt Lukas' Schwester?",
+      "loesung": "Jule",
+      "optionen": [
+        "Lena",
+        "Jule",
+        "Mia"
+      ]
+    },
+    {
+      "id": 2,
+      "typ": "leseverstehen",
+      "frage": "Wann fährt der Bus los?",
+      "loesung": "um sieben Uhr",
+      "optionen": [
+        "um sechs Uhr",
+        "um sieben Uhr",
+        "um acht Uhr"
+      ]
+    },
+    {
+      "id": 3,
+      "typ": "leseverstehen",
+      "frage": "Wie lange dauert die Fahrt nach München?",
+      "loesung": "drei Stunden",
+      "optionen": [
+        "zwei Stunden",
+        "drei Stunden",
+        "vier Stunden"
+      ]
+    },
+    {
+      "id": 4,
+      "typ": "leseverstehen",
+      "frage": "Wie heißt der Mann, der im Bus neben den Kindern sitzt?",
+      "loesung": "Herr Sommer",
+      "optionen": [
+        "Herr Winter",
+        "Herr Sommer",
+        "Herr Herbst"
+      ]
+    },
+    {
+      "id": 5,
+      "typ": "leseverstehen",
+      "frage": "In welcher Reihe sitzen die Kinder?",
+      "loesung": "in der dritten Reihe",
+      "optionen": [
+        "in der ersten Reihe",
+        "in der dritten Reihe",
+        "in der fünften Reihe"
+      ]
+    },
+    {
+      "id": 6,
+      "typ": "leseverstehen",
+      "frage": "Wie endet das Spiel?",
+      "loesung": "3 zu 1",
+      "optionen": [
+        "2 zu 1",
+        "3 zu 1",
+        "3 zu 0"
+      ]
+    }
+  ]
+}
