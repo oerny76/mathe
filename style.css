@@ -430,26 +430,152 @@ body {
 }
 
 .scratch-pad {
-  display: block;
-  width: 100%;
   margin-top: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 2px dashed var(--line);
-  background: rgba(245, 245, 240, 0.06);
-  color: var(--chalk-white);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  resize: vertical;
-}
-
-.scratch-pad:focus {
-  outline: 2px solid var(--chalk-yellow);
-  outline-offset: 1px;
 }
 
 .scratch-pad[hidden] {
   display: none;
+}
+
+/* ---------- Rechenkaro (karierte Seite) ---------- */
+.rk-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--chalk-yellow);
+}
+
+.rk-dirs {
+  display: flex;
+  gap: 6px;
+}
+
+.rk-dir {
+  width: 44px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: rgba(245, 245, 240, 0.06);
+  color: var(--chalk-white);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.rk-dir.active {
+  border-color: var(--chalk-yellow);
+  background: rgba(242, 199, 68, 0.22);
+  color: var(--chalk-yellow);
+}
+
+.rk-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 12), 1fr);
+  background: #fbfaf3;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.rk-grid:focus {
+  outline: 2px solid var(--chalk-yellow);
+  outline-offset: 1px;
+}
+
+.rk-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #b9cde6;
+  border-bottom: 1px solid #b9cde6;
+  color: #1d2b4a;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 4.6vw, 1.5rem);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rk-cell.line {
+  box-shadow: inset 0 -3px 0 #1d2b4a;
+}
+
+.rk-cell.sel {
+  background: rgba(242, 199, 68, 0.5);
+  outline: 2px solid #e0a800;
+  outline-offset: -2px;
+}
+
+.rk-cell.sel::after {
+  content: attr(data-arrow);
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 0.5em;
+  color: #8a6400;
+}
+
+.rk-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rk-key {
+  flex: 1 0 40px;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: rgba(245, 245, 240, 0.08);
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.rk-key:active {
+  background: rgba(242, 199, 68, 0.25);
+}
+
+.rk-sym {
+  color: var(--chalk-blue);
+}
+
+.rk-tool {
+  flex: 2 0 80px;
+  color: var(--chalk-yellow);
+  font-size: 1rem;
+}
+
+.rk-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.rk-small {
+  background: none;
+  border: none;
+  color: var(--chalk-white);
+  opacity: 0.75;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-decoration: underline dotted;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.rk-small:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 /* ---------- Eltern-Korrektur ---------- */

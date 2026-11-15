@@ -1,10 +1,11 @@
-const CACHE_NAME = "mathe-pwa-v7";
+const CACHE_NAME = "mathe-pwa-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./shared.js",
   "./kopf.js",
+  "./rechenkaro.js",
   "./app.js",
   "./manifest.json",
   "./tj/",
