@@ -1477,12 +1477,7 @@ function renderTasks() {
         <span class="task-mark" aria-hidden="true"></span>
       </div>
       <button type="button" class="scratch-toggle" data-task-id="${task.id}">✏️ Rechenfeld</button>
-      <textarea
-        class="scratch-pad"
-        placeholder="Hier kannst du rechnen …"
-        rows="3"
-        hidden
-      ></textarea>
+      <div class="scratch-pad" hidden></div>
       <div class="parent-override">
         <button type="button" class="parent-override-toggle" data-task-id="${task.id}">👪 Eltern: als richtig werten</button>
         <div class="parent-override-form" hidden>
@@ -1500,6 +1495,9 @@ function renderTasks() {
       const pad = btn.nextElementSibling;
       const isHidden = pad.hasAttribute("hidden");
       if (isHidden) {
+        // Karierte Seite erst beim ersten Öffnen aufbauen; der Inhalt bleibt
+        // auch nach "Nochmal versuchen" erhalten (siehe rechenkaro.js).
+        if (!pad.firstChild) window.Rechenkaro.mount(pad, `${currentFile}:${btn.dataset.taskId}`);
         pad.removeAttribute("hidden");
         btn.textContent = "✏️ Rechenfeld ausblenden";
       } else {
